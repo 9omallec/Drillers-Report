@@ -1,0 +1,3039 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>O'Malley Drilling Inv. - Daily Drill Report</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        'brand-green': {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            200: '#bbf7d0',
+                            300: '#86efac',
+                            400: '#4ade80',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                            800: '#166534',
+                            900: '#14532d',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Mobile and Touch Optimizations */
+        * {
+            -webkit-tap-highlight-color: rgba(22, 163, 74, 0.2);
+            touch-action: manipulation;
+        }
+        
+        /* Better touch targets */
+        button, a, label, input[type="checkbox"], input[type="radio"], select {
+            min-height: 44px;
+            min-width: 44px;
+        }
+        
+        /* Mobile-optimized inputs */
+        input, select, textarea {
+            font-size: 16px !important; /* Prevents zoom on iOS */
+            -webkit-appearance: none;
+            appearance: none;
+        }
+        
+        select {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 8px center;
+            padding-right: 32px;
+        }
+        
+        /* Smooth scrolling */
+        html {
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        /* Prevent text selection on touch */
+        .no-select {
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        
+        /* Mobile-friendly table scroll */
+        .table-container {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            max-width: 100%;
+        }
+        
+        /* Touch-friendly collapsible headers */
+        .collapsible-header {
+            cursor: pointer;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+        }
+        
+        /* Custom Checkbox Styling - Green Checkmarks */
+        input[type="checkbox"] {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 22px;
+            height: 22px;
+            cursor: pointer;
+            border: 2px solid #d1d5db;
+            border-radius: 4px;
+            background-color: white;
+            position: relative;
+            transition: all 0.2s ease;
+        }
+        
+        .dark input[type="checkbox"] {
+            border-color: #6b7280;
+            background-color: #374151;
+        }
+        
+        input[type="checkbox"]:checked {
+            background-color: #16a34a;
+            border-color: #16a34a;
+        }
+        
+        /* Green Checkmark */
+        input[type="checkbox"]:checked::after {
+            content: '✓';
+            position: absolute;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            left: 3px;
+            top: -2px;
+        }
+        
+        input[type="checkbox"]:hover {
+            border-color: #16a34a;
+        }
+        
+        /* Mobile responsive adjustments */
+        @media (max-width: 768px) {
+            body {
+                font-size: 14px;
+            }
+            
+            .mobile-full-width {
+                width: 100% !important;
+            }
+            
+            /* Stack grids on mobile */
+            .mobile-stack > * {
+                grid-column: span 1 !important;
+            }
+            
+            /* Larger touch targets on mobile */
+            button, .button {
+                padding: 12px 16px;
+                font-size: 16px;
+            }
+            
+            /* Better mobile inputs */
+            input, select, textarea {
+                padding: 10px;
+                font-size: 16px !important;
+            }
+            
+            .tiny-input {
+                width: 55px;
+                padding: 8px 4px;
+                font-size: 16px !important;
+            }
+            
+            .small-input {
+                padding: 10px;
+                font-size: 16px !important;
+            }
+            
+            /* Mobile header */
+            h1 {
+                font-size: 1.5rem !important;
+                line-height: 1.3 !important;
+            }
+            
+            h2 {
+                font-size: 1.2rem !important;
+                line-height: 1.3 !important;
+            }
+            
+            h3 {
+                font-size: 1rem !important;
+                line-height: 1.3 !important;
+            }
+            
+            /* Mobile table optimizations */
+            table {
+                font-size: 13px;
+            }
+            
+            table td, table th {
+                padding: 6px 4px !important;
+                font-size: 13px !important;
+            }
+            
+            /* Optimize table container for mobile */
+            .table-container {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                margin: 0 -0.5rem;
+                padding: 0 0.5rem;
+            }
+            
+            /* Mobile-friendly buttons */
+            .no-print button {
+                margin: 4px 0;
+                width: 100%;
+            }
+            
+            /* Larger checkboxes on mobile */
+            input[type="checkbox"] {
+                width: 24px;
+                height: 24px;
+            }
+            
+            /* Optimize spacing on mobile */
+            .space-y-4 > * + * {
+                margin-top: 0.75rem !important;
+            }
+            
+            .gap-4 {
+                gap: 0.75rem !important;
+            }
+            
+            /* Better mobile grid layouts */
+            .grid-cols-2 {
+                grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
+            }
+            
+            /* Optimize padding and margins */
+            .p-4 {
+                padding: 0.75rem !important;
+            }
+            
+            .p-6 {
+                padding: 1rem !important;
+            }
+            
+            .mb-6 {
+                margin-bottom: 1rem !important;
+            }
+            
+            /* Optimize logo size on mobile */
+            .w-16 {
+                width: 3rem !important;
+                height: 3rem !important;
+            }
+        }
+        
+        /* Extra small devices */
+        @media (max-width: 480px) {
+            .max-w-7xl {
+                padding-left: 0.5rem;
+                padding-right: 0.5rem;
+            }
+            
+            /* Even larger touch targets for small phones */
+            button, .button {
+                padding: 14px 18px;
+                font-size: 17px;
+            }
+            
+            /* Smaller fonts for very small screens */
+            body {
+                font-size: 13px;
+            }
+            
+            h1 {
+                font-size: 1.3rem !important;
+            }
+            
+            h2 {
+                font-size: 1.1rem !important;
+            }
+            
+            h3 {
+                font-size: 0.95rem !important;
+            }
+            
+            table {
+                font-size: 12px;
+            }
+            
+            table td, table th {
+                padding: 4px 2px !important;
+                font-size: 12px !important;
+            }
+            
+            .tiny-input {
+                width: 50px;
+                padding: 6px 2px;
+                font-size: 14px !important;
+            }
+        }
+        
+        @media print {
+            .no-print { display: none !important; }
+            .print-page-break { page-break-after: always; }
+            .print-hide-empty { display: none !important; }
+            
+            /* Force both tabs to display */
+            #job-details-tab, #supplies-tab {
+                display: block !important;
+            }
+            
+            /* Only show supplies tab if it has content */
+            #supplies-tab.no-content {
+                display: none !important;
+            }
+            
+            #supplies-tab.has-content {
+                page-break-before: always;
+            }
+            
+            /* Force Light Mode for Printing */
+            * {
+                color: #000 !important;
+                background-color: #fff !important;
+                print-color-adjust: exact;
+                -webkit-print-color-adjust: exact;
+            }
+            
+            /* Preserve green accents for checkmarks only */
+            input[type="checkbox"]:checked {
+                background-color: #16a34a !important;
+                border-color: #16a34a !important;
+            }
+            
+            input[type="checkbox"]:checked::after {
+                color: white !important;
+            }
+            
+            /* Ultra-compact layout */
+            body {
+                font-size: 9px !important;
+                line-height: 1.2 !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            
+            .max-w-7xl {
+                max-width: 100% !important;
+                padding: 0.2rem !important;
+                margin: 0 !important;
+            }
+            
+            /* Headers */
+            h1 {
+                font-size: 14px !important;
+                margin: 0.15rem 0 !important;
+                padding: 0 !important;
+                font-weight: bold !important;
+            }
+            
+            h2 {
+                font-size: 11px !important;
+                margin: 0.15rem 0 0.1rem 0 !important;
+                padding: 0 !important;
+                font-weight: bold !important;
+                border-bottom: 1px solid #000 !important;
+            }
+            
+            h3 {
+                font-size: 9px !important;
+                margin: 0.1rem 0 !important;
+                font-weight: bold !important;
+            }
+            
+            /* Remove ALL borders and styling from inputs */
+            input, select, textarea {
+                border: none !important;
+                background: transparent !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                font-size: 8px !important;
+                height: auto !important;
+                min-height: 0 !important;
+                appearance: none !important;
+                -webkit-appearance: none !important;
+                box-shadow: none !important;
+                font-family: Arial, sans-serif !important;
+            }
+            
+            /* Make inputs look like regular text */
+            input[type="text"], input[type="date"], input[type="time"], select, textarea {
+                display: inline !important;
+                font-weight: normal !important;
+            }
+            
+            /* Hide empty inputs and their labels */
+            input:empty, input[value=""], textarea:empty {
+                display: none !important;
+            }
+            
+            /* Special handling for select dropdowns - show value only */
+            select {
+                color: #000 !important;
+                font-weight: normal !important;
+            }
+            
+            /* Hide select dropdown arrow */
+            select::-ms-expand {
+                display: none !important;
+            }
+            
+            /* Checkboxes */
+            input[type="checkbox"] {
+                width: 10px !important;
+                height: 10px !important;
+                min-width: 0 !important;
+                min-height: 0 !important;
+                border: 1px solid #333 !important;
+                margin-right: 2px !important;
+            }
+            
+            input[type="checkbox"]:checked::after {
+                font-size: 8px !important;
+                left: 0px !important;
+                top: -2px !important;
+            }
+            
+            /* Hide unchecked checkboxes and their labels */
+            input[type="checkbox"]:not(:checked) {
+                display: none !important;
+            }
+            
+            /* Remove shadows and rounded corners */
+            .shadow-sm, .shadow-lg, .shadow {
+                box-shadow: none !important;
+            }
+            
+            .rounded-lg, .rounded, .rounded-md {
+                border-radius: 0 !important;
+            }
+            
+            /* Minimize padding and margins */
+            .p-4, .p-3, .p-2, .p-1, .p-6 {
+                padding: 0.05rem !important;
+            }
+            
+            .mb-4, .mb-3, .mb-2, .mb-1, .mb-6 {
+                margin-bottom: 0.1rem !important;
+            }
+            
+            .mt-4, .mt-3, .mt-2, .mt-1 {
+                margin-top: 0.1rem !important;
+            }
+            
+            .gap-4, .gap-3, .gap-2 {
+                gap: 0.1rem !important;
+            }
+            
+            .space-y-4 > * + *, .space-y-3 > * + *, .space-y-2 > * + * {
+                margin-top: 0.1rem !important;
+            }
+            
+            /* Table optimizations */
+            table {
+                font-size: 8px !important;
+                border-collapse: collapse !important;
+                width: 100% !important;
+            }
+            
+            /* Clean table borders - minimal styling */
+            table td, table th {
+                padding: 2px 3px !important;
+                border: 0.5px solid #ccc !important;
+                vertical-align: top !important;
+            }
+            
+            table th {
+                font-weight: bold !important;
+                background-color: #f5f5f5 !important;
+            }
+            
+            /* Hide empty table cells */
+            table td:empty {
+                border: none !important;
+            }
+            
+            /* Hide table rows where all cells are empty */
+            table tr:has(td:empty:only-child) {
+                display: none !important;
+            }
+            
+            /* Logo smaller */
+            .w-16, .w-12 {
+                width: 1.5rem !important;
+                height: 1.5rem !important;
+            }
+            
+            /* Prevent awkward breaks */
+            .shadow-sm, h2, h3, tr {
+                page-break-inside: avoid !important;
+            }
+            
+            /* Compress grid layouts */
+            .grid {
+                gap: 0.05rem !important;
+            }
+            
+            /* Optimize borders */
+            .border-t, .border-b, .border {
+                border-width: 0px !important;
+            }
+            
+            /* Only show section borders under headers */
+            h2 {
+                border-bottom: 1px solid #333 !important;
+            }
+            
+            /* Reduce div spacing */
+            div {
+                margin: 0 !important;
+            }
+            
+            /* Labels should be inline with values */
+            label {
+                font-size: 8px !important;
+                font-weight: normal !important;
+                display: inline !important;
+                margin-right: 3px !important;
+            }
+            
+            /* Hide empty sections */
+            div:empty {
+                display: none !important;
+            }
+            
+            /* Text sizing */
+            .text-4xl, .text-3xl {
+                font-size: 14px !important;
+            }
+            
+            .text-2xl {
+                font-size: 11px !important;
+            }
+            
+            .text-xl {
+                font-size: 10px !important;
+            }
+            
+            .text-lg {
+                font-size: 9px !important;
+            }
+            
+            .text-base {
+                font-size: 8px !important;
+            }
+            
+            .text-sm {
+                font-size: 7px !important;
+            }
+            
+            .text-xs {
+                font-size: 6px !important;
+            }
+            
+            /* Optimize flex layouts for print */
+            .flex-col {
+                display: block !important;
+            }
+            
+            .flex {
+                display: block !important;
+            }
+            
+            /* Make two-column layouts stack to save space */
+            .md\:flex-row {
+                display: block !important;
+            }
+            
+            .flex-1 {
+                flex: none !important;
+            }
+        }
+        
+        .small-input {
+            padding: 0.375rem 0.5rem;
+            font-size: 16px;
+        }
+        .tiny-input {
+            width: 50px;
+            padding: 0.25rem;
+            font-size: 16px;
+            text-align: center;
+        }
+        .scrollable-input {
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+        
+        /* Smooth transitions for better UX */
+        button, input, select, textarea {
+            transition: all 0.2s ease;
+        }
+        
+        /* Active/focus states for touch feedback */
+        button:active, 
+        .collapsible-header:active {
+            transform: scale(0.98);
+            opacity: 0.9;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #16a34a !important;
+            box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        function DailyDrillReport() {
+            // Get current project ID first - this is critical for loading correct data
+            const currentProjectId = localStorage.getItem('currentProjectId') || '';
+            
+            // Helper to create storage key with project ID
+            const makeStorageKey = (key, projId) => {
+                return projId ? `${projId}_${key}` : key;
+            };
+            
+            // Helper function to load from localStorage with project ID
+            const loadFromStorage = (key, defaultValue, projId) => {
+                try {
+                    const storageKey = makeStorageKey(key, projId);
+                    const item = localStorage.getItem(storageKey);
+                    return item ? JSON.parse(item) : defaultValue;
+                } catch (error) {
+                    console.error('Error loading from storage:', error);
+                    return defaultValue;
+                }
+            };
+            
+            // Project Management State
+            const [projects, setProjects] = useState(() => {
+                const saved = localStorage.getItem('projectsList');
+                return saved ? JSON.parse(saved) : [];
+            });
+            
+            const [projectId, setProjectId] = useState(currentProjectId);
+            
+            const [projectName, setProjectName] = useState(() => {
+                const saved = localStorage.getItem('currentProjectName');
+                return saved || 'Default Project';
+            });
+            
+            const [showProjectModal, setShowProjectModal] = useState(false);
+            const [newProjectName, setNewProjectName] = useState('');
+            
+            const [activeTab, setActiveTab] = useState('details');
+            const [darkMode, setDarkMode] = useState(() => {
+                const saved = localStorage.getItem('darkMode');
+                return saved === 'true';
+            });
+            
+            useEffect(() => {
+                if (darkMode) {
+                    document.documentElement.classList.add('dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                }
+                localStorage.setItem('darkMode', darkMode);
+            }, [darkMode]);
+            
+            // Save projects list
+            useEffect(() => {
+                localStorage.setItem('projectsList', JSON.stringify(projects));
+            }, [projects]);
+            
+            // Save project ID and name
+            useEffect(() => {
+                if (projectId) {
+                    localStorage.setItem('currentProjectId', projectId);
+                    localStorage.setItem('currentProjectName', projectName);
+                }
+            }, [projectId, projectName]);
+            
+            // Report Data with localStorage
+            const [reportData, setReportData] = useState(() => 
+                loadFromStorage('reportData', {
+                    customer: '',
+                    jobName: '',
+                    location: '',
+                    driller: '',
+                    helper: '',
+                    perDiem: '',
+                    commentsLabor: '',
+                    uploadedPhotosDetails: []
+                }, currentProjectId)
+            );
+
+            // Equipment with localStorage
+            const [equipment, setEquipment] = useState(() =>
+                loadFromStorage('equipment', {
+                    drillRig: '',
+                    truck: '',
+                    dumpTruck: 'No',
+                    dumpTruckTimes: '',
+                    trailer: 'No',
+                    coreMachine: false,
+                    groutMachine: false,
+                    extruder: false,
+                    generator: false,
+                    decon: false
+                }, currentProjectId)
+            );
+
+            // Work Days with localStorage
+            const [workDays, setWorkDays] = useState(() =>
+                loadFromStorage('workDays', [{
+                    id: 1,
+                    date: new Date().toISOString().split('T')[0],
+                    timeLeftShop: '',
+                    arrivedOnSite: '',
+                    timeLeftSite: '',
+                    arrivedAtShop: '',
+                    hoursDriving: '',
+                    hoursOnSite: '',
+                    standbyHours: '',
+                    standbyMinutes: '',
+                    standbyReason: '',
+                    pitStopHours: '',
+                    pitStopMinutes: '',
+                    pitStopReason: '',
+                    collapsed: false
+                }], currentProjectId)
+            );
+
+            // Borings with localStorage
+            const [borings, setBorings] = useState(() =>
+                loadFromStorage('borings', [{
+                    id: 1,
+                    method: '',
+                    footage: '',
+                    isEnvironmental: false,
+                    isGeotechnical: false,
+                    washboreSetup: false,
+                    washboreFootage: '',
+                    casingSetup: false,
+                    casingFootage: '',
+                    coreSetup: false,
+                    coreFootage: '',
+                    collapsed: false
+                }], currentProjectId)
+            );
+            
+            // Auto-save to localStorage whenever data changes
+            useEffect(() => {
+                const key = makeStorageKey('reportData', projectId);
+                localStorage.setItem(key, JSON.stringify(reportData));
+            }, [reportData, projectId]);
+            
+            useEffect(() => {
+                const key = makeStorageKey('equipment', projectId);
+                localStorage.setItem(key, JSON.stringify(equipment));
+            }, [equipment, projectId]);
+            
+            useEffect(() => {
+                const key = makeStorageKey('workDays', projectId);
+                localStorage.setItem(key, JSON.stringify(workDays));
+            }, [workDays, projectId]);
+            
+            useEffect(() => {
+                const key = makeStorageKey('borings', projectId);
+                localStorage.setItem(key, JSON.stringify(borings));
+            }, [borings, projectId]);
+
+            // Project Management Functions
+            const createNewProject = () => {
+                if (!newProjectName.trim()) {
+                    alert('Please enter a project name');
+                    return;
+                }
+                
+                const newId = `project_${Date.now()}`;
+                const newProject = {
+                    id: newId,
+                    name: newProjectName.trim(),
+                    createdAt: new Date().toISOString()
+                };
+                
+                setProjects([...projects, newProject]);
+                setProjectId(newId);
+                setProjectName(newProjectName.trim());
+                setNewProjectName('');
+                setShowProjectModal(false);
+                
+                // Clear current data for new project
+                setReportData({
+                    customer: '',
+                    jobName: '',
+                    location: '',
+                    driller: '',
+                    helper: '',
+                    perDiem: '',
+                    commentsLabor: '',
+                    uploadedPhotosDetails: []
+                });
+                setWorkDays([{
+                    id: 1,
+                    date: new Date().toISOString().split('T')[0],
+                    timeLeftShop: '',
+                    arrivedOnSite: '',
+                    timeLeftSite: '',
+                    arrivedAtShop: '',
+                    hoursDriving: '',
+                    hoursOnSite: '',
+                    standbyHours: '',
+                    standbyMinutes: '',
+                    standbyReason: '',
+                    pitStopHours: '',
+                    pitStopMinutes: '',
+                    pitStopReason: '',
+                    collapsed: false
+                }]);
+                setBorings([{
+                    id: 1,
+                    method: '',
+                    footage: '',
+                    isEnvironmental: false,
+                    isGeotechnical: false,
+                    washboreSetup: false,
+                    washboreFootage: '',
+                    casingSetup: false,
+                    casingFootage: '',
+                    coreSetup: false,
+                    coreFootage: '',
+                    collapsed: false
+                }]);
+                setEquipment({
+                    drillRig: '',
+                    truck: '',
+                    dumpTruck: 'No',
+                    dumpTruckTimes: '',
+                    trailer: 'No',
+                    coreMachine: false,
+                    groutMachine: false,
+                    extruder: false,
+                    generator: false,
+                    decon: false
+                });
+                setSuppliesData({
+                    endCaps1: '', endCaps2: '', endCaps4: '', endCapsOther: '',
+                    lockingCaps1: '', lockingCaps2: '', lockingCaps4: '', lockingCapsOther: '',
+                    screen5_1: '', screen5_2: '', screen5_4: '', screen5Other: '',
+                    screen10_1: '', screen10_2: '', screen10_4: '', screen10Other: '',
+                    riser5_1: '', riser5_2: '', riser5_4: '', riser5Other: '',
+                    riser10_1: '', riser10_2: '', riser10_4: '', riser10Other: '',
+                    flushMounts7: '', flushMounts8: '', flushMountsOther: '',
+                    stickUpCovers4: '', stickUpCovers6: '', stickUpCoversOther: '',
+                    bollards3: '', bollards4: '', bollardsOther: '',
+                    concrete50: '', concrete60: '', concrete80: '',
+                    sand: '', drillingMud: '',
+                    bentoniteChips: '', bentonitePellets: '',
+                    bentoniteGrout: '', portlandGrout: '',
+                    buckets: '', shelbyTubes: '',
+                    numCoreBoxes: '',
+                    other: '',
+                    misc: '',
+                    uploadedPhotosSupplies: []
+                });
+            };
+            
+            const switchProject = (selectedProjectId) => {
+                // Handle default project (empty string)
+                if (selectedProjectId === '') {
+                    localStorage.setItem('currentProjectId', '');
+                    localStorage.setItem('currentProjectName', 'Default Project');
+                    window.location.reload();
+                    return;
+                }
+                
+                // Handle named projects
+                const project = projects.find(p => p.id === selectedProjectId);
+                if (project) {
+                    localStorage.setItem('currentProjectId', project.id);
+                    localStorage.setItem('currentProjectName', project.name);
+                    window.location.reload();
+                }
+            };
+            
+            const deleteProject = (projectIdToDelete) => {
+                if (confirm('Are you sure you want to delete this project? This cannot be undone.')) {
+                    // Remove from projects list
+                    setProjects(projects.filter(p => p.id !== projectIdToDelete));
+                    
+                    // Clear data from localStorage
+                    const keysToDelete = [
+                        `${projectIdToDelete}_reportData`,
+                        `${projectIdToDelete}_equipment`,
+                        `${projectIdToDelete}_workDays`,
+                        `${projectIdToDelete}_borings`,
+                        `${projectIdToDelete}_suppliesData`
+                    ];
+                    keysToDelete.forEach(key => localStorage.removeItem(key));
+                    
+                    // If deleting current project, switch to default
+                    if (projectIdToDelete === projectId) {
+                        setProjectId('');
+                        setProjectName('Default Project');
+                        window.location.reload();
+                    }
+                }
+            };
+
+            const addBoring = () => {
+                setBorings([...borings, { 
+                    id: borings.length + 1, 
+                    method: '', 
+                    footage: '',
+                    isEnvironmental: false,
+                    isGeotechnical: false,
+                    washboreSetup: false,
+                    washboreFootage: '',
+                    casingSetup: false,
+                    casingFootage: '',
+                    coreSetup: false,
+                    coreFootage: '',
+                    collapsed: false
+                }]);
+            };
+
+            const toggleBoring = (id) => {
+                setBorings(borings.map(b => 
+                    b.id === id ? { ...b, collapsed: !b.collapsed } : b
+                ));
+            };
+
+            const removeBoring = (id) => {
+                if (borings.length > 1) {
+                    setBorings(borings.filter(b => b.id !== id));
+                }
+            };
+
+            const updateBoring = (id, field, value) => {
+                setBorings(borings.map(b => b.id === id ? { ...b, [field]: value } : b));
+            };
+
+            const addWorkDay = () => {
+                const lastDay = workDays[workDays.length - 1];
+                const nextDate = new Date(lastDay.date);
+                nextDate.setDate(nextDate.getDate() + 1);
+                
+                setWorkDays([...workDays, {
+                    id: workDays.length + 1,
+                    date: nextDate.toISOString().split('T')[0],
+                    timeLeftShop: '',
+                    arrivedOnSite: '',
+                    timeLeftSite: '',
+                    arrivedAtShop: '',
+                    hoursDriving: '',
+                    hoursOnSite: '',
+                    standbyHours: '',
+                    standbyMinutes: '',
+                    standbyReason: '',
+                    pitStopHours: '',
+                    pitStopMinutes: '',
+                    pitStopReason: '',
+                    collapsed: false
+                }]);
+            };
+
+            const removeWorkDay = (id) => {
+                if (workDays.length > 1) {
+                    setWorkDays(workDays.filter(d => d.id !== id));
+                }
+            };
+
+            const toggleWorkDay = (id) => {
+                setWorkDays(workDays.map(d => 
+                    d.id === id ? { ...d, collapsed: !d.collapsed } : d
+                ));
+            };
+
+            const updateWorkDay = (id, field, value) => {
+                setWorkDays(workDays.map(d => {
+                    if (d.id === id) {
+                        const updated = { ...d, [field]: value };
+                        
+                        // Auto-calculate hours
+                        if (['timeLeftShop', 'arrivedOnSite', 'timeLeftSite', 'arrivedAtShop'].includes(field)) {
+                            const { timeLeftShop, arrivedOnSite, timeLeftSite, arrivedAtShop } = updated;
+                            
+                            if (timeLeftShop && arrivedOnSite && timeLeftSite && arrivedAtShop) {
+                                const morning = calculateTimeDiff(timeLeftShop, arrivedOnSite);
+                                const evening = calculateTimeDiff(timeLeftSite, arrivedAtShop);
+                                const totalDriving = (morning + evening).toFixed(2);
+                                
+                                const onSite = calculateTimeDiff(arrivedOnSite, timeLeftSite);
+                                const totalOnSite = onSite.toFixed(2);
+                                
+                                updated.hoursDriving = totalDriving;
+                                updated.hoursOnSite = totalOnSite;
+                            }
+                        }
+                        
+                        return updated;
+                    }
+                    return d;
+                }));
+            };
+
+            const calculateTimeDiff = (startTime, endTime) => {
+                if (!startTime || !endTime) return 0;
+                const [startHour, startMin] = startTime.split(':').map(Number);
+                const [endHour, endMin] = endTime.split(':').map(Number);
+                const startMinutes = startHour * 60 + startMin;
+                const endMinutes = endHour * 60 + endMin;
+                const diff = endMinutes - startMinutes;
+                return diff / 60;
+            };
+
+            const getTotalHours = () => {
+                const totalDriving = workDays.reduce((sum, day) => sum + (parseFloat(day.hoursDriving) || 0), 0);
+                const totalOnSite = workDays.reduce((sum, day) => sum + (parseFloat(day.hoursOnSite) || 0), 0);
+                const totalStandby = workDays.reduce((sum, day) => {
+                    const hours = parseFloat(day.standbyHours) || 0;
+                    const minutes = parseFloat(day.standbyMinutes) || 0;
+                    return sum + hours + (minutes / 60);
+                }, 0);
+                const totalPitStop = workDays.reduce((sum, day) => {
+                    const hours = parseFloat(day.pitStopHours) || 0;
+                    const minutes = parseFloat(day.pitStopMinutes) || 0;
+                    return sum + hours + (minutes / 60);
+                }, 0);
+                
+                return {
+                    driving: totalDriving.toFixed(2),
+                    onSite: totalOnSite.toFixed(2),
+                    standby: totalStandby.toFixed(2),
+                    pitStop: totalPitStop.toFixed(2),
+                    total: (totalDriving + totalOnSite + totalStandby).toFixed(2)
+                };
+            };
+
+            // Calculate total footage, number of borings, and depths
+            const getBoringStats = () => {
+                const totalFootage = borings.reduce((sum, b) => sum + (parseFloat(b.footage) || 0), 0);
+                const numBorings = borings.filter(b => b.footage && parseFloat(b.footage) > 0).length;
+                const depths = borings
+                    .filter(b => b.footage && parseFloat(b.footage) > 0)
+                    .map(b => b.footage)
+                    .join(', ');
+                return {
+                    totalFootage: totalFootage.toFixed(1),
+                    numBorings: numBorings,
+                    depths: depths
+                };
+            };
+
+            // Supplies Data
+            const [suppliesData, setSuppliesData] = useState(() =>
+                loadFromStorage('suppliesData', {
+                    // Main table items
+                    endCaps1: '', endCaps2: '', endCaps4: '', endCapsOther: '',
+                    lockingCaps1: '', lockingCaps2: '', lockingCaps4: '', lockingCapsOther: '',
+                    screen5_1: '', screen5_2: '', screen5_4: '', screen5Other: '',
+                    screen10_1: '', screen10_2: '', screen10_4: '', screen10Other: '',
+                    riser5_1: '', riser5_2: '', riser5_4: '', riser5Other: '',
+                    riser10_1: '', riser10_2: '', riser10_4: '', riser10Other: '',
+                    // Other items
+                    flushMounts7: '', flushMounts8: '', flushMountsOther: '',
+                    stickUpCovers4: '', stickUpCovers6: '', stickUpCoversOther: '',
+                    bollards3: '', bollards4: '', bollardsOther: '',
+                    concrete50: '', concrete60: '', concrete80: '',
+                    sand: '', drillingMud: '',
+                    bentoniteChips: '', bentonitePellets: '',
+                    bentoniteGrout: '', portlandGrout: '',
+                    buckets: '', shelbyTubes: '',
+                    numCoreBoxes: '',
+                    other: '',
+                    misc: '',
+                    uploadedPhotosSupplies: []
+                }, currentProjectId)
+            );
+            
+            // Auto-save supplies data
+            useEffect(() => {
+                const key = makeStorageKey('suppliesData', projectId);
+                localStorage.setItem(key, JSON.stringify(suppliesData));
+            }, [suppliesData, projectId]);
+
+            const handleReportChange = (field, value) => {
+                setReportData(prev => ({ ...prev, [field]: value }));
+            };
+
+            const handleEquipmentChange = (field, value) => {
+                setEquipment(prev => ({ ...prev, [field]: value }));
+            };
+
+            const handleSuppliesChange = (field, value) => {
+                setSuppliesData(prev => ({ ...prev, [field]: value }));
+            };
+
+            const handlePhotoUpload = async (event, section) => {
+                const files = Array.from(event.target.files);
+                
+                // Compress and process each file
+                const processedFiles = await Promise.all(
+                    files.map(async (file) => {
+                        // Only compress images
+                        if (file.type.startsWith('image/')) {
+                            try {
+                                const compressedFile = await compressImage(file);
+                                return {
+                                    name: file.name,
+                                    size: (compressedFile.size / 1024).toFixed(2) + ' KB',
+                                    type: compressedFile.type,
+                                    data: compressedFile
+                                };
+                            } catch (error) {
+                                console.error('Compression error:', error);
+                                // Fall back to original if compression fails
+                                return {
+                                    name: file.name,
+                                    size: (file.size / 1024).toFixed(2) + ' KB',
+                                    type: file.type
+                                };
+                            }
+                        } else {
+                            // PDFs and other files - no compression
+                            return {
+                                name: file.name,
+                                size: (file.size / 1024).toFixed(2) + ' KB',
+                                type: file.type
+                            };
+                        }
+                    })
+                );
+                
+                if (section === 'details') {
+                    setReportData(prev => ({
+                        ...prev,
+                        uploadedPhotosDetails: [...prev.uploadedPhotosDetails, ...processedFiles]
+                    }));
+                } else {
+                    setSuppliesData(prev => ({
+                        ...prev,
+                        uploadedPhotosSupplies: [...prev.uploadedPhotosSupplies, ...processedFiles]
+                    }));
+                }
+            };
+            
+            // Image compression function
+            const compressImage = (file) => {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        const img = new Image();
+                        img.onload = () => {
+                            // Create canvas
+                            const canvas = document.createElement('canvas');
+                            const ctx = canvas.getContext('2d');
+                            
+                            // Calculate new dimensions (max 1920px width)
+                            let width = img.width;
+                            let height = img.height;
+                            const maxWidth = 1920;
+                            
+                            if (width > maxWidth) {
+                                height = (height * maxWidth) / width;
+                                width = maxWidth;
+                            }
+                            
+                            canvas.width = width;
+                            canvas.height = height;
+                            
+                            // Draw and compress
+                            ctx.drawImage(img, 0, 0, width, height);
+                            
+                            canvas.toBlob(
+                                (blob) => {
+                                    if (blob) {
+                                        resolve(blob);
+                                    } else {
+                                        reject(new Error('Compression failed'));
+                                    }
+                                },
+                                'image/jpeg',
+                                0.85 // 85% quality
+                            );
+                        };
+                        img.onerror = reject;
+                        img.src = e.target.result;
+                    };
+                    reader.onerror = reject;
+                    reader.readAsDataURL(file);
+                });
+            };
+            
+            // GPS Location function
+            const [isGettingLocation, setIsGettingLocation] = useState(false);
+            
+            const getCurrentLocation = () => {
+                setIsGettingLocation(true);
+                
+                if (!navigator.geolocation) {
+                    alert('GPS is not supported by your browser');
+                    setIsGettingLocation(false);
+                    return;
+                }
+                
+                navigator.geolocation.getCurrentPosition(
+                    async (position) => {
+                        const { latitude, longitude } = position.coords;
+                        
+                        // Try to get address from coordinates using reverse geocoding
+                        try {
+                            // Using OpenStreetMap's Nominatim API (free, no key required)
+                            const response = await fetch(
+                                `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
+                            );
+                            const data = await response.json();
+                            
+                            if (data && data.display_name) {
+                                handleReportChange('location', data.display_name);
+                            } else {
+                                // Fallback to coordinates if address not found
+                                handleReportChange('location', `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`);
+                            }
+                        } catch (error) {
+                            console.error('Geocoding error:', error);
+                            // Fallback to coordinates
+                            handleReportChange('location', `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`);
+                        }
+                        
+                        setIsGettingLocation(false);
+                    },
+                    (error) => {
+                        console.error('Location error:', error);
+                        let message = 'Unable to get location. ';
+                        switch(error.code) {
+                            case error.PERMISSION_DENIED:
+                                message += 'Please enable location permissions.';
+                                break;
+                            case error.POSITION_UNAVAILABLE:
+                                message += 'Location information unavailable.';
+                                break;
+                            case error.TIMEOUT:
+                                message += 'Location request timed out.';
+                                break;
+                            default:
+                                message += 'An unknown error occurred.';
+                        }
+                        alert(message);
+                        setIsGettingLocation(false);
+                    },
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 10000,
+                        maximumAge: 0
+                    }
+                );
+            };
+
+            const removePhoto = (index, section) => {
+                if (section === 'details') {
+                    setReportData(prev => ({
+                        ...prev,
+                        uploadedPhotosDetails: prev.uploadedPhotosDetails.filter((_, i) => i !== index)
+                    }));
+                } else {
+                    setSuppliesData(prev => ({
+                        ...prev,
+                        uploadedPhotosSupplies: prev.uploadedPhotosSupplies.filter((_, i) => i !== index)
+                    }));
+                }
+            };
+
+            const handlePrint = () => {
+                // Check if supplies section has any content
+                const hasSuppliesContent = Object.entries(suppliesData).some(([key, value]) => {
+                    if (key === 'uploadedPhotosSupplies') {
+                        return value && value.length > 0;
+                    }
+                    return value && value.toString().trim() !== '';
+                });
+                
+                const suppliesTab = document.getElementById('supplies-tab');
+                const jobDetailsTab = document.getElementById('job-details-tab');
+                
+                if (suppliesTab) {
+                    if (hasSuppliesContent) {
+                        suppliesTab.classList.add('has-content');
+                        suppliesTab.classList.remove('no-content');
+                    } else {
+                        suppliesTab.classList.add('no-content');
+                        suppliesTab.classList.remove('has-content');
+                    }
+                }
+                
+                // Add print-hide class to empty elements before printing
+                const allInputs = document.querySelectorAll('input[type="text"], input[type="date"], input[type="time"], textarea, select');
+                allInputs.forEach(input => {
+                    const value = input.value || input.textContent;
+                    if (!value || value.trim() === '' || value === 'Select') {
+                        // Hide the input
+                        input.classList.add('print-hide-empty');
+                        // Also hide parent label container if it exists
+                        const parent = input.closest('.flex.items-center, .space-y-2 > div, tr, .grid > div');
+                        if (parent) parent.classList.add('print-hide-empty');
+                    }
+                });
+                
+                // Hide unchecked checkboxes and their labels
+                const allCheckboxes = document.querySelectorAll('input[type="checkbox"]');
+                allCheckboxes.forEach(checkbox => {
+                    if (!checkbox.checked) {
+                        checkbox.classList.add('print-hide-empty');
+                        // Hide the label too
+                        const label = checkbox.closest('label') || checkbox.nextElementSibling;
+                        if (label && label.tagName === 'LABEL') {
+                            label.classList.add('print-hide-empty');
+                        }
+                        // Hide parent container
+                        const parent = checkbox.closest('.flex.items-center, .space-y-2 > div');
+                        if (parent) parent.classList.add('print-hide-empty');
+                    }
+                });
+                
+                // Force both tabs to be visible during print
+                if (jobDetailsTab) jobDetailsTab.style.display = 'block';
+                if (suppliesTab && hasSuppliesContent) suppliesTab.style.display = 'block';
+                
+                // Trigger print
+                window.print();
+                
+                // Restore display and remove print-hide classes after print
+                setTimeout(() => {
+                    // Remove all print-hide classes
+                    document.querySelectorAll('.print-hide-empty').forEach(el => {
+                        el.classList.remove('print-hide-empty');
+                    });
+                    
+                    // Restore tab visibility
+                    if (activeTab === 'job-details') {
+                        if (jobDetailsTab) jobDetailsTab.style.display = 'block';
+                        if (suppliesTab) suppliesTab.style.display = 'none';
+                    } else {
+                        if (jobDetailsTab) jobDetailsTab.style.display = 'none';
+                        if (suppliesTab) suppliesTab.style.display = 'block';
+                    }
+                }, 100);
+            };
+
+            const handleSave = () => {
+                const data = {
+                    report: reportData,
+                    workDays: workDays,
+                    borings: borings,
+                    equipment: equipment,
+                    supplies: suppliesData,
+                    savedAt: new Date().toISOString()
+                };
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `drill-report-${reportData.jobName || 'unnamed'}-${new Date().toISOString().split('T')[0]}.json`;
+                a.click();
+            };
+
+            const handleLoad = (event) => {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        try {
+                            const data = JSON.parse(e.target.result);
+                            if (data.report) setReportData(data.report);
+                            if (data.workDays) setWorkDays(data.workDays);
+                            if (data.borings) setBorings(data.borings);
+                            if (data.equipment) setEquipment(data.equipment);
+                            if (data.supplies) setSuppliesData(data.supplies);
+                        } catch (error) {
+                            alert('Error loading file');
+                        }
+                    };
+                    reader.readAsText(file);
+                }
+            };
+
+            const handleSubmitReport = () => {
+                // Generate JSON file for boss dashboard import
+                const reportData_json = {
+                    report: reportData,
+                    workDays: workDays,
+                    borings: borings,
+                    equipment: equipment,
+                    supplies: suppliesData,
+                    savedAt: new Date().toISOString()
+                };
+                const jsonBlob = new Blob([JSON.stringify(reportData_json, null, 2)], { type: 'application/json' });
+                const jsonUrl = URL.createObjectURL(jsonBlob);
+                const jsonLink = document.createElement('a');
+                jsonLink.href = jsonUrl;
+                jsonLink.download = `Report-${reportData.jobName || 'Report'}-${new Date().toISOString().split('T')[0]}.json`;
+                jsonLink.click();
+                URL.revokeObjectURL(jsonUrl);
+                
+                // Auto-open Google Drive after a short delay
+                setTimeout(() => {
+                    window.open('https://drive.google.com', '_blank');
+                }, 500);
+                
+                // Show success message
+                setTimeout(() => {
+                    const successMsg = document.createElement('div');
+                    successMsg.style.cssText = `
+                        position: fixed;
+                        top: 50%;
+                        left: 50%;
+                        transform: translate(-50%, -50%);
+                        background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+                        padding: 30px;
+                        border-radius: 16px;
+                        box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+                        z-index: 10000;
+                        max-width: 90%;
+                        text-align: center;
+                    `;
+                    
+                    successMsg.innerHTML = `
+                        <div style="font-size: 56px; margin-bottom: 15px;">✅</div>
+                        <h3 style="color: white; font-size: 24px; margin-bottom: 15px; font-weight: bold;">Report Saved!</h3>
+                        <p style="color: rgba(255,255,255,0.95); margin-bottom: 25px; line-height: 1.6; font-size: 16px;">
+                            <strong style="display: block; margin-bottom: 10px;">Report-${reportData.jobName || 'Report'}-${new Date().toISOString().split('T')[0]}.json</strong>
+                            File downloaded and Google Drive opened in new tab.
+                        </p>
+                        
+                        <div style="background: rgba(255,255,255,0.2); border-radius: 12px; padding: 20px; margin-bottom: 20px; backdrop-filter: blur(10px);">
+                            <div style="color: white; font-size: 14px; line-height: 1.8; text-align: left;">
+                                <div style="margin-bottom: 8px;">📁 <strong>Next:</strong> Upload the JSON file to your "Drill Reports" folder</div>
+                                <div>✨ Your boss will be able to import and review it</div>
+                            </div>
+                        </div>
+                        
+                        <button onclick="this.parentElement.remove()" 
+                            style="background: white; color: #16a34a; padding: 15px 40px; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
+                            Got It! 👍
+                        </button>
+                    `;
+                    
+                    document.body.appendChild(successMsg);
+                }, 800);
+            };
+            
+            // Generate a standalone HTML report for attachment
+            const generateHTMLReport = () => {
+                const totals = getTotalHours();
+                const boringStats = getBoringStats();
+                const reportDate = new Date().toLocaleDateString();
+                
+                // Generate work days HTML
+                let workDaysHTML = '';
+                workDays.forEach((day, index) => {
+                    const dayDriving = parseFloat(day.hoursDriving) || 0;
+                    const dayOnSite = parseFloat(day.hoursOnSite) || 0;
+                    const dayStandby = (parseFloat(day.standbyHours) || 0) + ((parseFloat(day.standbyMinutes) || 0) / 60);
+                    
+                    if (dayDriving > 0 || dayOnSite > 0 || dayStandby > 0) {
+                        workDaysHTML += `
+                        <tr>
+                            <td style="padding: 8px; border: 1px solid #ddd;">Day ${index + 1}</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">${day.date || 'N/A'}</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">${dayDriving.toFixed(2)}</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">${dayOnSite.toFixed(2)}</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">${dayStandby > 0 ? dayStandby.toFixed(2) : '-'}</td>
+                            <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">${(dayDriving + dayOnSite + dayStandby).toFixed(2)}</td>
+                        </tr>`;
+                    }
+                });
+                
+                // Generate borings HTML
+                let boringsHTML = '';
+                borings.forEach((boring, index) => {
+                    if (boring.footage && parseFloat(boring.footage) > 0) {
+                        boringsHTML += `
+                        <tr>
+                            <td style="padding: 8px; border: 1px solid #ddd;">B-${index + 1}</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">${boring.method || 'N/A'}</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">${boring.footage} ft</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">
+                                ${boring.isEnvironmental ? 'Environmental' : ''}
+                                ${boring.isGeotechnical ? 'Geotechnical' : ''}
+                            </td>
+                        </tr>`;
+                    }
+                });
+                
+                // Generate supplies HTML
+                let suppliesHTML = '';
+                const addSupplyRow = (label, value) => {
+                    if (value && value.trim()) {
+                        suppliesHTML += `<tr>
+                            <td style="padding: 8px; border: 1px solid #ddd;">${label}</td>
+                            <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">${value}</td>
+                        </tr>`;
+                    }
+                };
+                
+                addSupplyRow('End Caps 1"', suppliesData.endCaps1);
+                addSupplyRow('End Caps 2"', suppliesData.endCaps2);
+                addSupplyRow('End Caps 4"', suppliesData.endCaps4);
+                addSupplyRow('Locking Caps 1"', suppliesData.lockingCaps1);
+                addSupplyRow('Locking Caps 2"', suppliesData.lockingCaps2);
+                addSupplyRow('Locking Caps 4"', suppliesData.lockingCaps4);
+                addSupplyRow('Screen 5\' 1"', suppliesData.screen5_1);
+                addSupplyRow('Screen 5\' 2"', suppliesData.screen5_2);
+                addSupplyRow('Screen 5\' 4"', suppliesData.screen5_4);
+                addSupplyRow('Screen 10\' 1"', suppliesData.screen10_1);
+                addSupplyRow('Screen 10\' 2"', suppliesData.screen10_2);
+                addSupplyRow('Screen 10\' 4"', suppliesData.screen10_4);
+                addSupplyRow('Riser 5\' 1"', suppliesData.riser5_1);
+                addSupplyRow('Riser 5\' 2"', suppliesData.riser5_2);
+                addSupplyRow('Riser 5\' 4"', suppliesData.riser5_4);
+                addSupplyRow('Riser 10\' 1"', suppliesData.riser10_1);
+                addSupplyRow('Riser 10\' 2"', suppliesData.riser10_2);
+                addSupplyRow('Riser 10\' 4"', suppliesData.riser10_4);
+                addSupplyRow('Concrete 50#', suppliesData.concrete50);
+                addSupplyRow('Concrete 60#', suppliesData.concrete60);
+                addSupplyRow('Concrete 80#', suppliesData.concrete80);
+                addSupplyRow('Sand', suppliesData.sand);
+                addSupplyRow('Drilling Mud', suppliesData.drillingMud);
+                addSupplyRow('Bentonite Chips', suppliesData.bentoniteChips);
+                addSupplyRow('Bentonite Pellets', suppliesData.bentonitePellets);
+                addSupplyRow('Bentonite Grout', suppliesData.bentoniteGrout);
+                addSupplyRow('Portland Grout', suppliesData.portlandGrout);
+                addSupplyRow('Flush Mounts 7"', suppliesData.flushMounts7);
+                addSupplyRow('Flush Mounts 8"', suppliesData.flushMounts8);
+                addSupplyRow('Flush Mounts Other', suppliesData.flushMountsOther);
+                addSupplyRow('Stick Up Covers 4"', suppliesData.stickUpCovers4);
+                addSupplyRow('Stick Up Covers 6"', suppliesData.stickUpCovers6);
+                addSupplyRow('Stick Up Covers Other', suppliesData.stickUpCoversOther);
+                addSupplyRow('Bollards 3"', suppliesData.bollards3);
+                addSupplyRow('Bollards 4"', suppliesData.bollards4);
+                addSupplyRow('Bollards Other', suppliesData.bollardsOther);
+                addSupplyRow('# of Buckets', suppliesData.buckets);
+                addSupplyRow('# of Shelby Tubes', suppliesData.shelbyTubes);
+                addSupplyRow('# of Core Boxes', suppliesData.numCoreBoxes);
+                addSupplyRow('Other', suppliesData.other);
+                
+                return `<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Daily Drill Report - ${reportData.customer || 'Report'}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background: white;
+        }
+        .header {
+            text-align: center;
+            border-bottom: 3px solid #16a34a;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            color: #16a34a;
+            margin: 0;
+            font-size: 32px;
+        }
+        .header h2 {
+            color: #666;
+            margin: 5px 0 0 0;
+            font-size: 20px;
+        }
+        .section {
+            margin-bottom: 30px;
+            page-break-inside: avoid;
+        }
+        .section h3 {
+            background: #16a34a;
+            color: white;
+            padding: 10px;
+            margin: 0 0 15px 0;
+            font-size: 18px;
+        }
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .info-item {
+            padding: 10px;
+            background: #f9f9f9;
+            border-left: 4px solid #16a34a;
+        }
+        .info-item label {
+            font-weight: bold;
+            color: #666;
+            display: block;
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+        .info-item value {
+            font-size: 16px;
+            color: #333;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th {
+            background: #16a34a;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: bold;
+        }
+        td {
+            padding: 8px;
+            border: 1px solid #ddd;
+        }
+        tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+        .totals {
+            background: #e8f5e9;
+            padding: 15px;
+            margin-top: 15px;
+            border-left: 4px solid #16a34a;
+        }
+        .totals div {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+        }
+        .totals .grand-total {
+            font-size: 20px;
+            font-weight: bold;
+            color: #16a34a;
+            border-top: 2px solid #16a34a;
+            padding-top: 10px;
+            margin-top: 10px;
+        }
+        .comments {
+            background: #f9f9f9;
+            padding: 15px;
+            border: 1px solid #ddd;
+            white-space: pre-wrap;
+        }
+        @media print {
+            body { margin: 0; padding: 15px; }
+            .section { page-break-inside: avoid; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Daily Drill Report</h1>
+        <h2>O'Malley Drilling Inv.</h2>
+        <p style="color: #666; margin: 10px 0 0 0;">Report Date: ${reportDate}</p>
+    </div>
+
+    <div class="section">
+        <h3>JOB INFORMATION</h3>
+        <div class="info-grid">
+            <div class="info-item">
+                <label>Customer</label>
+                <value>${reportData.customer || 'N/A'}</value>
+            </div>
+            <div class="info-item">
+                <label>Job Name/Number</label>
+                <value>${reportData.jobName || 'N/A'}</value>
+            </div>
+            <div class="info-item">
+                <label>Location</label>
+                <value>${reportData.location || 'N/A'}</value>
+            </div>
+            <div class="info-item">
+                <label>Driller</label>
+                <value>${reportData.driller || 'N/A'}</value>
+            </div>
+            <div class="info-item">
+                <label>Helper</label>
+                <value>${reportData.helper || 'N/A'}</value>
+            </div>
+            ${reportData.perDiem ? `<div class="info-item">
+                <label>Per Diem</label>
+                <value>${reportData.perDiem} nights</value>
+            </div>` : ''}
+        </div>
+    </div>
+
+    <div class="section">
+        <h3>EQUIPMENT</h3>
+        <div class="info-grid">
+            <div class="info-item">
+                <label>Drill Rig</label>
+                <value>${equipment.drillRig || 'N/A'}</value>
+            </div>
+            <div class="info-item">
+                <label>Truck</label>
+                <value>${equipment.truck || 'N/A'}</value>
+            </div>
+            <div class="info-item">
+                <label>Dump Truck</label>
+                <value>${equipment.dumpTruck}${equipment.dumpTruck === 'Yes' && equipment.dumpTruckTimes ? ` (${equipment.dumpTruckTimes} times)` : ''}</value>
+            </div>
+            <div class="info-item">
+                <label>Trailer</label>
+                <value>${equipment.trailer}</value>
+            </div>
+        </div>
+        <div style="margin-top: 15px; padding: 10px; background: #f9f9f9;">
+            <strong>Additional Equipment:</strong>
+            ${equipment.coreMachine ? '✓ Core Machine ' : ''}
+            ${equipment.groutMachine ? '✓ Grout Machine ' : ''}
+            ${equipment.extruder ? '✓ Extruder ' : ''}
+            ${equipment.generator ? '✓ Generator ' : ''}
+            ${equipment.decon ? '✓ Decon' : ''}
+            ${!equipment.coreMachine && !equipment.groutMachine && !equipment.extruder && !equipment.generator && !equipment.decon ? 'None' : ''}
+        </div>
+    </div>
+
+    <div class="section">
+        <h3>WORK HOURS</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Day</th>
+                    <th>Date</th>
+                    <th>Driving (hrs)</th>
+                    <th>On-Site (hrs)</th>
+                    <th>Standby (hrs)</th>
+                    <th>Total (hrs)</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${workDaysHTML}
+            </tbody>
+        </table>
+        <div class="totals">
+            <div><span>Total Driving Hours:</span><span><strong>${totals.driving} hours</strong></span></div>
+            <div><span>Total On-Site Hours:</span><span><strong>${totals.onSite} hours</strong></span></div>
+            ${parseFloat(totals.standby) > 0 ? `<div><span>Total Standby Hours:</span><span><strong>${totals.standby} hours</strong></span></div>` : ''}
+            <div class="grand-total"><span>GRAND TOTAL:</span><span>${totals.total} hours</span></div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h3>PRODUCTION</h3>
+        <div class="totals" style="margin-bottom: 15px;">
+            <div><span>Number of Borings:</span><span><strong>${boringStats.numBorings}</strong></span></div>
+            <div><span>Total Footage:</span><span><strong>${boringStats.totalFootage} ft</strong></span></div>
+        </div>
+        ${boringsHTML ? `<table>
+            <thead>
+                <tr>
+                    <th>Boring</th>
+                    <th>Method</th>
+                    <th>Footage</th>
+                    <th>Type</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${boringsHTML}
+            </tbody>
+        </table>` : '<p>No boring data recorded.</p>'}
+    </div>
+
+    <div class="section">
+        <h3>SUPPLIES USED</h3>
+        ${suppliesHTML ? `<table>
+            <thead>
+                <tr>
+                    <th>Item</th>
+                    <th>Quantity</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${suppliesHTML}
+            </tbody>
+        </table>` : '<p>No supplies recorded.</p>'}
+        ${suppliesData.misc ? `<div style="margin-top: 20px;">
+            <strong>Miscellaneous Supplies:</strong>
+            <div class="comments">${suppliesData.misc}</div>
+        </div>` : ''}
+    </div>
+
+    ${reportData.commentsLabor ? `<div class="section">
+        <h3>COMMENTS / LABOR</h3>
+        <div class="comments">${reportData.commentsLabor}</div>
+    </div>` : ''}
+
+    <div style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 2px solid #16a34a; color: #666;">
+        <p><strong>O'Malley Drilling Inv.</strong></p>
+        <p>Generated: ${new Date().toLocaleString()}</p>
+    </div>
+</body>
+</html>`;
+            };
+            
+            // Generate QuickBooks-ready CSV
+            const generateQuickBooksCSV = () => {
+                const totals = getTotalHours();
+                const boringStats = getBoringStats();
+                
+                // CSV Header
+                let csv = 'Date,Customer,Job Name/Number,Location,Driller,Helper,Drive Hours,On-Site Hours,Standby Hours,Total Hours,Total Footage,# of Borings,Equipment,Notes\n';
+                
+                // Collect equipment list
+                const equipmentList = [];
+                if (equipment.drillRig) equipmentList.push(`Drill Rig: ${equipment.drillRig}`);
+                if (equipment.truck) equipmentList.push(`Truck: ${equipment.truck}`);
+                if (equipment.dumpTruck === 'Yes') equipmentList.push(`Dump Truck (${equipment.dumpTruckTimes || 1}x)`);
+                if (equipment.trailer) equipmentList.push(`Trailer: ${equipment.trailer}`);
+                if (equipment.coreMachine) equipmentList.push('Core Machine');
+                if (equipment.groutMachine) equipmentList.push('Grout Machine');
+                if (equipment.extruder) equipmentList.push('Extruder');
+                if (equipment.generator) equipmentList.push('Generator');
+                if (equipment.decon) equipmentList.push('Decon');
+                
+                // Combine notes
+                const notesParts = [];
+                if (reportData.commentsLabor) notesParts.push(reportData.commentsLabor);
+                if (suppliesData.misc) notesParts.push(`Supplies: ${suppliesData.misc}`);
+                const notes = notesParts.join(' | ').replace(/"/g, '""'); // Escape quotes for CSV
+                
+                // Main data row
+                const date = new Date().toLocaleDateString();
+                const customer = (reportData.customer || '').replace(/"/g, '""');
+                const jobName = (reportData.jobName || '').replace(/"/g, '""');
+                const location = (reportData.location || '').replace(/"/g, '""');
+                const driller = (reportData.driller || '').replace(/"/g, '""');
+                const helper = (reportData.helper || '').replace(/"/g, '""');
+                const equipmentStr = equipmentList.join('; ').replace(/"/g, '""');
+                
+                csv += `"${date}","${customer}","${jobName}","${location}","${driller}","${helper}",${totals.driving},${totals.onSite},${totals.standby},${totals.total},${boringStats.totalFootage},${boringStats.numBorings},"${equipmentStr}","${notes}"\n`;
+                
+                // Add detailed work days breakdown
+                csv += '\n,Daily Breakdown:\n';
+                csv += ',Day,Date,Drive Hours,On-Site Hours,Standby Hours,Total Hours\n';
+                workDays.forEach((day, index) => {
+                    const dayDriving = parseFloat(day.hoursDriving) || 0;
+                    const dayOnSite = parseFloat(day.hoursOnSite) || 0;
+                    const dayStandby = (parseFloat(day.standbyHours) || 0) + ((parseFloat(day.standbyMinutes) || 0) / 60);
+                    const dayTotal = dayDriving + dayOnSite + dayStandby;
+                    
+                    if (dayDriving > 0 || dayOnSite > 0 || dayStandby > 0) {
+                        csv += `,${index + 1},"${day.date || ''}",${dayDriving.toFixed(2)},${dayOnSite.toFixed(2)},${dayStandby.toFixed(2)},${dayTotal.toFixed(2)}\n`;
+                    }
+                });
+                
+                // Add supplies used
+                csv += '\n,Supplies Used:\n';
+                csv += ',Item,Quantity\n';
+                
+                const addSupplyCSV = (label, value) => {
+                    if (value && value.toString().trim()) {
+                        const cleanLabel = label.replace(/"/g, '""');
+                        const cleanValue = value.toString().replace(/"/g, '""');
+                        csv += `,"${cleanLabel}","${cleanValue}"\n`;
+                    }
+                };
+                
+                // Add all non-empty supplies
+                addSupplyCSV('End Caps 1"', suppliesData.endCaps1);
+                addSupplyCSV('End Caps 2"', suppliesData.endCaps2);
+                addSupplyCSV('End Caps 4"', suppliesData.endCaps4);
+                addSupplyCSV('Locking Caps 1"', suppliesData.lockingCaps1);
+                addSupplyCSV('Locking Caps 2"', suppliesData.lockingCaps2);
+                addSupplyCSV('Locking Caps 4"', suppliesData.lockingCaps4);
+                addSupplyCSV('Screen 5\' 1"', suppliesData.screen5_1);
+                addSupplyCSV('Screen 5\' 2"', suppliesData.screen5_2);
+                addSupplyCSV('Screen 5\' 4"', suppliesData.screen5_4);
+                addSupplyCSV('Screen 10\' 1"', suppliesData.screen10_1);
+                addSupplyCSV('Screen 10\' 2"', suppliesData.screen10_2);
+                addSupplyCSV('Screen 10\' 4"', suppliesData.screen10_4);
+                addSupplyCSV('Riser 5\' 1"', suppliesData.riser5_1);
+                addSupplyCSV('Riser 5\' 2"', suppliesData.riser5_2);
+                addSupplyCSV('Riser 5\' 4"', suppliesData.riser5_4);
+                addSupplyCSV('Riser 10\' 1"', suppliesData.riser10_1);
+                addSupplyCSV('Riser 10\' 2"', suppliesData.riser10_2);
+                addSupplyCSV('Riser 10\' 4"', suppliesData.riser10_4);
+                addSupplyCSV('Concrete 50#', suppliesData.concrete50);
+                addSupplyCSV('Concrete 60#', suppliesData.concrete60);
+                addSupplyCSV('Concrete 80#', suppliesData.concrete80);
+                addSupplyCSV('Sand', suppliesData.sand);
+                addSupplyCSV('Drilling Mud', suppliesData.drillingMud);
+                addSupplyCSV('Bentonite Chips', suppliesData.bentoniteChips);
+                addSupplyCSV('Bentonite Pellets', suppliesData.bentonitePellets);
+                addSupplyCSV('Bentonite Grout', suppliesData.bentoniteGrout);
+                addSupplyCSV('Portland Grout', suppliesData.portlandGrout);
+                addSupplyCSV('# of Buckets', suppliesData.buckets);
+                addSupplyCSV('# of Shelby Tubes', suppliesData.shelbyTubes);
+                addSupplyCSV('# of Core Boxes', suppliesData.numCoreBoxes);
+                
+                return csv;
+            };
+
+            const totals = getTotalHours();
+            const boringStats = getBoringStats();
+
+            return (
+                <div className={`min-h-screen transition-colors ${darkMode ? 'bg-gray-900' : 'bg-white'}`}>
+                    <div className="max-w-7xl mx-auto p-3">
+                        {/* Header with Logo and Company Name */}
+                        <div className={`shadow-sm rounded-lg p-4 mb-4 no-print ${darkMode ? 'bg-gray-800' : 'bg-white border border-gray-200'}`}>
+                            <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+                                <div className="flex items-center gap-4">
+                                    {/* Logo Placeholder */}
+                                    <div className={`w-16 h-16 rounded-lg flex items-center justify-center ${darkMode ? 'bg-gray-700' : 'bg-gray-100'}`}>
+                                        <span className="text-brand-green-600 font-bold text-2xl">OM</span>
+                                    </div>
+                                    <div>
+                                        <p className={`text-2xl md:text-4xl font-bold ${darkMode ? 'text-brand-green-400' : 'text-brand-green-600'}`}>Daily Drill Report</p>
+                                        <h1 className={`text-base md:text-xl font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                            O'Malley Drilling Inv.
+                                        </h1>
+                                    </div>
+                                </div>
+                                
+                                {/* Project Selector */}
+                                <div className="w-full md:w-auto">
+                                    <div className={`px-4 py-2 rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-gray-100'}`}>
+                                        <label className={`text-xs font-semibold ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Current Project:</label>
+                                        <div className={`text-base md:text-lg font-bold mt-1 truncate ${darkMode ? 'text-brand-green-400' : 'text-brand-green-600'}`}>
+                                            {projectName || 'Default Project'}
+                                        </div>
+                                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 mt-2">
+                                            <select
+                                                value={projectId}
+                                                onChange={(e) => {
+                                                    if (confirm('Switch project? Make sure you clicked Save if you want to keep a backup.')) {
+                                                        switchProject(e.target.value);
+                                                    }
+                                                }}
+                                                className={`flex-1 px-3 py-2 border rounded font-semibold text-sm ${darkMode ? 'bg-gray-600 text-white border-gray-500' : 'bg-white border-gray-300'}`}
+                                            >
+                                                <option value="">Default Project</option>
+                                                {projects.map(project => (
+                                                    <option key={project.id} value={project.id}>
+                                                        {project.name}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                            <div className="flex gap-2">
+                                                <button
+                                                    onClick={() => setShowProjectModal(true)}
+                                                    className="flex-1 sm:flex-none px-4 py-2 bg-brand-green-600 text-white rounded hover:bg-brand-green-700 font-semibold text-sm whitespace-nowrap"
+                                                    title="Create New Project"
+                                                >
+                                                    + New
+                                                </button>
+                                                {projectId && (
+                                                    <button
+                                                        onClick={() => deleteProject(projectId)}
+                                                        className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 font-semibold text-sm"
+                                                        title="Delete Current Project"
+                                                    >
+                                                        🗑️ Delete
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </div>
+                                        <div className={`text-xs mt-2 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                                            ✓ Auto-saves as you type
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div className="flex gap-2 items-center flex-wrap w-full md:w-auto justify-stretch md:justify-end">
+                                    <button
+                                        onClick={() => setDarkMode(!darkMode)}
+                                        className={`p-3 rounded-lg transition touch-manipulation ${darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-200 hover:bg-gray-300'}`}
+                                        title={darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+                                        aria-label={darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+                                    >
+                                        {darkMode ? (
+                                            <svg className="w-6 h-6 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fillRule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clipRule="evenodd" />
+                                            </svg>
+                                        ) : (
+                                            <svg className="w-6 h-6 text-gray-700" fill="currentColor" viewBox="0 0 20 20">
+                                                <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
+                                            </svg>
+                                        )}
+                                    </button>
+                                    <button
+                                        onClick={handleSave}
+                                        className="flex-1 md:flex-none px-4 py-3 text-base font-semibold bg-brand-green-600 text-white rounded-lg hover:bg-brand-green-700 transition touch-manipulation"
+                                    >
+                                        Save
+                                    </button>
+                                    <label className="flex-1 md:flex-none px-4 py-3 text-base font-semibold bg-brand-green-700 text-white rounded-lg hover:bg-brand-green-800 transition cursor-pointer touch-manipulation text-center">
+                                        Load
+                                        <input type="file" accept=".json" onChange={handleLoad} className="hidden" />
+                                    </label>
+                                    <button
+                                        onClick={handleSubmitReport}
+                                        className="flex-1 md:flex-none px-4 py-3 text-base font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition touch-manipulation"
+                                        title="Submit report to shared Google Drive"
+                                    >
+                                        📤 Submit Report
+                                    </button>
+                                    <button
+                                        onClick={handlePrint}
+                                        className={`flex-1 md:flex-none px-4 py-3 text-base font-semibold rounded-lg transition touch-manipulation ${darkMode ? 'bg-gray-700 text-white hover:bg-gray-600' : 'bg-gray-600 text-white hover:bg-gray-700'}`}
+                                    >
+                                        Print
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Tabs */}
+                        <div className={`shadow-lg rounded-lg mb-4 no-print overflow-hidden ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
+                            <div className="flex">
+                                <button
+                                    onClick={() => setActiveTab('details')}
+                                    className={`flex-1 py-3 px-6 text-center font-bold text-base transition relative ${
+                                        activeTab === 'details'
+                                            ? 'bg-brand-green-600 text-white shadow-md'
+                                            : `${darkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`
+                                    }`}
+                                >
+                                    JOB DETAILS
+                                    {activeTab === 'details' && (
+                                        <div className="absolute bottom-0 left-0 right-0 h-1 bg-brand-green-400"></div>
+                                    )}
+                                </button>
+                                <button
+                                    onClick={() => setActiveTab('supplies')}
+                                    className={`flex-1 py-3 px-6 text-center font-bold text-base transition relative ${
+                                        activeTab === 'supplies'
+                                            ? 'bg-brand-green-600 text-white shadow-md'
+                                            : `${darkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`
+                                    }`}
+                                >
+                                    SUPPLIES
+                                    {activeTab === 'supplies' && (
+                                        <div className="absolute bottom-0 left-0 right-0 h-1 bg-brand-green-400"></div>
+                                    )}
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Job Details Tab */}
+                        {activeTab === 'details' && (
+                            <div className="space-y-4">
+                                {/* Primary Job Information */}
+                                <div className={`shadow-sm rounded-lg p-4 ${darkMode ? 'bg-gray-800' : 'bg-white border border-gray-200'}`}>
+                                    <h2 className={`text-xl font-bold mb-3 border-b pb-2 ${darkMode ? 'text-gray-100 border-gray-700' : 'text-gray-800 border-gray-200'}`}>
+                                        JOB INFORMATION
+                                    </h2>
+                                    
+                                    {/* Customer, Job Name, Location on one line */}
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
+                                        <div>
+                                            <label className={`block text-base font-semibold mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Customer</label>
+                                            <input
+                                                type="text"
+                                                value={reportData.customer}
+                                                onChange={(e) => handleReportChange('customer', e.target.value)}
+                                                className={`w-full px-3 py-2 border rounded focus:ring-2 focus:ring-brand-green-500 scrollable-input text-base ${darkMode ? 'border-gray-600 bg-gray-700 text-gray-100' : 'border-gray-300 bg-white'}`}
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className={`block text-base font-semibold mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Job Name / #</label>
+                                            <input
+                                                type="text"
+                                                value={reportData.jobName}
+                                                onChange={(e) => handleReportChange('jobName', e.target.value)}
+                                                className={`w-full px-3 py-2 border rounded focus:ring-2 focus:ring-brand-green-500 scrollable-input text-base ${darkMode ? 'border-gray-600 bg-gray-700 text-gray-100' : 'border-gray-300 bg-white'}`}
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className={`block text-base font-semibold mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Location</label>
+                                            <div className="flex gap-2">
+                                                <input
+                                                    type="text"
+                                                    value={reportData.location}
+                                                    onChange={(e) => handleReportChange('location', e.target.value)}
+                                                    className={`flex-1 px-3 py-2 border rounded focus:ring-2 focus:ring-brand-green-500 scrollable-input text-base ${darkMode ? 'border-gray-600 bg-gray-700 text-gray-100' : 'border-gray-300 bg-white'}`}
+                                                    placeholder="Enter location or use GPS"
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={getCurrentLocation}
+                                                    disabled={isGettingLocation}
+                                                    className={`px-3 py-2 rounded font-semibold text-sm whitespace-nowrap flex items-center gap-1 ${
+                                                        isGettingLocation 
+                                                            ? 'bg-gray-400 cursor-not-allowed' 
+                                                            : 'bg-brand-green-600 hover:bg-brand-green-700'
+                                                    } text-white`}
+                                                    title="Use current GPS location"
+                                                >
+                                                    {isGettingLocation ? '📍...' : '📍 GPS'}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    {/* Driller and Helper */}
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                        <div>
+                                            <label className={`block text-base font-semibold mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Driller</label>
+                                            <input
+                                                type="text"
+                                                value={reportData.driller}
+                                                onChange={(e) => handleReportChange('driller', e.target.value)}
+                                                className={`w-full small-input border rounded focus:ring-2 focus:ring-brand-green-500 ${darkMode ? 'border-gray-600 bg-gray-700 text-gray-100' : 'border-gray-300 bg-white'}`}
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className={`block text-base font-semibold mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Helper</label>
+                                            <input
+                                                type="text"
+                                                value={reportData.helper}
+                                                onChange={(e) => handleReportChange('helper', e.target.value)}
+                                                className={`w-full small-input border rounded focus:ring-2 focus:ring-brand-green-500 ${darkMode ? 'border-gray-600 bg-gray-700 text-gray-100' : 'border-gray-300 bg-white'}`}
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Equipment Section */}
+                                <div className={`shadow-sm rounded-lg p-4 ${darkMode ? 'bg-gray-800' : 'bg-white border border-gray-200'}`}>
+                                    <h2 className={`text-xl font-bold mb-3 border-b pb-2 ${darkMode ? 'text-gray-100 border-gray-700' : 'text-gray-800 border-gray-200'}`}>
+                                        EQUIPMENT
+                                    </h2>
+                                    
+                                    {/* Drill Rig, Truck, Dump Truck, Trailer */}
+                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+                                        <div>
+                                            <label className={`block text-base font-semibold mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Drill Rig</label>
+                                            <select
+                                                value={equipment.drillRig}
+                                                onChange={(e) => handleEquipmentChange('drillRig', e.target.value)}
+                                                className={`w-full small-input border rounded focus:ring-2 focus:ring-brand-green-500 ${darkMode ? 'border-gray-600 bg-gray-700 text-gray-100' : 'border-gray-300 bg-white'}`}
+                                            >
+                                                <option value="">Select...</option>
+                                                <option value="75A">75A</option>
+                                                <option value="75B">75B</option>
+                                                <option value="55">55</option>
+                                                <option value="Track Rig">Track Rig</option>
+                                                <option value="None">None</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label className={`block text-base font-semibold mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Truck</label>
+                                            <select
+                                                value={equipment.truck}
+                                                onChange={(e) => handleEquipmentChange('truck', e.target.value)}
+                                                className={`w-full small-input border rounded focus:ring-2 focus:ring-brand-green-500 ${darkMode ? 'border-gray-600 bg-gray-700 text-gray-100' : 'border-gray-300 bg-white'}`}
+                                            >
+                                                <option value="">Select...</option>
+                                                <option value="White Dodge">White Dodge</option>
+                                                <option value="Grey Dodge">Grey Dodge</option>
+                                                <option value="Single Cab">Single Cab</option>
+                                                <option value="Personal">Personal</option>
+                                                <option value="None">None</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label className={`block text-base font-semibold mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Dump Truck</label>
+                                            <div className="flex gap-2">
+                                                <select
+                                                    value={equipment.dumpTruck}
+                                                    onChange={(e) => handleEquipmentChange('dumpTruck', e.target.value)}
+                                                    className={`flex-1 small-input border rounded focus:ring-2 focus:ring-brand-green-500 ${darkMode ? 'border-gray-600 bg-gray-700 text-gray-100' : 'border-gray-300 bg-white'}`}
+                                                >
+                                                    <option value="No">No</option>
+                                                    <option value="Yes">Yes</option>
+                                                </select>
+                                                {equipment.dumpTruck === 'Yes' && (
+                                                    <input
+                                                        type="text"
+                                                        value={equipment.dumpTruckTimes}
+                                                        onChange={(e) => handleEquipmentChange('dumpTruckTimes', e.target.value)}
+                                                        placeholder="#"
+                                                        className={`w-12 small-input border rounded focus:ring-2 focus:ring-brand-green-500 text-center ${darkMode ? 'border-gray-600 bg-gray-700 text-gray-100' : 'border-gray-300 bg-white'}`}
+                                                    />
+                                                )}
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label className={`block text-base font-semibold mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Trailer</label>
+                                            <select
+                                                value={equipment.trailer}
+                                                onChange={(e) => handleEquipmentChange('trailer', e.target.value)}
+                                                className={`w-full small-input border rounded focus:ring-2 focus:ring-brand-green-500 ${darkMode ? 'border-gray-600 bg-gray-700 text-gray-100' : 'border-gray-300 bg-white'}`}
+                                            >
+                                                <option value="No">No</option>
+                                                <option value="Yes">Yes</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    
+                                    {/* Equipment Checkboxes */}
+                                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+                                        <label className="flex items-center gap-2 cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                checked={equipment.coreMachine}
+                                                onChange={(e) => handleEquipmentChange('coreMachine', e.target.checked)}
+                                                className="w-5 h-5 text-brand-green-600 rounded focus:ring-brand-green-500 cursor-pointer"
+                                            />
+                                            <span className={`text-sm font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Core Machine</span>
+                                        </label>
+                                        <label className="flex items-center gap-2 cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                checked={equipment.groutMachine}
+                                                onChange={(e) => handleEquipmentChange('groutMachine', e.target.checked)}
+                                                className="w-5 h-5 text-brand-green-600 rounded focus:ring-brand-green-500 cursor-pointer"
+                                            />
+                                            <span className={`text-sm font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Grout Machine</span>
+                                        </label>
+                                        <label className="flex items-center gap-2 cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                checked={equipment.extruder}
+                                                onChange={(e) => handleEquipmentChange('extruder', e.target.checked)}
+                                                className="w-5 h-5 text-brand-green-600 rounded focus:ring-brand-green-500 cursor-pointer"
+                                            />
+                                            <span className={`text-sm font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Extruder</span>
+                                        </label>
+                                        <label className="flex items-center gap-2 cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                checked={equipment.generator}
+                                                onChange={(e) => handleEquipmentChange('generator', e.target.checked)}
+                                                className="w-5 h-5 text-brand-green-600 rounded focus:ring-brand-green-500 cursor-pointer"
+                                            />
+                                            <span className={`text-sm font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Generator</span>
+                                        </label>
+                                        <label className="flex items-center gap-2 cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                checked={equipment.decon}
+                                                onChange={(e) => handleEquipmentChange('decon', e.target.checked)}
+                                                className="w-5 h-5 text-brand-green-600 rounded focus:ring-brand-green-500 cursor-pointer"
+                                            />
+                                            <span className={`text-sm font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Decon</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                {/* Work Days */}
+                                <div className={`shadow-sm rounded-lg p-4 ${darkMode ? 'bg-gray-800' : 'bg-white border border-gray-200'}`}>
+                                    <div className="flex justify-between items-center mb-3">
+                                        <h3 className={`text-xl font-bold ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>WORK DAYS</h3>
+                                        <div className="text-right">
+                                            <div className={`text-xs space-y-1 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                                                {parseFloat(totals.driving) > 0 && (
+                                                    <div>Driving: <span className="font-bold">{totals.driving}h</span></div>
+                                                )}
+                                                {parseFloat(totals.onSite) > 0 && (
+                                                    <div>On Site: <span className="font-bold">{totals.onSite}h</span></div>
+                                                )}
+                                                {parseFloat(totals.standby) > 0 && (
+                                                    <div>Standby: <span className="font-bold">{totals.standby}h</span></div>
+                                                )}
+                                                {parseFloat(totals.pitStop) > 0 && (
+                                                    <div>Pit Stops: <span className="font-bold">{totals.pitStop}h</span></div>
+                                                )}
+                                            </div>
+                                            {parseFloat(totals.total) > 0 && (
+                                                <div className={`text-2xl font-bold mt-1 ${darkMode ? 'text-brand-green-400' : 'text-brand-green-600'}`}>
+                                                    Total: {totals.total}h
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                    
+                                    {/* Per Diem Field */}
+                                    <div className="mb-3 flex items-center gap-2">
+                                        <label className={`text-base font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Per Diem (# of Nights):</label>
+                                        <input
+                                            type="text"
+                                            value={reportData.perDiem}
+                                            onChange={(e) => handleReportChange('perDiem', e.target.value)}
+                                            placeholder="0"
+                                            className={`w-16 small-input border rounded focus:ring-2 focus:ring-brand-green-500 text-center ${darkMode ? 'border-gray-600 bg-gray-700 text-gray-100' : 'border-gray-300 bg-white'}`}
+                                        />
+                                    </div>
+                                    
+                                    {workDays.map((day, index) => (
+                                        <div key={day.id} className={`mb-3 rounded-lg overflow-hidden ${darkMode ? 'bg-gray-700' : 'bg-gray-50'}`}>
+                                            {/* Collapsible Header */}
+                                            <div 
+                                                onClick={() => toggleWorkDay(day.id)}
+                                                className={`flex justify-between items-center p-3 cursor-pointer hover:opacity-80 transition ${darkMode ? 'bg-gray-600' : 'bg-gray-100'}`}
+                                            >
+                                                <div className="flex items-center gap-3">
+                                                    <span className={`text-lg font-bold ${darkMode ? 'text-gray-200' : 'text-gray-800'}`}>
+                                                        Day {index + 1}
+                                                    </span>
+                                                    <input
+                                                        type="date"
+                                                        value={day.date}
+                                                        onChange={(e) => {
+                                                            e.stopPropagation();
+                                                            updateWorkDay(day.id, 'date', e.target.value);
+                                                        }}
+                                                        onClick={(e) => e.stopPropagation()}
+                                                        className={`small-input border rounded focus:ring-2 focus:ring-brand-green-500 ${darkMode ? 'border-gray-500 bg-gray-700 text-gray-100' : 'border-gray-300 bg-white'}`}
+                                                    />
+                                                </div>
+                                                <div className="flex items-center gap-3">
+                                                    {(day.hoursDriving || day.hoursOnSite) && (
+                                                        <div className={`text-xs ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                                                            {day.hoursDriving && <span>Drive: {day.hoursDriving}h</span>}
+                                                            {day.hoursDriving && day.hoursOnSite && <span className="mx-1">|</span>}
+                                                            {day.hoursOnSite && <span>Site: {day.hoursOnSite}h</span>}
+                                                        </div>
+                                                    )}
+                                                    <svg 
+                                                        className={`w-5 h-5 transition-transform ${day.collapsed ? 'rotate-0' : 'rotate-180'} ${darkMode ? 'text-gray-300' : 'text-gray-600'}`} 
+                                                        fill="none" 
+                                                        stroke="currentColor" 
+                                                        viewBox="0 0 24 24"
+                                                    >
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                                    </svg>
+                                                    {workDays.length > 1 && (
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                removeWorkDay(day.id);
+                                                            }}
+                                                            className="text-red-500 hover:text-red-700 font-bold text-lg"
+                                                        >
+                                                            ×
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            </div>
+                                            
+                                            {/* Collapsible Content */}
+                                            {!day.collapsed && (
+                                                <div className="p-3 space-y-3">
+                                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                                                        <div>
+                                                            <label className={`block text-sm font-semibold mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Left Shop</label>
+                                                            <input
+                                                                type="time"
+                                                                value={day.timeLeftShop}
+                                                                onChange={(e) => updateWorkDay(day.id, 'timeLeftShop', e.target.value)}
+                                                                className={`w-full small-input border rounded focus:ring-2 focus:ring-brand-green-500 ${darkMode ? 'border-gray-600 bg-gray-600 text-gray-100' : 'border-gray-300 bg-white'}`}
+                                                            />
+                                                        </div>
+                                                        <div>
+                                                            <label className={`block text-sm font-semibold mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Arrived Site</label>
+                                                            <input
+                                                                type="time"
+                                                                value={day.arrivedOnSite}
+                                                                onChange={(e) => updateWorkDay(day.id, 'arrivedOnSite', e.target.value)}
+                                                                className={`w-full small-input border rounded focus:ring-2 focus:ring-brand-green-500 ${darkMode ? 'border-gray-600 bg-gray-600 text-gray-100' : 'border-gray-300 bg-white'}`}
+                                                            />
+                                                        </div>
+                                                        <div>
+                                                            <label className={`block text-sm font-semibold mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Left Site</label>
+                                                            <input
+                                                                type="time"
+                                                                value={day.timeLeftSite}
+                                                                onChange={(e) => updateWorkDay(day.id, 'timeLeftSite', e.target.value)}
+                                                                className={`w-full small-input border rounded focus:ring-2 focus:ring-brand-green-500 ${darkMode ? 'border-gray-600 bg-gray-600 text-gray-100' : 'border-gray-300 bg-white'}`}
+                                                            />
+                                                        </div>
+                                                        <div>
+                                                            <label className={`block text-sm font-semibold mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Arrived Shop</label>
+                                                            <input
+                                                                type="time"
+                                                                value={day.arrivedAtShop}
+                                                                onChange={(e) => updateWorkDay(day.id, 'arrivedAtShop', e.target.value)}
+                                                                className={`w-full small-input border rounded focus:ring-2 focus:ring-brand-green-500 ${darkMode ? 'border-gray-600 bg-gray-600 text-gray-100' : 'border-gray-300 bg-white'}`}
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                                        <div>
+                                                            <label className={`block text-sm font-semibold mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Standby Time</label>
+                                                            <div className="flex gap-2">
+                                                                <select
+                                                                    value={day.standbyHours}
+                                                                    onChange={(e) => updateWorkDay(day.id, 'standbyHours', e.target.value)}
+                                                                    className={`w-16 small-input border rounded focus:ring-2 focus:ring-brand-green-500 ${darkMode ? 'border-gray-600 bg-gray-600 text-gray-100' : 'border-gray-300 bg-white'}`}
+                                                                >
+                                                                    <option value="">0h</option>
+                                                                    {[...Array(24)].map((_, i) => (
+                                                                        <option key={i} value={i}>{i}h</option>
+                                                                    ))}
+                                                                </select>
+                                                                <select
+                                                                    value={day.standbyMinutes}
+                                                                    onChange={(e) => updateWorkDay(day.id, 'standbyMinutes', e.target.value)}
+                                                                    className={`w-16 small-input border rounded focus:ring-2 focus:ring-brand-green-500 ${darkMode ? 'border-gray-600 bg-gray-600 text-gray-100' : 'border-gray-300 bg-white'}`}
+                                                                >
+                                                                    <option value="">0m</option>
+                                                                    <option value="15">15m</option>
+                                                                    <option value="30">30m</option>
+                                                                    <option value="45">45m</option>
+                                                                </select>
+                                                                <input
+                                                                    type="text"
+                                                                    placeholder="Reason..."
+                                                                    value={day.standbyReason}
+                                                                    onChange={(e) => updateWorkDay(day.id, 'standbyReason', e.target.value)}
+                                                                    className={`flex-1 small-input border rounded focus:ring-2 focus:ring-brand-green-500 ${darkMode ? 'border-gray-600 bg-gray-600 text-gray-100' : 'border-gray-300 bg-white'}`}
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                        <div>
+                                                            <label className={`block text-sm font-semibold mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Pit Stops</label>
+                                                            <div className="flex gap-2">
+                                                                <select
+                                                                    value={day.pitStopHours}
+                                                                    onChange={(e) => updateWorkDay(day.id, 'pitStopHours', e.target.value)}
+                                                                    className={`w-16 small-input border rounded focus:ring-2 focus:ring-brand-green-500 ${darkMode ? 'border-gray-600 bg-gray-600 text-gray-100' : 'border-gray-300 bg-white'}`}
+                                                                >
+                                                                    <option value="">0h</option>
+                                                                    {[...Array(24)].map((_, i) => (
+                                                                        <option key={i} value={i}>{i}h</option>
+                                                                    ))}
+                                                                </select>
+                                                                <select
+                                                                    value={day.pitStopMinutes}
+                                                                    onChange={(e) => updateWorkDay(day.id, 'pitStopMinutes', e.target.value)}
+                                                                    className={`w-16 small-input border rounded focus:ring-2 focus:ring-brand-green-500 ${darkMode ? 'border-gray-600 bg-gray-600 text-gray-100' : 'border-gray-300 bg-white'}`}
+                                                                >
+                                                                    <option value="">0m</option>
+                                                                    <option value="15">15m</option>
+                                                                    <option value="30">30m</option>
+                                                                    <option value="45">45m</option>
+                                                                </select>
+                                                                <input
+                                                                    type="text"
+                                                                    placeholder="Reason..."
+                                                                    value={day.pitStopReason}
+                                                                    onChange={(e) => updateWorkDay(day.id, 'pitStopReason', e.target.value)}
+                                                                    className={`flex-1 small-input border rounded focus:ring-2 focus:ring-brand-green-500 ${darkMode ? 'border-gray-600 bg-gray-600 text-gray-100' : 'border-gray-300 bg-white'}`}
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    {(day.hoursDriving || day.hoursOnSite) && (
+                                                        <div className={`flex gap-4 text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                                                            {day.hoursDriving && (
+                                                                <div>
+                                                                    <span>Driving: </span>
+                                                                    <span className="font-bold">{day.hoursDriving}h</span>
+                                                                </div>
+                                                            )}
+                                                            {day.hoursOnSite && (
+                                                                <div>
+                                                                    <span>On Site: </span>
+                                                                    <span className="font-bold">{day.hoursOnSite}h</span>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))}
+                                    
+                                    <button
+                                        onClick={addWorkDay}
+                                        className="w-full py-2 border-2 border-dashed border-brand-green-500 text-brand-green-600 rounded-lg hover:bg-brand-green-50 dark:hover:bg-gray-700 transition font-semibold"
+                                    >
+                                        + Add Work Day
+                                    </button>
+                                </div>
+
+                                {/* Borings */}
+                                <div className={`shadow-sm rounded-lg p-4 ${darkMode ? 'bg-gray-800' : 'bg-white border border-gray-200'}`}>
+                                    <div className="flex justify-between items-center mb-3">
+                                        <h3 className={`text-xl font-bold ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>BORINGS</h3>
+                                        {(parseFloat(boringStats.totalFootage) > 0 || boringStats.numBorings > 0) && (
+                                            <div className={`text-xs text-right ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                                                <div>Total Footage: <span className="font-bold">{boringStats.totalFootage} ft</span></div>
+                                                <div># of Borings: <span className="font-bold">{boringStats.numBorings}</span></div>
+                                                {boringStats.depths && <div>Depths: <span className="font-bold">{boringStats.depths} ft</span></div>}
+                                            </div>
+                                        )}
+                                    </div>
+                                    
+                                    {borings.map((boring, index) => (
+                                        <div key={boring.id} className={`mb-3 rounded-lg overflow-hidden ${darkMode ? 'bg-gray-700' : 'bg-gray-50'}`}>
+                                            {/* Collapsible Header */}
+                                            <div 
+                                                onClick={() => toggleBoring(boring.id)}
+                                                className={`flex justify-between items-center p-3 cursor-pointer hover:opacity-80 transition ${darkMode ? 'bg-gray-600' : 'bg-gray-100'}`}
+                                            >
+                                                <div className="flex items-center gap-3 flex-1 min-w-0">
+                                                    <span className={`font-bold text-lg flex-shrink-0 ${darkMode ? 'text-gray-200' : 'text-gray-800'}`}>B-{index + 1}</span>
+                                                    <div className="flex items-center gap-3 flex-shrink-0">
+                                                        <label 
+                                                            className="flex items-center gap-1 cursor-pointer"
+                                                            onClick={(e) => e.stopPropagation()}
+                                                        >
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={boring.isEnvironmental}
+                                                                onChange={(e) => updateBoring(boring.id, 'isEnvironmental', e.target.checked)}
+                                                                className="w-4 h-4 text-brand-green-600 rounded focus:ring-brand-green-500"
+                                                            />
+                                                            <span className={`text-xs font-semibold whitespace-nowrap ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Env</span>
+                                                        </label>
+                                                        <label 
+                                                            className="flex items-center gap-1 cursor-pointer"
+                                                            onClick={(e) => e.stopPropagation()}
+                                                        >
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={boring.isGeotechnical}
+                                                                onChange={(e) => updateBoring(boring.id, 'isGeotechnical', e.target.checked)}
+                                                                className="w-4 h-4 text-brand-green-600 rounded focus:ring-brand-green-500"
+                                                            />
+                                                            <span className={`text-xs font-semibold whitespace-nowrap ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Geo</span>
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center gap-2 flex-shrink-0 ml-3">
+                                                    {(boring.method || boring.footage) && (
+                                                        <div className={`text-xs whitespace-nowrap ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                                                            {boring.method && <span>{boring.method}</span>}
+                                                            {boring.method && boring.footage && <span className="mx-1">|</span>}
+                                                            {boring.footage && <span>{boring.footage} ft</span>}
+                                                        </div>
+                                                    )}
+                                                    <svg 
+                                                        className={`w-5 h-5 transition-transform flex-shrink-0 ${boring.collapsed ? 'rotate-0' : 'rotate-180'} ${darkMode ? 'text-gray-300' : 'text-gray-600'}`} 
+                                                        fill="none" 
+                                                        stroke="currentColor" 
+                                                        viewBox="0 0 24 24"
+                                                    >
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                                    </svg>
+                                                    {borings.length > 1 && (
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                removeBoring(boring.id);
+                                                            }}
+                                                            className="text-red-500 hover:text-red-700 font-bold text-xl"
+                                                        >
+                                                            ×
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            </div>
+                                            
+                                            {/* Collapsible Content */}
+                                            {!boring.collapsed && (
+                                                <div className="p-3 space-y-2">
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                                        <div>
+                                                            <label className={`block text-sm font-semibold mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Method</label>
+                                                            <select
+                                                                value={boring.method}
+                                                                onChange={(e) => updateBoring(boring.id, 'method', e.target.value)}
+                                                                className={`w-full small-input border rounded focus:ring-2 focus:ring-brand-green-500 ${darkMode ? 'border-gray-600 bg-gray-600 text-gray-100' : 'border-gray-300 bg-white'}`}
+                                                            >
+                                                                <option value="">Select...</option>
+                                                                <option value="Turn & Burn">Turn & Burn</option>
+                                                                <option value="Continuous Sample">Continuous Sample</option>
+                                                                <option value="Standard Sampling">Standard Sampling</option>
+                                                            </select>
+                                                        </div>
+                                                        <div>
+                                                            <label className={`block text-sm font-semibold mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Footage</label>
+                                                            <input
+                                                                type="text"
+                                                                value={boring.footage}
+                                                                onChange={(e) => updateBoring(boring.id, 'footage', e.target.value)}
+                                                                placeholder="ft"
+                                                                className={`w-full small-input border rounded focus:ring-2 focus:ring-brand-green-500 ${darkMode ? 'border-gray-600 bg-gray-600 text-gray-100' : 'border-gray-300 bg-white'}`}
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                                                        <div className="flex items-center gap-2">
+                                                            <label className="flex items-center gap-1 cursor-pointer">
+                                                                <input
+                                                                    type="checkbox"
+                                                                    checked={boring.washboreSetup}
+                                                                    onChange={(e) => updateBoring(boring.id, 'washboreSetup', e.target.checked)}
+                                                                    className="w-4 h-4 text-brand-green-600 rounded focus:ring-brand-green-500"
+                                                                />
+                                                                <span className={`text-sm font-semibold whitespace-nowrap ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Washbore</span>
+                                                            </label>
+                                                            {boring.washboreSetup && (
+                                                                <input
+                                                                    type="text"
+                                                                    value={boring.washboreFootage}
+                                                                    onChange={(e) => updateBoring(boring.id, 'washboreFootage', e.target.value)}
+                                                                    placeholder="Footage"
+                                                                    className={`flex-1 small-input border rounded focus:ring-2 focus:ring-brand-green-500 ${darkMode ? 'border-gray-600 bg-gray-600 text-gray-100' : 'border-gray-300 bg-white'}`}
+                                                                />
+                                                            )}
+                                                        </div>
+                                                        <div className="flex items-center gap-2">
+                                                            <label className="flex items-center gap-1 cursor-pointer">
+                                                                <input
+                                                                    type="checkbox"
+                                                                    checked={boring.casingSetup}
+                                                                    onChange={(e) => updateBoring(boring.id, 'casingSetup', e.target.checked)}
+                                                                    className="w-4 h-4 text-brand-green-600 rounded focus:ring-brand-green-500"
+                                                                />
+                                                                <span className={`text-sm font-semibold whitespace-nowrap ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Casing</span>
+                                                            </label>
+                                                            {boring.casingSetup && (
+                                                                <input
+                                                                    type="text"
+                                                                    value={boring.casingFootage}
+                                                                    onChange={(e) => updateBoring(boring.id, 'casingFootage', e.target.value)}
+                                                                    placeholder="Footage"
+                                                                    className={`flex-1 small-input border rounded focus:ring-2 focus:ring-brand-green-500 ${darkMode ? 'border-gray-600 bg-gray-600 text-gray-100' : 'border-gray-300 bg-white'}`}
+                                                                />
+                                                            )}
+                                                        </div>
+                                                        <div className="flex items-center gap-2">
+                                                            <label className="flex items-center gap-1 cursor-pointer">
+                                                                <input
+                                                                    type="checkbox"
+                                                                    checked={boring.coreSetup}
+                                                                    onChange={(e) => updateBoring(boring.id, 'coreSetup', e.target.checked)}
+                                                                    className="w-4 h-4 text-brand-green-600 rounded focus:ring-brand-green-500"
+                                                                />
+                                                                <span className={`text-sm font-semibold whitespace-nowrap ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Core</span>
+                                                            </label>
+                                                            {boring.coreSetup && (
+                                                                <input
+                                                                    type="text"
+                                                                    value={boring.coreFootage}
+                                                                    onChange={(e) => updateBoring(boring.id, 'coreFootage', e.target.value)}
+                                                                    placeholder="Footage"
+                                                                    className={`flex-1 small-input border rounded focus:ring-2 focus:ring-brand-green-500 ${darkMode ? 'border-gray-600 bg-gray-600 text-gray-100' : 'border-gray-300 bg-white'}`}
+                                                                />
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))}
+                                    
+                                    <button
+                                        onClick={addBoring}
+                                        className="text-brand-green-600 hover:text-brand-green-700 text-base font-semibold"
+                                    >
+                                        + Add Boring
+                                    </button>
+                                </div>
+
+                                {/* Comments / Labor */}
+                                <div className={`shadow-sm rounded-lg p-4 ${darkMode ? 'bg-gray-800' : 'bg-white border border-gray-200'}`}>
+                                    <h3 className={`text-xl font-bold mb-2 ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>COMMENTS / MISC. LABOR</h3>
+                                    <p className="text-base font-bold mb-2 text-red-600">*ATTACH ALL RECEIPTS / PICTURES*</p>
+                                    <textarea
+                                        value={reportData.commentsLabor}
+                                        onChange={(e) => handleReportChange('commentsLabor', e.target.value)}
+                                        rows="6"
+                                        className={`w-full small-input border rounded focus:ring-2 focus:ring-brand-green-500 mb-2 ${darkMode ? 'border-gray-600 bg-gray-700 text-gray-100' : 'border-gray-300 bg-white'}`}
+                                        placeholder="Enter comments and miscellaneous labor details..."
+                                    />
+                                    <div className="flex gap-2 mb-2">
+                                        <label className="px-4 py-2 bg-brand-green-600 text-white rounded-lg hover:bg-brand-green-700 transition cursor-pointer text-base font-semibold">
+                                            📎 Upload Photos/Receipts
+                                            <input
+                                                type="file"
+                                                multiple
+                                                accept="image/*,.pdf"
+                                                onChange={(e) => handlePhotoUpload(e, 'details')}
+                                                className="hidden"
+                                            />
+                                        </label>
+                                    </div>
+                                    {reportData.uploadedPhotosDetails.length > 0 && (
+                                        <div className={`p-2 rounded ${darkMode ? 'bg-gray-700' : 'bg-gray-50'}`}>
+                                            <p className={`text-sm font-semibold mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Uploaded Files:</p>
+                                            {reportData.uploadedPhotosDetails.map((file, index) => (
+                                                <div key={index} className="flex justify-between items-center text-sm py-1">
+                                                    <span className={darkMode ? 'text-gray-300' : 'text-gray-700'}>{file.name} ({file.size})</span>
+                                                    <button
+                                                        onClick={() => removePhoto(index, 'details')}
+                                                        className="text-red-500 hover:text-red-700 font-bold"
+                                                    >
+                                                        ×
+                                                    </button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Supplies Tab */}
+                        {activeTab === 'supplies' && (
+                            <div id="supplies-tab">
+                                <div className={`shadow-sm rounded-lg p-4 ${darkMode ? 'bg-gray-800' : 'bg-white border border-gray-200'}`}>
+                                    <h2 className={`text-xl font-bold mb-4 border-b pb-2 ${darkMode ? 'text-gray-100 border-gray-700' : 'text-gray-800 border-gray-200'}`}>
+                                        SUPPLIES
+                                    </h2>
+
+                                    {/* Main Supplies Table */}
+                                    <div className="table-container mb-6">
+                                        <table className={`w-full border-collapse ${darkMode ? 'border-gray-600' : 'border-gray-300'}`}>
+                                            <thead>
+                                                <tr className={darkMode ? 'bg-gray-700' : 'bg-gray-100'}>
+                                                    <th className={`border p-2 text-left text-lg font-bold ${darkMode ? 'border-gray-600 text-gray-200' : 'border-gray-300 text-gray-800'}`}>Item</th>
+                                                    <th className={`border p-2 text-center text-lg font-bold ${darkMode ? 'border-gray-600 text-gray-200' : 'border-gray-300 text-gray-800'}`}>1"</th>
+                                                    <th className={`border p-2 text-center text-lg font-bold ${darkMode ? 'border-gray-600 text-gray-200' : 'border-gray-300 text-gray-800'}`}>2"</th>
+                                                    <th className={`border p-2 text-center text-lg font-bold ${darkMode ? 'border-gray-600 text-gray-200' : 'border-gray-300 text-gray-800'}`}>4"</th>
+                                                    <th className={`border p-2 text-center text-lg font-bold ${darkMode ? 'border-gray-600 text-gray-200' : 'border-gray-300 text-gray-800'}`}>Other</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {[
+                                                    ['End Caps', 'endCaps'],
+                                                    ['Locking Caps', 'lockingCaps'],
+                                                    ['Screen 5\'', 'screen5'],
+                                                    ['Screen 10\'', 'screen10'],
+                                                    ['Riser 5\'', 'riser5'],
+                                                    ['Riser 10\'', 'riser10']
+                                                ].map(([label, prefix]) => (
+                                                    <tr key={prefix}>
+                                                        <td className={`border p-2 font-semibold text-base ${darkMode ? 'border-gray-600 text-gray-300' : 'border-gray-300 text-gray-700'}`}>{label}</td>
+                                                        <td className={`border p-2 ${darkMode ? 'border-gray-600' : 'border-gray-300'}`}>
+                                                            <input
+                                                                type="text"
+                                                                value={suppliesData[`${prefix}1`] || suppliesData[`${prefix}_1`]}
+                                                                onChange={(e) => handleSuppliesChange(`${prefix}1` in suppliesData ? `${prefix}1` : `${prefix}_1`, e.target.value)}
+                                                                className={`tiny-input mx-auto border rounded focus:ring-1 focus:ring-brand-green-500 ${darkMode ? 'border-gray-600 bg-gray-600 text-gray-100' : 'border-gray-300 bg-white'}`}
+                                                            />
+                                                        </td>
+                                                        <td className={`border p-2 ${darkMode ? 'border-gray-600' : 'border-gray-300'}`}>
+                                                            <input
+                                                                type="text"
+                                                                value={suppliesData[`${prefix}2`] || suppliesData[`${prefix}_2`]}
+                                                                onChange={(e) => handleSuppliesChange(`${prefix}2` in suppliesData ? `${prefix}2` : `${prefix}_2`, e.target.value)}
+                                                                className={`tiny-input mx-auto border rounded focus:ring-1 focus:ring-brand-green-500 ${darkMode ? 'border-gray-600 bg-gray-600 text-gray-100' : 'border-gray-300 bg-white'}`}
+                                                            />
+                                                        </td>
+                                                        <td className={`border p-2 ${darkMode ? 'border-gray-600' : 'border-gray-300'}`}>
+                                                            <input
+                                                                type="text"
+                                                                value={suppliesData[`${prefix}4`] || suppliesData[`${prefix}_4`]}
+                                                                onChange={(e) => handleSuppliesChange(`${prefix}4` in suppliesData ? `${prefix}4` : `${prefix}_4`, e.target.value)}
+                                                                className={`tiny-input mx-auto border rounded focus:ring-1 focus:ring-brand-green-500 ${darkMode ? 'border-gray-600 bg-gray-600 text-gray-100' : 'border-gray-300 bg-white'}`}
+                                                            />
+                                                        </td>
+                                                        <td className={`border p-2 ${darkMode ? 'border-gray-600' : 'border-gray-300'}`}>
+                                                            <input
+                                                                type="text"
+                                                                value={suppliesData[`${prefix}Other`]}
+                                                                onChange={(e) => handleSuppliesChange(`${prefix}Other`, e.target.value)}
+                                                                className={`tiny-input mx-auto border rounded focus:ring-1 focus:ring-brand-green-500 ${darkMode ? 'border-gray-600 bg-gray-600 text-gray-100' : 'border-gray-300 bg-white'}`}
+                                                            />
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    {/* Additional Supplies - Two Column Layout */}
+                                    <div className="space-y-4 mb-6">
+                                        {/* Row 1: Flush Mounts | Concrete */}
+                                        <div className="flex flex-col md:flex-row gap-4">
+                                            <div className="flex-1">
+                                                <h3 className={`text-lg font-bold mb-2 pb-1 border-b ${darkMode ? 'text-gray-200 border-gray-600' : 'text-gray-800 border-gray-300'}`}>Flush Mounts</h3>
+                                                <div className="space-y-2">
+                                                    {[
+                                                        ['7"', 'flushMounts7'],
+                                                        ['8"', 'flushMounts8'],
+                                                        ['Other', 'flushMountsOther']
+                                                    ].map(([label, key]) => (
+                                                        <div key={key} className="flex items-center justify-between">
+                                                            <label className={`text-sm font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>{label}</label>
+                                                            <input
+                                                                type="text"
+                                                                value={suppliesData[key]}
+                                                                onChange={(e) => handleSuppliesChange(key, e.target.value)}
+                                                                className={`tiny-input border rounded focus:ring-1 focus:ring-brand-green-500 ${darkMode ? 'border-gray-600 bg-gray-700 text-gray-100' : 'border-gray-300 bg-white'}`}
+                                                            />
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                            
+                                            <div className="flex-1">
+                                                <h3 className={`text-lg font-bold mb-2 pb-1 border-b ${darkMode ? 'text-gray-200 border-gray-600' : 'text-gray-800 border-gray-300'}`}>Concrete</h3>
+                                                <div className="space-y-2">
+                                                    {[
+                                                        ['50#', 'concrete50'],
+                                                        ['60#', 'concrete60'],
+                                                        ['80#', 'concrete80']
+                                                    ].map(([label, key]) => (
+                                                        <div key={key} className="flex items-center justify-between">
+                                                            <label className={`text-sm font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>{label}</label>
+                                                            <input
+                                                                type="text"
+                                                                value={suppliesData[key]}
+                                                                onChange={(e) => handleSuppliesChange(key, e.target.value)}
+                                                                className={`tiny-input border rounded focus:ring-1 focus:ring-brand-green-500 ${darkMode ? 'border-gray-600 bg-gray-700 text-gray-100' : 'border-gray-300 bg-white'}`}
+                                                            />
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        {/* Row 2: Bentonite | Bollards */}
+                                        <div className="flex flex-col md:flex-row gap-4">
+                                            <div className="flex-1">
+                                                <h3 className={`text-lg font-bold mb-2 pb-1 border-b ${darkMode ? 'text-gray-200 border-gray-600' : 'text-gray-800 border-gray-300'}`}>Bentonite</h3>
+                                                <div className="space-y-2">
+                                                    {[
+                                                        ['Chips', 'bentoniteChips'],
+                                                        ['Pellets', 'bentonitePellets'],
+                                                        ['Grout', 'bentoniteGrout']
+                                                    ].map(([label, key]) => (
+                                                        <div key={key} className="flex items-center justify-between">
+                                                            <label className={`text-sm font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>{label}</label>
+                                                            <input
+                                                                type="text"
+                                                                value={suppliesData[key]}
+                                                                onChange={(e) => handleSuppliesChange(key, e.target.value)}
+                                                                className={`tiny-input border rounded focus:ring-1 focus:ring-brand-green-500 ${darkMode ? 'border-gray-600 bg-gray-700 text-gray-100' : 'border-gray-300 bg-white'}`}
+                                                            />
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                            
+                                            <div className="flex-1">
+                                                <h3 className={`text-lg font-bold mb-2 pb-1 border-b ${darkMode ? 'text-gray-200 border-gray-600' : 'text-gray-800 border-gray-300'}`}>Bollards</h3>
+                                                <div className="space-y-2">
+                                                    {[
+                                                        ['3"', 'bollards3'],
+                                                        ['4"', 'bollards4'],
+                                                        ['Other', 'bollardsOther']
+                                                    ].map(([label, key]) => (
+                                                        <div key={key} className="flex items-center justify-between">
+                                                            <label className={`text-sm font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>{label}</label>
+                                                            <input
+                                                                type="text"
+                                                                value={suppliesData[key]}
+                                                                onChange={(e) => handleSuppliesChange(key, e.target.value)}
+                                                                className={`tiny-input border rounded focus:ring-1 focus:ring-brand-green-500 ${darkMode ? 'border-gray-600 bg-gray-700 text-gray-100' : 'border-gray-300 bg-white'}`}
+                                                            />
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        {/* Row 3: Other Materials | Stick Up Covers */}
+                                        <div className="flex flex-col md:flex-row gap-4">
+                                            <div className="flex-1">
+                                                <h3 className={`text-lg font-bold mb-2 pb-1 border-b ${darkMode ? 'text-gray-200 border-gray-600' : 'text-gray-800 border-gray-300'}`}>Other Materials</h3>
+                                                <div className="space-y-2">
+                                                    {[
+                                                        ['Portland Grout', 'portlandGrout'],
+                                                        ['Sand', 'sand'],
+                                                        ['Drilling Mud', 'drillingMud']
+                                                    ].map(([label, key]) => (
+                                                        <div key={key} className="flex items-center justify-between">
+                                                            <label className={`text-sm font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>{label}</label>
+                                                            <input
+                                                                type="text"
+                                                                value={suppliesData[key]}
+                                                                onChange={(e) => handleSuppliesChange(key, e.target.value)}
+                                                                className={`tiny-input border rounded focus:ring-1 focus:ring-brand-green-500 ${darkMode ? 'border-gray-600 bg-gray-700 text-gray-100' : 'border-gray-300 bg-white'}`}
+                                                            />
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                            
+                                            <div className="flex-1">
+                                                <h3 className={`text-lg font-bold mb-2 pb-1 border-b ${darkMode ? 'text-gray-200 border-gray-600' : 'text-gray-800 border-gray-300'}`}>Stick Up Covers</h3>
+                                                <div className="space-y-2">
+                                                    {[
+                                                        ['4"', 'stickUpCovers4'],
+                                                        ['6"', 'stickUpCovers6'],
+                                                        ['Other', 'stickUpCoversOther']
+                                                    ].map(([label, key]) => (
+                                                        <div key={key} className="flex items-center justify-between">
+                                                            <label className={`text-sm font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>{label}</label>
+                                                            <input
+                                                                type="text"
+                                                                value={suppliesData[key]}
+                                                                onChange={(e) => handleSuppliesChange(key, e.target.value)}
+                                                                className={`tiny-input border rounded focus:ring-1 focus:ring-brand-green-500 ${darkMode ? 'border-gray-600 bg-gray-700 text-gray-100' : 'border-gray-300 bg-white'}`}
+                                                            />
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        {/* Row 4 - Miscellaneous Items */}
+                                        <div>
+                                            <h3 className={`text-lg font-bold mb-2 pb-1 border-b ${darkMode ? 'text-gray-200 border-gray-600' : 'text-gray-800 border-gray-300'}`}>Miscellaneous Items</h3>
+                                            <div className="flex flex-col md:flex-row gap-4">
+                                                <div className="space-y-2 flex-1">
+                                                    {[
+                                                        ['# of Buckets', 'buckets'],
+                                                        ['# of Shelby Tubes', 'shelbyTubes'],
+                                                        ['# of Core Boxes', 'numCoreBoxes']
+                                                    ].map(([label, key]) => (
+                                                        <div key={key} className="flex items-center justify-between">
+                                                            <label className={`text-sm font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>{label}</label>
+                                                            <input
+                                                                type="text"
+                                                                value={suppliesData[key]}
+                                                                onChange={(e) => handleSuppliesChange(key, e.target.value)}
+                                                                className={`tiny-input border rounded focus:ring-1 focus:ring-brand-green-500 ${darkMode ? 'border-gray-600 bg-gray-700 text-gray-100' : 'border-gray-300 bg-white'}`}
+                                                            />
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                                <div className="flex-1 flex items-center gap-2">
+                                                    <label className={`text-sm font-semibold whitespace-nowrap ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Other:</label>
+                                                    <input
+                                                        type="text"
+                                                        value={suppliesData.other}
+                                                        onChange={(e) => handleSuppliesChange('other', e.target.value)}
+                                                        className={`flex-1 small-input border rounded focus:ring-2 focus:ring-brand-green-500 ${darkMode ? 'border-gray-600 bg-gray-700 text-gray-100' : 'border-gray-300 bg-white'}`}
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Misc Section */}
+                                    <div className={`pt-4 border-t ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+                                        <h3 className={`text-xl font-bold mb-2 ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>MISC.</h3>
+                                        <p className="text-base font-bold mb-2 text-red-600">*ATTACH ALL RECEIPTS / PICTURES*</p>
+                                        <textarea
+                                            value={suppliesData.misc}
+                                            onChange={(e) => handleSuppliesChange('misc', e.target.value)}
+                                            rows="3"
+                                            className={`w-full small-input border rounded focus:ring-2 focus:ring-brand-green-500 mb-2 ${darkMode ? 'border-gray-600 bg-gray-700 text-gray-100' : 'border-gray-300 bg-white'}`}
+                                            placeholder="Enter miscellaneous notes..."
+                                        />
+                                        <div className="flex gap-2 mb-2">
+                                            <label className="px-4 py-2 bg-brand-green-600 text-white rounded-lg hover:bg-brand-green-700 transition cursor-pointer text-base font-semibold">
+                                                📎 Upload Photos/Receipts
+                                                <input
+                                                    type="file"
+                                                    multiple
+                                                    accept="image/*,.pdf"
+                                                    onChange={(e) => handlePhotoUpload(e, 'supplies')}
+                                                    className="hidden"
+                                                />
+                                            </label>
+                                        </div>
+                                        {suppliesData.uploadedPhotosSupplies.length > 0 && (
+                                            <div className={`p-2 rounded ${darkMode ? 'bg-gray-700' : 'bg-gray-50'}`}>
+                                                <p className={`text-sm font-semibold mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Uploaded Files:</p>
+                                                {suppliesData.uploadedPhotosSupplies.map((file, index) => (
+                                                    <div key={index} className="flex justify-between items-center text-sm py-1">
+                                                        <span className={darkMode ? 'text-gray-300' : 'text-gray-700'}>{file.name} ({file.size})</span>
+                                                        <button
+                                                            onClick={() => removePhoto(index, 'supplies')}
+                                                            className="text-red-500 hover:text-red-700 font-bold"
+                                                        >
+                                                            ×
+                                                        </button>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                    
+                    {/* Project Creation Modal */}
+                    {showProjectModal && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 no-print">
+                            <div className={`rounded-lg p-6 max-w-md w-full mx-4 ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
+                                <h3 className={`text-2xl font-bold mb-4 ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>
+                                    Create New Project
+                                </h3>
+                                <p className={`mb-4 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                                    Enter a name for your new project (e.g., customer name, job site, or job number):
+                                </p>
+                                <input
+                                    type="text"
+                                    value={newProjectName}
+                                    onChange={(e) => setNewProjectName(e.target.value)}
+                                    placeholder="e.g., ABC Corp - Main Street Site"
+                                    className={`w-full px-4 py-3 border rounded-lg mb-4 text-lg ${darkMode ? 'bg-gray-700 text-white border-gray-600' : 'bg-white border-gray-300'}`}
+                                    onKeyPress={(e) => {
+                                        if (e.key === 'Enter') createNewProject();
+                                    }}
+                                    autoFocus
+                                />
+                                <div className="flex flex-col sm:flex-row gap-3">
+                                    <button
+                                        onClick={createNewProject}
+                                        className="flex-1 px-4 py-3 bg-brand-green-600 text-white rounded-lg hover:bg-brand-green-700 font-semibold text-lg"
+                                    >
+                                        Create Project
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            setShowProjectModal(false);
+                                            setNewProjectName('');
+                                        }}
+                                        className={`flex-1 px-4 py-3 rounded-lg font-semibold text-lg ${darkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+                                    >
+                                        Cancel
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        ReactDOM.render(<DailyDrillReport />, document.getElementById('root'));
+    </script>
+</body>
+</html>
