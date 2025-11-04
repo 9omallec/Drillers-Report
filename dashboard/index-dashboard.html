@@ -1,0 +1,1149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#16a34a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiRHJpbGxlcnMgUmVwb3J0IERhc2hib2FyZCIsInNob3J0X25hbWUiOiJSZXBvcnRzIiwiZGVzY3JpcHRpb24iOiJNYW5hZ2UgYW5kIHJldmlldyBkcmlsbCByZXBvcnRzIiwic3RhcnRfdXJsIjoiLi8iLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsImJhY2tncm91bmRfY29sb3IiOiIjZmZmZmZmIiwidGhlbWVfY29sb3IiOiIjMTZhMzRhIiwiaWNvbnMiOlt7InNyYyI6ImRhdGE6aW1hZ2Uvc3ZnK3htbCwlM0NzdmcgeG1sbnM9J2h0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnJyB2aWV3Qm94PScwIDAgMTAwIDEwMCclM0UlM0NyZWN0IHdpZHRoPScxMDAnIGhlaWdodD0nMTAwJyBmaWxsPSclMjMxNmEzNGEnLyUzRSUzQ3JlY3QgeD0nMjAnIHk9JzIwJyB3aWR0aD0nNjAnIGhlaWdodD0nNjAnIGZpbGw9J3doaXRlJyByeD0nNScvJTNFJTNDcmVjdCB4PSczMCcgeT0nMzUnIHdpZHRoPSc0MCcgaGVpZ2h0PSc2JyBmaWxsPSclMjMxNmEzNGEnIHJ4PScyJy8lM0UlM0NyZWN0IHg9JzMwJyB5PSc0NScgd2lkdGg9JzQwJyBoZWlnaHQ9JzYnIGZpbGw9JyUyMzE2YTM0YScgcng9JzInLyUzRSUzQ3JlY3QgeD0nMzAnIHk9JzU1JyB3aWR0aD0nNDAnIGhlaWdodD0nNicgZmlsbD0nJTIzMTZhMzRhJyByeD0nMicvJTNFJTNDY2lyY2xlIGN4PSc3MCcgY3k9JzMwJyByPSc4JyBmaWxsPSclMjMyMmM1NWUnLyUzRSUzQ3BhdGggZD0nTTY3IDMwIEw2OSAzMiBMNzMgMjgnIHN0cm9rZT0nd2hpdGUnIHN0cm9rZS13aWR0aD0nMicgZmlsbD0nbm9uZScvJTNFJTNDL3N2ZyUzRSIsInNpemVzIjoiNTEyeDUxMiIsInR5cGUiOiJpbWFnZS9zdmcreG1sIn1dfQ==">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%2316a34a'/%3E%3Crect x='20' y='20' width='60' height='60' fill='white' rx='5'/%3E%3Crect x='30' y='35' width='40' height='6' fill='%2316a34a' rx='2'/%3E%3Crect x='30' y='45' width='40' height='6' fill='%2316a34a' rx='2'/%3E%3Crect x='30' y='55' width='40' height='6' fill='%2316a34a' rx='2'/%3E%3Ccircle cx='70' cy='30' r='8' fill='%2322c55e'/%3E%3Cpath d='M67 30 L69 32 L73 28' stroke='white' stroke-width='2' fill='none'/%3E%3C/svg%3E">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%2316a34a'/%3E%3Crect x='20' y='20' width='60' height='60' fill='white' rx='5'/%3E%3Crect x='30' y='35' width='40' height='6' fill='%2316a34a' rx='2'/%3E%3Crect x='30' y='45' width='40' height='6' fill='%2316a34a' rx='2'/%3E%3Crect x='30' y='55' width='40' height='6' fill='%2316a34a' rx='2'/%3E%3Ccircle cx='70' cy='30' r='8' fill='%2322c55e'/%3E%3Cpath d='M67 30 L69 32 L73 28' stroke='white' stroke-width='2' fill='none'/%3E%3C/svg%3E">
+    <title>Drillers Report Dashboard - O'Malley Drilling</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://apis.google.com/js/api.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        @media print {
+            .no-print { display: none !important; }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        function BossDashboard() {
+            const [reports, setReports] = useState([]);
+            const [selectedReports, setSelectedReports] = useState([]);
+            const [filterStatus, setFilterStatus] = useState('all');
+            const [searchTerm, setSearchTerm] = useState('');
+            const [darkMode, setDarkMode] = useState(false);
+            const [viewingReport, setViewingReport] = useState(null);
+            const [showAnalytics, setShowAnalytics] = useState(false);
+
+            // Load reports from localStorage on mount
+            useEffect(() => {
+                const savedReports = localStorage.getItem('bossReports');
+                if (savedReports) {
+                    setReports(JSON.parse(savedReports));
+                }
+            }, []);
+
+            // Save reports whenever they change
+            useEffect(() => {
+                localStorage.setItem('bossReports', JSON.stringify(reports));
+            }, [reports]);
+
+            // ====== GOOGLE DRIVE API INTEGRATION ======
+            const GOOGLE_DRIVE_CONFIG = {
+                CLIENT_ID: '13192191935-5bcljariebng92efk6u78f9vf0jqfu4q.apps.googleusercontent.com',
+                FOLDER_ID: '0AKDyjXFIoWspUk9PVA',
+                SCOPES: 'https://www.googleapis.com/auth/drive.readonly',
+                DISCOVERY_DOCS: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest']
+            };
+
+            const [isSignedIn, setIsSignedIn] = useState(false);
+            const [driveStatus, setDriveStatus] = useState('');
+            const [gapiLoaded, setGapiLoaded] = useState(false);
+
+            // Initialize Google Drive API
+            useEffect(() => {
+                const initGoogleDrive = () => {
+                    if (!window.gapi) {
+                        console.log('gapi not loaded yet, retrying...');
+                        setTimeout(initGoogleDrive, 1000);
+                        return;
+                    }
+
+                    console.log('Loading gapi client...');
+                    setDriveStatus('🔄 Connecting to Google Drive...');
+                    
+                    window.gapi.load('client:auth2', () => {
+                        console.log('Initializing gapi client...');
+                        window.gapi.client.init({
+                            clientId: GOOGLE_DRIVE_CONFIG.CLIENT_ID,
+                            discoveryDocs: GOOGLE_DRIVE_CONFIG.DISCOVERY_DOCS,
+                            scope: GOOGLE_DRIVE_CONFIG.SCOPES
+                        }).then(() => {
+                            console.log('gapi initialized successfully');
+                            const authInstance = window.gapi.auth2.getAuthInstance();
+                            const signedIn = authInstance.isSignedIn.get();
+                            setIsSignedIn(signedIn);
+                            authInstance.isSignedIn.listen((newSignedIn) => {
+                                setIsSignedIn(newSignedIn);
+                                // Auto-sync when user signs in
+                                if (newSignedIn) {
+                                    setTimeout(() => syncFromDrive(), 500);
+                                }
+                            });
+                            setGapiLoaded(true);
+                            setDriveStatus('');
+                            console.log('Google Drive ready!');
+                            
+                            // If already signed in, auto-sync
+                            if (signedIn) {
+                                setTimeout(() => syncFromDrive(), 500);
+                            }
+                        }).catch((error) => {
+                            console.error('Error initializing Google Drive:', error);
+                            setDriveStatus('❌ Error connecting to Google Drive. Check console for details.');
+                            alert('Google Drive Error:\n\n' + error.message + '\n\nPlease make sure:\n1. You added your GitHub URL to authorized domains\n2. This page is loaded via HTTPS\n3. Pop-ups are not blocked');
+                        });
+                    });
+                };
+
+                initGoogleDrive();
+            }, []);
+
+            // Sign in to Google Drive
+            const signInToDrive = () => {
+                if (!gapiLoaded) {
+                    alert('⚠️ Google Drive is still loading...\n\nPlease wait a moment and try again.');
+                    return;
+                }
+                
+                try {
+                    console.log('Attempting sign in...');
+                    window.gapi.auth2.getAuthInstance().signIn()
+                        .then(() => {
+                            console.log('Sign in successful!');
+                            setDriveStatus('✓ Signed in to Google Drive');
+                        })
+                        .catch((error) => {
+                            console.error('Sign in error:', error);
+                            alert('Sign in failed:\n\n' + error.error + '\n\n' + error.details);
+                        });
+                } catch (error) {
+                    console.error('Sign in exception:', error);
+                    alert('Error signing in. Please refresh the page and try again.');
+                }
+            };
+
+            // Sign out from Google Drive
+            const signOutFromDrive = () => {
+                try {
+                    window.gapi.auth2.getAuthInstance().signOut();
+                    setDriveStatus('Signed out from Google Drive');
+                    setTimeout(() => setDriveStatus(''), 2000);
+                } catch (error) {
+                    console.error('Sign out error:', error);
+                }
+            };
+
+            // Sync reports from Google Drive
+            const syncFromDrive = async () => {
+                try {
+                    setDriveStatus('Syncing from Google Drive...');
+                    
+                    const response = await window.gapi.client.drive.files.list({
+                        q: `'${GOOGLE_DRIVE_CONFIG.FOLDER_ID}' in parents and mimeType='application/json' and trashed=false`,
+                        fields: 'files(id, name, createdTime)',
+                        orderBy: 'createdTime desc'
+                    });
+
+                    const files = response.result.files;
+                    
+                    if (!files || files.length === 0) {
+                        setDriveStatus('No reports found in Drive folder');
+                        setTimeout(() => setDriveStatus(''), 3000);
+                        return;
+                    }
+
+                    let importedCount = 0;
+                    
+                    for (const file of files) {
+                        // Check if already imported
+                        const alreadyImported = reports.some(r => r.driveFileId === file.id);
+                        if (alreadyImported) continue;
+
+                        // Download and parse file
+                        const fileData = await window.gapi.client.drive.files.get({
+                            fileId: file.id,
+                            alt: 'media'
+                        });
+
+                        const data = fileData.result;
+                        const newReport = {
+                            id: Date.now() + importedCount,
+                            importedAt: file.createdTime,
+                            status: 'pending',
+                            driveFileId: file.id,
+                            driveFileName: file.name,
+                            ...data.report,
+                            workDays: data.workDays,
+                            borings: data.borings,
+                            equipment: data.equipment,
+                            supplies: data.supplies
+                        };
+                        
+                        setReports(prev => [newReport, ...prev]);
+                        importedCount++;
+                    }
+
+                    if (importedCount > 0) {
+                        setDriveStatus(`✓ Imported ${importedCount} new report(s) from Drive!`);
+                    } else {
+                        setDriveStatus('All reports already imported');
+                    }
+                    setTimeout(() => setDriveStatus(''), 3000);
+
+                } catch (error) {
+                    console.error('Error syncing from Drive:', error);
+                    setDriveStatus('Error syncing from Google Drive');
+                }
+            };
+            // ====== END GOOGLE DRIVE API ======
+
+            // Import report from JSON file (emailed by driller)
+            const handleImportReport = (event) => {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        try {
+                            const data = JSON.parse(e.target.result);
+                            const newReport = {
+                                id: Date.now(),
+                                importedAt: new Date().toISOString(),
+                                status: 'pending',
+                                ...data.report,
+                                workDays: data.workDays,
+                                borings: data.borings,
+                                equipment: data.equipment,
+                                supplies: data.supplies
+                            };
+                            setReports([newReport, ...reports]);
+                            alert('Report imported successfully!');
+                        } catch (error) {
+                            alert('Error importing report. Please ensure it\'s a valid report file.');
+                        }
+                    };
+                    reader.readAsText(file);
+                }
+            };
+
+            // Approve a report
+            const approveReport = (id) => {
+                setReports(reports.map(r => 
+                    r.id === id ? { ...r, status: 'approved', approvedAt: new Date().toISOString() } : r
+                ));
+            };
+
+            // Request changes on a report
+            const requestChanges = (id) => {
+                const reason = prompt('What changes are needed?');
+                if (reason) {
+                    setReports(reports.map(r => 
+                        r.id === id ? { ...r, status: 'changes_requested', changeReason: reason } : r
+                    ));
+                }
+            };
+
+            // Delete a report
+            const deleteReport = (id) => {
+                if (confirm('Are you sure you want to delete this report?')) {
+                    setReports(reports.filter(r => r.id !== id));
+                }
+            };
+
+            // Export selected reports to CSV for QuickBooks Desktop
+            const exportToQuickBooks = () => {
+                if (selectedReports.length === 0) {
+                    alert('Please select reports to export');
+                    return;
+                }
+
+                // QuickBooks Desktop optimized format with more detailed breakdown
+                let csv = 'Date,Customer,Service Item,Description,Quantity,Rate,Amount,Employee,Job Name,Location,Notes\n';
+                
+                selectedReports.forEach(id => {
+                    const report = reports.find(r => r.id === id);
+                    if (report) {
+                        const date = report.importedAt?.split('T')[0] || '';
+                        const customer = report.customer || '';
+                        const jobName = report.jobName || '';
+                        const location = report.location || '';
+                        const driller = report.driller || '';
+                        
+                        // Calculate totals
+                        const totalDrive = report.workDays?.reduce((sum, day) => sum + (parseFloat(day.hoursDriving) || 0), 0) || 0;
+                        const totalOnSite = report.workDays?.reduce((sum, day) => sum + (parseFloat(day.hoursOnSite) || 0), 0) || 0;
+                        const totalStandby = report.workDays?.reduce((sum, day) => {
+                            const hours = parseFloat(day.standbyHours) || 0;
+                            const minutes = parseFloat(day.standbyMinutes) || 0;
+                            return sum + hours + (minutes / 60);
+                        }, 0) || 0;
+                        const totalFootage = report.borings?.reduce((sum, b) => sum + (parseFloat(b.footage) || 0), 0) || 0;
+                        const numBorings = report.borings?.filter(b => parseFloat(b.footage) > 0).length || 0;
+                        
+                        // Create separate line items for different service types (better for QuickBooks)
+                        if (totalDrive > 0) {
+                            csv += `"${date}","${customer}","Drive Time","Drilling - Drive Time",${totalDrive.toFixed(2)},,"","${driller}","${jobName}","${location}","${totalDrive.toFixed(2)} hours"\n`;
+                        }
+                        if (totalOnSite > 0) {
+                            csv += `"${date}","${customer}","On-Site Time","Drilling - On-Site Work",${totalOnSite.toFixed(2)},,"","${driller}","${jobName}","${location}","${totalOnSite.toFixed(2)} hours | ${numBorings} borings | ${totalFootage.toFixed(1)} ft"\n`;
+                        }
+                        if (totalStandby > 0) {
+                            csv += `"${date}","${customer}","Standby Time","Standby/Waiting",${totalStandby.toFixed(2)},,"","${driller}","${jobName}","${location}","${totalStandby.toFixed(2)} hours standby"\n`;
+                        }
+                        if (totalFootage > 0) {
+                            csv += `"${date}","${customer}","Drilling Footage","Drilling Services",${totalFootage.toFixed(1)},,"","${driller}","${jobName}","${location}","${numBorings} borings totaling ${totalFootage.toFixed(1)} feet"\n`;
+                        }
+                    }
+                });
+
+                const blob = new Blob([csv], { type: 'text/csv' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `QuickBooks-Desktop-Export-${new Date().toISOString().split('T')[0]}.csv`;
+                a.click();
+                URL.revokeObjectURL(url);
+                
+                alert('Export complete! Import this CSV into QuickBooks Desktop:\n\n1. File → Utilities → Import → Excel Files\n2. Select the downloaded CSV\n3. Map columns as needed\n4. Import and review invoices');
+            };
+
+            // Filter and search reports
+            const filteredReports = reports.filter(report => {
+                const matchesStatus = filterStatus === 'all' || report.status === filterStatus;
+                const matchesSearch = searchTerm === '' || 
+                    report.customer?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    report.jobName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    report.driller?.toLowerCase().includes(searchTerm.toLowerCase());
+                return matchesStatus && matchesSearch;
+            });
+
+            // Calculate summary statistics
+            const stats = {
+                total: reports.length,
+                pending: reports.filter(r => r.status === 'pending').length,
+                approved: reports.filter(r => r.status === 'approved').length,
+                changesRequested: reports.filter(r => r.status === 'changes_requested').length,
+                totalHours: reports.reduce((sum, r) => {
+                    const drive = r.workDays?.reduce((s, d) => s + (parseFloat(d.hoursDriving) || 0), 0) || 0;
+                    const onSite = r.workDays?.reduce((s, d) => s + (parseFloat(d.hoursOnSite) || 0), 0) || 0;
+                    return sum + drive + onSite;
+                }, 0).toFixed(1),
+                totalFootage: reports.reduce((sum, r) => {
+                    return sum + (r.borings?.reduce((s, b) => s + (parseFloat(b.footage) || 0), 0) || 0);
+                }, 0).toFixed(1)
+            };
+
+            return (
+                <div className={`min-h-screen ${darkMode ? 'bg-gray-900' : 'bg-gradient-to-br from-gray-50 to-gray-100'}`}>
+                    <div className="max-w-7xl mx-auto p-4">
+                        {/* Header */}
+                        <div className={`rounded-xl p-6 mb-6 shadow-xl ${darkMode ? 'bg-gradient-to-r from-gray-800 to-gray-900' : 'bg-gradient-to-r from-white to-gray-50'}`} style={{borderTop: '4px solid #16a34a'}}>
+                            <div className="flex justify-between items-center flex-wrap gap-4">
+                                <div>
+                                    <h1 className={`text-3xl md:text-4xl font-bold ${darkMode ? 'text-green-400' : 'text-green-600'}`}>
+                                        📊 Drillers Report Dashboard
+                                    </h1>
+                                    <p className={`text-lg ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                                        O'Malley Drilling Inv. - Report Management
+                                    </p>
+                                </div>
+                                <div className="flex gap-3">
+                                    <button
+                                        onClick={() => setShowAnalytics(true)}
+                                        className={`px-5 py-2.5 rounded-lg font-semibold transition-all shadow-md hover:shadow-lg ${darkMode ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-blue-500 hover:bg-blue-600 text-white'}`}
+                                    >
+                                        📈 Analytics
+                                    </button>
+                                    <button
+                                        onClick={() => setDarkMode(!darkMode)}
+                                        className={`px-4 py-2.5 rounded-lg font-semibold transition-all ${darkMode ? 'bg-gray-700 text-gray-200 hover:bg-gray-600' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+                                    >
+                                        {darkMode ? '☀️ Light' : '🌙 Dark'}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Statistics */}
+                        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+                            <div className={`rounded-xl p-5 ${darkMode ? 'bg-gray-800' : 'bg-white'} shadow-lg hover:shadow-xl transition-shadow`}>
+                                <div className={`text-3xl font-bold ${darkMode ? 'text-gray-200' : 'text-gray-800'}`}>{stats.total}</div>
+                                <div className={`text-sm font-medium ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Total Reports</div>
+                            </div>
+                            <div className={`rounded-xl p-5 ${darkMode ? 'bg-gray-800' : 'bg-white'} shadow-lg hover:shadow-xl transition-shadow`}>
+                                <div className="text-3xl font-bold text-yellow-500">{stats.pending}</div>
+                                <div className={`text-sm font-medium ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Pending</div>
+                            </div>
+                            <div className={`rounded-xl p-5 ${darkMode ? 'bg-gray-800' : 'bg-white'} shadow-lg hover:shadow-xl transition-shadow`}>
+                                <div className="text-3xl font-bold text-green-500">{stats.approved}</div>
+                                <div className={`text-sm font-medium ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Approved</div>
+                            </div>
+                            <div className={`rounded-xl p-5 ${darkMode ? 'bg-gray-800' : 'bg-white'} shadow-lg hover:shadow-xl transition-shadow`}>
+                                <div className="text-3xl font-bold text-blue-500">{stats.totalHours}</div>
+                                <div className={`text-sm font-medium ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Total Hours</div>
+                            </div>
+                            <div className={`rounded-xl p-5 ${darkMode ? 'bg-gray-800' : 'bg-white'} shadow-lg hover:shadow-xl transition-shadow`}>
+                                <div className="text-3xl font-bold text-purple-500">{stats.totalFootage} ft</div>
+                                <div className={`text-sm font-medium ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Total Footage</div>
+                            </div>
+                        </div>
+
+                        {/* Actions Bar */}
+                        <div className={`rounded-xl p-5 mb-6 shadow-lg ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
+                            <div className="flex flex-col md:flex-row gap-3 items-center">
+                                <button
+                                    onClick={() => window.open(`https://drive.google.com/drive/folders/${GOOGLE_DRIVE_CONFIG.FOLDER_ID}`, '_blank')}
+                                    className="px-5 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-lg hover:shadow-lg font-semibold transition-all"
+                                >
+                                    📁 Open Drive Folder
+                                </button>
+                                {!isSignedIn ? (
+                                    <button
+                                        onClick={signInToDrive}
+                                        disabled={!gapiLoaded}
+                                        className={`px-5 py-2.5 rounded-lg font-semibold transition-all ${
+                                            gapiLoaded
+                                                ? 'bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white hover:shadow-lg'
+                                                : 'bg-gray-400 text-gray-200 cursor-not-allowed'
+                                        }`}
+                                    >
+                                        {gapiLoaded ? '🔐 Sign in to Drive' : '⏳ Loading...'}
+                                    </button>
+                                ) : (
+                                    <>
+                                        <button
+                                            onClick={syncFromDrive}
+                                            className="px-5 py-2.5 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-lg hover:shadow-lg font-semibold transition-all"
+                                        >
+                                            ♻️ Sync from Drive
+                                        </button>
+                                        <button
+                                            onClick={signOutFromDrive}
+                                            className="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white text-sm rounded-lg transition-all"
+                                        >
+                                            Sign Out
+                                        </button>
+                                    </>
+                                )}
+                                <button
+                                    onClick={exportToQuickBooks}
+                                    className={`px-5 py-2.5 rounded-lg font-semibold transition-all ${
+                                        selectedReports.length === 0 
+                                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
+                                        : 'bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white hover:shadow-lg'
+                                    }`}
+                                    disabled={selectedReports.length === 0}
+                                >
+                                    💰 Export to QuickBooks ({selectedReports.length})
+                                </button>
+                                {/* Manual Import - Backup Option (Less Prominent) */}
+                                <label className={`px-4 py-2 rounded-lg cursor-pointer text-sm font-medium transition-all ${darkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`} title="Manual import (backup option if Drive sync fails)">
+                                    📥 Manual Import
+                                    <input
+                                        type="file"
+                                        accept=".json"
+                                        onChange={handleImportReport}
+                                        className="hidden"
+                                    />
+                                </label>
+                                <select
+                                    value={filterStatus}
+                                    onChange={(e) => setFilterStatus(e.target.value)}
+                                    className={`px-4 py-2.5 border rounded-lg font-medium transition-all ${darkMode ? 'bg-gray-700 text-white border-gray-600 hover:border-gray-500' : 'bg-white border-gray-300 hover:border-gray-400'}`}
+                                >
+                                    <option value="all">All Status</option>
+                                    <option value="pending">Pending</option>
+                                    <option value="approved">Approved</option>
+                                    <option value="changes_requested">Changes Requested</option>
+                                </select>
+                                <input
+                                    type="text"
+                                    placeholder="🔍 Search customer, job, or driller..."
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    className={`flex-1 px-4 py-2.5 border rounded-lg transition-all ${darkMode ? 'bg-gray-700 text-white border-gray-600 placeholder-gray-400 focus:border-green-500' : 'bg-white border-gray-300 focus:border-green-500'}`}
+                                />
+                            </div>
+                            {/* Google Drive Status Message */}
+                            {driveStatus && (
+                                <div className={`mt-3 p-3 rounded-lg text-center font-medium ${
+                                    driveStatus.includes('✓') || driveStatus.includes('Success') || driveStatus.includes('Imported')
+                                        ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' 
+                                        : driveStatus.includes('Error') 
+                                        ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+                                        : 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
+                                }`}>
+                                    {driveStatus}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Reports Table */}
+                        <div className={`rounded-xl shadow-lg overflow-hidden ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
+                            {filteredReports.length === 0 ? (
+                                <div className="p-8 text-center">
+                                    <p className={`text-lg ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                                        {reports.length === 0 
+                                            ? isSignedIn 
+                                                ? 'No reports yet. Click "♻️ Sync from Drive" to load reports, or have drillers submit new reports.'
+                                                : 'No reports yet. Click "🔐 Sign in to Drive" above to automatically sync reports from Google Drive.'
+                                            : 'No reports match your search criteria.'}
+                                    </p>
+                                </div>
+                            ) : (
+                                <div className="overflow-x-auto">
+                                    <table className="w-full">
+                                        <thead className={darkMode ? 'bg-gray-700' : 'bg-gray-50'}>
+                                            <tr>
+                                                <th className="px-4 py-3 text-left">
+                                                    <input
+                                                        type="checkbox"
+                                                        onChange={(e) => {
+                                                            if (e.target.checked) {
+                                                                setSelectedReports(filteredReports.map(r => r.id));
+                                                            } else {
+                                                                setSelectedReports([]);
+                                                            }
+                                                        }}
+                                                    />
+                                                </th>
+                                                <th className={`px-4 py-3 text-left text-sm font-semibold ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>Date</th>
+                                                <th className={`px-4 py-3 text-left text-sm font-semibold ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>Customer</th>
+                                                <th className={`px-4 py-3 text-left text-sm font-semibold ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>Job</th>
+                                                <th className={`px-4 py-3 text-left text-sm font-semibold ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>Driller</th>
+                                                <th className={`px-4 py-3 text-left text-sm font-semibold ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>Hours</th>
+                                                <th className={`px-4 py-3 text-left text-sm font-semibold ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>Footage</th>
+                                                <th className={`px-4 py-3 text-left text-sm font-semibold ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>Status</th>
+                                                <th className={`px-4 py-3 text-left text-sm font-semibold ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-gray-200">
+                                            {filteredReports.map(report => {
+                                                const totalHours = (report.workDays?.reduce((sum, day) => {
+                                                    const drive = parseFloat(day.hoursDriving) || 0;
+                                                    const onSite = parseFloat(day.hoursOnSite) || 0;
+                                                    return sum + drive + onSite;
+                                                }, 0) || 0).toFixed(1);
+                                                const totalFootage = (report.borings?.reduce((sum, b) => sum + (parseFloat(b.footage) || 0), 0) || 0).toFixed(1);
+                                                
+                                                return (
+                                                    <tr key={report.id} className={darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-50'}>
+                                                        <td className="px-4 py-3">
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={selectedReports.includes(report.id)}
+                                                                onChange={(e) => {
+                                                                    if (e.target.checked) {
+                                                                        setSelectedReports([...selectedReports, report.id]);
+                                                                    } else {
+                                                                        setSelectedReports(selectedReports.filter(id => id !== report.id));
+                                                                    }
+                                                                }}
+                                                            />
+                                                        </td>
+                                                        <td className={`px-4 py-3 text-sm ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                                            {report.importedAt?.split('T')[0] || 'N/A'}
+                                                        </td>
+                                                        <td className={`px-4 py-3 text-sm ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                                            {report.customer || 'N/A'}
+                                                        </td>
+                                                        <td className={`px-4 py-3 text-sm ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                                            {report.jobName || 'N/A'}
+                                                        </td>
+                                                        <td className={`px-4 py-3 text-sm ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                                            {report.driller || 'N/A'}
+                                                        </td>
+                                                        <td className={`px-4 py-3 text-sm font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                                            {totalHours}
+                                                        </td>
+                                                        <td className={`px-4 py-3 text-sm font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                                            {totalFootage} ft
+                                                        </td>
+                                                        <td className="px-4 py-3">
+                                                            <span className={`px-2 py-1 rounded text-xs font-semibold ${
+                                                                report.status === 'approved' ? 'bg-green-100 text-green-800' :
+                                                                report.status === 'changes_requested' ? 'bg-red-100 text-red-800' :
+                                                                'bg-yellow-100 text-yellow-800'
+                                                            }`}>
+                                                                {report.status === 'approved' ? '✓ Approved' :
+                                                                 report.status === 'changes_requested' ? '⚠ Changes Needed' :
+                                                                 '⏳ Pending'}
+                                                            </span>
+                                                        </td>
+                                                        <td className="px-4 py-3">
+                                                            <div className="flex gap-2">
+                                                                <button
+                                                                    onClick={() => setViewingReport(report)}
+                                                                    className="px-3 py-1 bg-blue-600 text-white rounded text-xs hover:bg-blue-700"
+                                                                    title="View Full Report"
+                                                                >
+                                                                    👁
+                                                                </button>
+                                                                {report.status === 'pending' && (
+                                                                    <>
+                                                                        <button
+                                                                            onClick={() => approveReport(report.id)}
+                                                                            className="px-3 py-1 bg-green-600 text-white rounded text-xs hover:bg-green-700"
+                                                                            title="Approve"
+                                                                        >
+                                                                            ✓
+                                                                        </button>
+                                                                        <button
+                                                                            onClick={() => requestChanges(report.id)}
+                                                                            className="px-3 py-1 bg-orange-600 text-white rounded text-xs hover:bg-orange-700"
+                                                                            title="Request Changes"
+                                                                        >
+                                                                            ✎
+                                                                        </button>
+                                                                    </>
+                                                                )}
+                                                                <button
+                                                                    onClick={() => deleteReport(report.id)}
+                                                                    className="px-3 py-1 bg-red-600 text-white rounded text-xs hover:bg-red-700"
+                                                                    title="Delete"
+                                                                >
+                                                                    ×
+                                                                </button>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                );
+                                            })}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Google Drive Instructions */}
+                        <div className={`rounded-lg p-4 mt-6 ${darkMode ? 'bg-blue-900 border-2 border-blue-700' : 'bg-blue-50 border-2 border-blue-300'}`}>
+                            <div className="flex items-start gap-3">
+                                <span className="text-2xl">📁</span>
+                                <div className="flex-1">
+                                    <h3 className={`font-bold text-lg mb-2 ${darkMode ? 'text-blue-200' : 'text-blue-900'}`}>
+                                        Getting Reports from Google Drive
+                                    </h3>
+                                    <ol className={`space-y-1 text-sm ${darkMode ? 'text-blue-100' : 'text-blue-800'}`} style={{ paddingLeft: '20px', listStyle: 'decimal' }}>
+                                        <li>Open the shared <strong>"Drill Reports"</strong> folder in Google Drive</li>
+                                        <li>Download the <strong>Report-[JobName]-[Date].json</strong> file(s)</li>
+                                        <li>Click <strong>"Import Report"</strong> button above</li>
+                                        <li>Select the downloaded JSON file</li>
+                                        <li>Click the 👁 eye icon to view and approve reports!</li>
+                                    </ol>
+                                    <button
+                                        onClick={() => window.open('https://drive.google.com', '_blank')}
+                                        className={`mt-3 px-4 py-2 rounded font-semibold text-sm ${darkMode ? 'bg-blue-700 hover:bg-blue-600 text-white' : 'bg-blue-600 hover:bg-blue-700 text-white'}`}
+                                    >
+                                        🌐 Open Google Drive
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Instructions */}
+                        <div className={`rounded-lg p-6 mt-6 ${darkMode ? 'bg-gray-800' : 'bg-blue-50'}`}>
+                            <h3 className={`text-lg font-bold mb-3 ${darkMode ? 'text-blue-400' : 'text-blue-800'}`}>
+                                📋 How to Use This Dashboard
+                            </h3>
+                            <ol className={`list-decimal list-inside space-y-2 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                <li>Download JSON files from the "Drill Reports" folder in Google Drive</li>
+                                <li>Click "Import Report" and select the JSON file</li>
+                                <li>Click the 👁 eye icon to view the full report</li>
+                                <li>Review and click "✓" to approve or "✎" to request changes</li>
+                                <li>Select multiple approved reports and click "Export to QuickBooks" for billing</li>
+                            </ol>
+                            <p className={`mt-4 text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                                💡 Tip: All data is stored locally on your computer. Bookmark this page for quick access!
+                            </p>
+                        </div>
+                    </div>
+                    
+                    {/* Full Report View Modal */}
+                    {viewingReport && (
+                        <div 
+                            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+                            onClick={() => setViewingReport(null)}
+                        >
+                            <div 
+                                className={`w-full max-w-7xl max-h-[90vh] overflow-y-auto rounded-lg shadow-2xl ${darkMode ? 'bg-gray-900' : 'bg-white'}`}
+                                onClick={(e) => e.stopPropagation()}
+                            >
+                                {/* Modal Header */}
+                                <div className={`sticky top-0 z-10 flex items-center justify-between p-6 border-b ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
+                                    <h2 className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                                        📋 {viewingReport.jobName || 'Drill Report'}
+                                    </h2>
+                                    <button
+                                        onClick={() => setViewingReport(null)}
+                                        className="text-3xl font-bold text-gray-500 hover:text-gray-700"
+                                    >
+                                        ×
+                                    </button>
+                                </div>
+                                
+                                {/* Report Content - Matching Driller App Layout */}
+                                <div className="p-6">
+                                    {/* Job Details Section */}
+                                    <div className={`rounded-lg p-6 mb-6 ${darkMode ? 'bg-gray-800' : 'bg-gray-50'}`}>
+                                        <h3 className={`text-xl font-bold mb-4 ${darkMode ? 'text-brand-green-400' : 'text-brand-green-600'}`}>
+                                            📝 Job Details
+                                        </h3>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div>
+                                                <label className={`block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Customer</label>
+                                                <div className={`p-3 rounded ${darkMode ? 'bg-gray-700 text-white' : 'bg-white text-gray-900'}`}>
+                                                    {viewingReport.customer || 'N/A'}
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <label className={`block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Job Name / Number</label>
+                                                <div className={`p-3 rounded ${darkMode ? 'bg-gray-700 text-white' : 'bg-white text-gray-900'}`}>
+                                                    {viewingReport.jobName || 'N/A'}
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <label className={`block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Location</label>
+                                                <div className={`p-3 rounded ${darkMode ? 'bg-gray-700 text-white' : 'bg-white text-gray-900'}`}>
+                                                    {viewingReport.location || 'N/A'}
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <label className={`block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Driller</label>
+                                                <div className={`p-3 rounded ${darkMode ? 'bg-gray-700 text-white' : 'bg-white text-gray-900'}`}>
+                                                    {viewingReport.driller || 'N/A'}
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <label className={`block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Helper</label>
+                                                <div className={`p-3 rounded ${darkMode ? 'bg-gray-700 text-white' : 'bg-white text-gray-900'}`}>
+                                                    {viewingReport.helper || 'N/A'}
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <label className={`block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Per Diem (nights)</label>
+                                                <div className={`p-3 rounded ${darkMode ? 'bg-gray-700 text-white' : 'bg-white text-gray-900'}`}>
+                                                    {viewingReport.perDiem || '0'}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Work Hours Section */}
+                                    <div className={`rounded-lg p-6 mb-6 ${darkMode ? 'bg-gray-800' : 'bg-gray-50'}`}>
+                                        <h3 className={`text-xl font-bold mb-4 ${darkMode ? 'text-brand-green-400' : 'text-brand-green-600'}`}>
+                                            ⏰ Work Hours
+                                        </h3>
+                                        {viewingReport.workDays && viewingReport.workDays.length > 0 ? (
+                                            <div className="space-y-4">
+                                                {viewingReport.workDays.map((day, index) => {
+                                                    const drive = parseFloat(day.hoursDriving) || 0;
+                                                    const onSite = parseFloat(day.hoursOnSite) || 0;
+                                                    const standby = (parseFloat(day.standbyHours) || 0) + ((parseFloat(day.standbyMinutes) || 0) / 60);
+                                                    const dayTotal = drive + onSite + standby;
+                                                    
+                                                    if (dayTotal === 0) return null;
+                                                    
+                                                    return (
+                                                        <div key={index} className={`p-4 rounded ${darkMode ? 'bg-gray-700' : 'bg-white'}`}>
+                                                            <div className="font-bold mb-3">Day {index + 1} - {day.date || 'N/A'}</div>
+                                                            
+                                                            {/* Exact Times Section */}
+                                                            <div className="mb-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded border-l-4 border-blue-500">
+                                                                <div className="text-sm font-semibold mb-2 text-blue-700 dark:text-blue-300">⏰ Exact Times:</div>
+                                                                <div className="grid grid-cols-2 gap-2 text-sm">
+                                                                    {day.timeLeftShop && (
+                                                                        <div>
+                                                                            <span className="text-gray-600 dark:text-gray-400">Left Shop:</span>
+                                                                            <strong className="ml-1">{day.timeLeftShop}</strong>
+                                                                        </div>
+                                                                    )}
+                                                                    {day.arrivedOnSite && (
+                                                                        <div>
+                                                                            <span className="text-gray-600 dark:text-gray-400">Arrived Site:</span>
+                                                                            <strong className="ml-1">{day.arrivedOnSite}</strong>
+                                                                        </div>
+                                                                    )}
+                                                                    {day.timeLeftSite && (
+                                                                        <div>
+                                                                            <span className="text-gray-600 dark:text-gray-400">Left Site:</span>
+                                                                            <strong className="ml-1">{day.timeLeftSite}</strong>
+                                                                        </div>
+                                                                    )}
+                                                                    {day.arrivedAtShop && (
+                                                                        <div>
+                                                                            <span className="text-gray-600 dark:text-gray-400">Arrived Shop:</span>
+                                                                            <strong className="ml-1">{day.arrivedAtShop}</strong>
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                            
+                                                            {/* Hour Totals */}
+                                                            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+                                                                <div>
+                                                                    <span className="text-gray-500">Driving:</span> <strong>{drive.toFixed(2)} hrs</strong>
+                                                                </div>
+                                                                <div>
+                                                                    <span className="text-gray-500">On-Site:</span> <strong>{onSite.toFixed(2)} hrs</strong>
+                                                                </div>
+                                                                {standby > 0 && (
+                                                                    <div>
+                                                                        <span className="text-gray-500">Standby:</span> <strong>{standby.toFixed(2)} hrs</strong>
+                                                                        {day.standbyReason && <div className="text-xs text-gray-500">({day.standbyReason})</div>}
+                                                                    </div>
+                                                                )}
+                                                                <div>
+                                                                    <span className="text-gray-500">Total:</span> <strong className="text-brand-green-600">{dayTotal.toFixed(2)} hrs</strong>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        ) : (
+                                            <p className="text-gray-500">No work hours recorded</p>
+                                        )}
+                                    </div>
+
+                                    {/* Equipment Section */}
+                                    <div className={`rounded-lg p-6 mb-6 ${darkMode ? 'bg-gray-800' : 'bg-gray-50'}`}>
+                                        <h3 className={`text-xl font-bold mb-4 ${darkMode ? 'text-brand-green-400' : 'text-brand-green-600'}`}>
+                                            🚜 Equipment Used
+                                        </h3>
+                                        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                                            {viewingReport.equipment?.drillRig && (
+                                                <div className={`p-3 rounded ${darkMode ? 'bg-gray-700' : 'bg-white'}`}>
+                                                    <div className="text-sm text-gray-500">Drill Rig</div>
+                                                    <div className="font-semibold">{viewingReport.equipment.drillRig}</div>
+                                                </div>
+                                            )}
+                                            {viewingReport.equipment?.truck && (
+                                                <div className={`p-3 rounded ${darkMode ? 'bg-gray-700' : 'bg-white'}`}>
+                                                    <div className="text-sm text-gray-500">Truck</div>
+                                                    <div className="font-semibold">{viewingReport.equipment.truck}</div>
+                                                </div>
+                                            )}
+                                            {viewingReport.equipment?.trailer && (
+                                                <div className={`p-3 rounded ${darkMode ? 'bg-gray-700' : 'bg-white'}`}>
+                                                    <div className="text-sm text-gray-500">Trailer</div>
+                                                    <div className="font-semibold">{viewingReport.equipment.trailer}</div>
+                                                </div>
+                                            )}
+                                            {viewingReport.equipment?.dumpTruck === 'Yes' && (
+                                                <div className={`p-3 rounded ${darkMode ? 'bg-gray-700' : 'bg-white'}`}>
+                                                    <div className="text-sm text-gray-500">Dump Truck</div>
+                                                    <div className="font-semibold">Yes {viewingReport.equipment.dumpTruckTimes ? `(${viewingReport.equipment.dumpTruckTimes}x)` : ''}</div>
+                                                </div>
+                                            )}
+                                            {viewingReport.equipment?.coreMachine && (
+                                                <div className={`p-3 rounded ${darkMode ? 'bg-gray-700' : 'bg-white'}`}>
+                                                    <div className="text-sm text-gray-500">Core Machine</div>
+                                                    <div className="font-semibold">✓ Yes</div>
+                                                </div>
+                                            )}
+                                            {viewingReport.equipment?.groutMachine && (
+                                                <div className={`p-3 rounded ${darkMode ? 'bg-gray-700' : 'bg-white'}`}>
+                                                    <div className="text-sm text-gray-500">Grout Machine</div>
+                                                    <div className="font-semibold">✓ Yes</div>
+                                                </div>
+                                            )}
+                                            {viewingReport.equipment?.extruder && (
+                                                <div className={`p-3 rounded ${darkMode ? 'bg-gray-700' : 'bg-white'}`}>
+                                                    <div className="text-sm text-gray-500">Extruder</div>
+                                                    <div className="font-semibold">✓ Yes</div>
+                                                </div>
+                                            )}
+                                            {viewingReport.equipment?.generator && (
+                                                <div className={`p-3 rounded ${darkMode ? 'bg-gray-700' : 'bg-white'}`}>
+                                                    <div className="text-sm text-gray-500">Generator</div>
+                                                    <div className="font-semibold">✓ Yes</div>
+                                                </div>
+                                            )}
+                                            {viewingReport.equipment?.decon && (
+                                                <div className={`p-3 rounded ${darkMode ? 'bg-gray-700' : 'bg-white'}`}>
+                                                    <div className="text-sm text-gray-500">Decon</div>
+                                                    <div className="font-semibold">✓ Yes</div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {/* Borings Section */}
+                                    <div className={`rounded-lg p-6 mb-6 ${darkMode ? 'bg-gray-800' : 'bg-gray-50'}`}>
+                                        <h3 className={`text-xl font-bold mb-4 ${darkMode ? 'text-brand-green-400' : 'text-brand-green-600'}`}>
+                                            🕳️ Borings
+                                        </h3>
+                                        {viewingReport.borings && viewingReport.borings.length > 0 ? (
+                                            <div className="space-y-3">
+                                                {viewingReport.borings.map((boring, index) => {
+                                                    if (!boring.footage || parseFloat(boring.footage) === 0) return null;
+                                                    return (
+                                                        <div key={index} className={`p-4 rounded ${darkMode ? 'bg-gray-700' : 'bg-white'}`}>
+                                                            <div className="flex items-center justify-between mb-2">
+                                                                <span className="font-bold text-lg">B-{index + 1}</span>
+                                                                <span className="text-brand-green-600 font-bold">{boring.footage} ft</span>
+                                                            </div>
+                                                            <div className="grid grid-cols-2 gap-2 text-sm">
+                                                                {boring.method && (
+                                                                    <div>
+                                                                        <span className="text-gray-500">Method:</span> <strong>{boring.method}</strong>
+                                                                    </div>
+                                                                )}
+                                                                {boring.sampleType && (
+                                                                    <div>
+                                                                        <span className="text-gray-500">Sample:</span> <strong>{boring.sampleType}</strong>
+                                                                    </div>
+                                                                )}
+                                                                {boring.isEnvironmental && (
+                                                                    <div className="text-blue-600">✓ Environmental</div>
+                                                                )}
+                                                                {boring.isGeotechnical && (
+                                                                    <div className="text-purple-600">✓ Geotechnical</div>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        ) : (
+                                            <p className="text-gray-500">No borings recorded</p>
+                                        )}
+                                    </div>
+
+                                    {/* Supplies Section */}
+                                    {viewingReport.supplies && Object.keys(viewingReport.supplies).some(key => viewingReport.supplies[key]) && (
+                                        <div className={`rounded-lg p-6 mb-6 ${darkMode ? 'bg-gray-800' : 'bg-gray-50'}`}>
+                                            <h3 className={`text-xl font-bold mb-4 ${darkMode ? 'text-brand-green-400' : 'text-brand-green-600'}`}>
+                                                📦 Supplies Used
+                                            </h3>
+                                            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
+                                                {Object.entries(viewingReport.supplies).map(([key, value]) => {
+                                                    if (!value || value === '' || key === 'misc') return null;
+                                                    // Format the key into readable label
+                                                    const label = key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+                                                    return (
+                                                        <div key={key} className={`p-2 rounded ${darkMode ? 'bg-gray-700' : 'bg-white'}`}>
+                                                            <span className="text-gray-500">{label}:</span> <strong>{value}</strong>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                            {viewingReport.supplies.misc && (
+                                                <div className={`mt-4 p-3 rounded ${darkMode ? 'bg-gray-700' : 'bg-white'}`}>
+                                                    <div className="font-semibold mb-1">Miscellaneous:</div>
+                                                    <div className="whitespace-pre-wrap">{viewingReport.supplies.misc}</div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+
+                                    {/* Comments/Labor Section */}
+                                    {viewingReport.commentsLabor && (
+                                        <div className={`rounded-lg p-6 mb-6 ${darkMode ? 'bg-gray-800' : 'bg-gray-50'}`}>
+                                            <h3 className={`text-xl font-bold mb-4 ${darkMode ? 'text-brand-green-400' : 'text-brand-green-600'}`}>
+                                                💬 Comments / Labor
+                                            </h3>
+                                            <div className={`p-4 rounded whitespace-pre-wrap ${darkMode ? 'bg-gray-700 text-white' : 'bg-white text-gray-900'}`}>
+                                                {viewingReport.commentsLabor}
+                                            </div>
+                                        </div>
+                                    )}
+                                    
+                                    {/* Close Button */}
+                                    <div className="flex justify-center mt-6">
+                                        <button
+                                            onClick={() => setViewingReport(null)}
+                                            className="px-8 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 font-semibold"
+                                        >
+                                            Close Report
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                    {/* Analytics Modal */}
+                    {showAnalytics && (
+                        <div 
+                            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+                            onClick={() => setShowAnalytics(false)}
+                        >
+                            <div 
+                                className={`w-full max-w-6xl max-h-[90vh] overflow-y-auto rounded-xl shadow-2xl ${darkMode ? 'bg-gray-900' : 'bg-white'}`}
+                                onClick={(e) => e.stopPropagation()}
+                            >
+                                {/* Modal Header */}
+                                <div className={`sticky top-0 z-10 p-6 border-b ${darkMode ? 'bg-gradient-to-r from-gray-800 to-gray-900 border-gray-700' : 'bg-gradient-to-r from-blue-50 to-white border-gray-200'}`}>
+                                    <div className="flex items-center justify-between">
+                                        <h2 className={`text-3xl font-bold ${darkMode ? 'text-blue-400' : 'text-blue-600'}`}>
+                                            📊 Analytics Dashboard
+                                        </h2>
+                                        <button
+                                            onClick={() => setShowAnalytics(false)}
+                                            className="text-3xl font-bold text-gray-500 hover:text-gray-700"
+                                        >
+                                            ×
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                {/* Analytics Content */}
+                                <div className="p-6">
+                                    {reports.length === 0 ? (
+                                        <div className="text-center py-12">
+                                            <div className="text-6xl mb-4">📈</div>
+                                            <p className={`text-xl ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                                                No data yet. Import some reports to see analytics!
+                                            </p>
+                                        </div>
+                                    ) : (
+                                        <>
+                                            {/* Overview Stats */}
+                                            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+                                                <div className={`p-6 rounded-xl ${darkMode ? 'bg-gradient-to-br from-blue-900 to-blue-800' : 'bg-gradient-to-br from-blue-50 to-blue-100'} border-2 ${darkMode ? 'border-blue-700' : 'border-blue-200'}`}>
+                                                    <div className="text-4xl font-bold text-blue-600">{reports.length}</div>
+                                                    <div className={`text-sm font-medium mt-1 ${darkMode ? 'text-blue-300' : 'text-blue-700'}`}>Total Reports</div>
+                                                </div>
+                                                <div className={`p-6 rounded-xl ${darkMode ? 'bg-gradient-to-br from-green-900 to-green-800' : 'bg-gradient-to-br from-green-50 to-green-100'} border-2 ${darkMode ? 'border-green-700' : 'border-green-200'}`}>
+                                                    <div className="text-4xl font-bold text-green-600">{stats.totalHours}</div>
+                                                    <div className={`text-sm font-medium mt-1 ${darkMode ? 'text-green-300' : 'text-green-700'}`}>Total Hours Worked</div>
+                                                </div>
+                                                <div className={`p-6 rounded-xl ${darkMode ? 'bg-gradient-to-br from-purple-900 to-purple-800' : 'bg-gradient-to-br from-purple-50 to-purple-100'} border-2 ${darkMode ? 'border-purple-700' : 'border-purple-200'}`}>
+                                                    <div className="text-4xl font-bold text-purple-600">{stats.totalFootage} ft</div>
+                                                    <div className={`text-sm font-medium mt-1 ${darkMode ? 'text-purple-300' : 'text-purple-700'}`}>Total Footage Drilled</div>
+                                                </div>
+                                                <div className={`p-6 rounded-xl ${darkMode ? 'bg-gradient-to-br from-orange-900 to-orange-800' : 'bg-gradient-to-br from-orange-50 to-orange-100'} border-2 ${darkMode ? 'border-orange-700' : 'border-orange-200'}`}>
+                                                    <div className="text-4xl font-bold text-orange-600">{((stats.totalHours || 0) * 85).toFixed(0)}</div>
+                                                    <div className={`text-sm font-medium mt-1 ${darkMode ? 'text-orange-300' : 'text-orange-700'}`}>Est. Revenue ($85/hr)</div>
+                                                </div>
+                                            </div>
+
+                                            {/* Hours by Driller */}
+                                            <div className={`p-6 rounded-xl mb-6 ${darkMode ? 'bg-gray-800' : 'bg-gray-50'}`}>
+                                                <h3 className={`text-xl font-bold mb-4 ${darkMode ? 'text-green-400' : 'text-green-600'}`}>
+                                                    👷 Hours by Driller
+                                                </h3>
+                                                <div className="space-y-3">
+                                                    {(() => {
+                                                        const drillerHours = {};
+                                                        reports.forEach(report => {
+                                                            const driller = report.driller || 'Unknown';
+                                                            const hours = (report.workDays?.reduce((sum, day) => {
+                                                                return sum + (parseFloat(day.hoursDriving) || 0) + (parseFloat(day.hoursOnSite) || 0);
+                                                            }, 0) || 0);
+                                                            drillerHours[driller] = (drillerHours[driller] || 0) + hours;
+                                                        });
+                                                        const maxHours = Math.max(...Object.values(drillerHours));
+                                                        return Object.entries(drillerHours).map(([driller, hours]) => (
+                                                            <div key={driller} className="flex items-center gap-4">
+                                                                <div className={`w-32 font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>{driller}</div>
+                                                                <div className="flex-1">
+                                                                    <div className={`h-8 rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-gray-200'} overflow-hidden`}>
+                                                                        <div 
+                                                                            className="h-full bg-gradient-to-r from-green-500 to-green-600 flex items-center px-3 text-white font-bold text-sm"
+                                                                            style={{ width: `${(hours / maxHours) * 100}%` }}
+                                                                        >
+                                                                            {hours.toFixed(1)} hrs
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        ));
+                                                    })()}
+                                                </div>
+                                            </div>
+
+                                            {/* Reports by Customer */}
+                                            <div className={`p-6 rounded-xl mb-6 ${darkMode ? 'bg-gray-800' : 'bg-gray-50'}`}>
+                                                <h3 className={`text-xl font-bold mb-4 ${darkMode ? 'text-blue-400' : 'text-blue-600'}`}>
+                                                    🏢 Reports by Customer
+                                                </h3>
+                                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                                                    {(() => {
+                                                        const customerCounts = {};
+                                                        reports.forEach(report => {
+                                                            const customer = report.customer || 'Unknown';
+                                                            customerCounts[customer] = (customerCounts[customer] || 0) + 1;
+                                                        });
+                                                        return Object.entries(customerCounts)
+                                                            .sort((a, b) => b[1] - a[1])
+                                                            .map(([customer, count]) => (
+                                                                <div key={customer} className={`p-4 rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-white'} border-2 ${darkMode ? 'border-gray-600' : 'border-gray-200'}`}>
+                                                                    <div className={`font-semibold mb-1 ${darkMode ? 'text-gray-200' : 'text-gray-800'}`}>{customer}</div>
+                                                                    <div className="flex items-center gap-2">
+                                                                        <div className="text-2xl font-bold text-blue-600">{count}</div>
+                                                                        <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>reports</div>
+                                                                    </div>
+                                                                </div>
+                                                            ));
+                                                    })()}
+                                                </div>
+                                            </div>
+
+                                            {/* Status Breakdown */}
+                                            <div className={`p-6 rounded-xl ${darkMode ? 'bg-gray-800' : 'bg-gray-50'}`}>
+                                                <h3 className={`text-xl font-bold mb-4 ${darkMode ? 'text-purple-400' : 'text-purple-600'}`}>
+                                                    📋 Report Status Breakdown
+                                                </h3>
+                                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                                    <div className={`p-5 rounded-lg ${darkMode ? 'bg-yellow-900 bg-opacity-30' : 'bg-yellow-50'} border-2 ${darkMode ? 'border-yellow-700' : 'border-yellow-200'}`}>
+                                                        <div className="text-3xl font-bold text-yellow-600">{stats.pending}</div>
+                                                        <div className={`text-sm font-medium mt-1 ${darkMode ? 'text-yellow-300' : 'text-yellow-700'}`}>⏳ Pending Review</div>
+                                                        <div className={`text-xs mt-2 ${darkMode ? 'text-yellow-400' : 'text-yellow-600'}`}>
+                                                            {stats.total > 0 ? `${((stats.pending / stats.total) * 100).toFixed(0)}% of total` : '0%'}
+                                                        </div>
+                                                    </div>
+                                                    <div className={`p-5 rounded-lg ${darkMode ? 'bg-green-900 bg-opacity-30' : 'bg-green-50'} border-2 ${darkMode ? 'border-green-700' : 'border-green-200'}`}>
+                                                        <div className="text-3xl font-bold text-green-600">{stats.approved}</div>
+                                                        <div className={`text-sm font-medium mt-1 ${darkMode ? 'text-green-300' : 'text-green-700'}`}>✓ Approved</div>
+                                                        <div className={`text-xs mt-2 ${darkMode ? 'text-green-400' : 'text-green-600'}`}>
+                                                            {stats.total > 0 ? `${((stats.approved / stats.total) * 100).toFixed(0)}% of total` : '0%'}
+                                                        </div>
+                                                    </div>
+                                                    <div className={`p-5 rounded-lg ${darkMode ? 'bg-red-900 bg-opacity-30' : 'bg-red-50'} border-2 ${darkMode ? 'border-red-700' : 'border-red-200'}`}>
+                                                        <div className="text-3xl font-bold text-red-600">{reports.filter(r => r.status === 'changes_requested').length}</div>
+                                                        <div className={`text-sm font-medium mt-1 ${darkMode ? 'text-red-300' : 'text-red-700'}`}>⚠ Changes Requested</div>
+                                                        <div className={`text-xs mt-2 ${darkMode ? 'text-red-400' : 'text-red-600'}`}>
+                                                            {stats.total > 0 ? `${((reports.filter(r => r.status === 'changes_requested').length / stats.total) * 100).toFixed(0)}% of total` : '0%'}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </>
+                                    )}
+                                    
+                                    {/* Close Button */}
+                                    <div className="flex justify-center mt-8">
+                                        <button
+                                            onClick={() => setShowAnalytics(false)}
+                                            className="px-8 py-3 bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all"
+                                        >
+                                            Close Analytics
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        ReactDOM.render(<BossDashboard />, document.getElementById('root'));
+    </script>
+</body>
+</html>
