@@ -790,7 +790,7 @@
             const GOOGLE_DRIVE_CONFIG = {
                 CLIENT_ID: '13192191935-5bcljariebng92efk6u78f9vf0jqfu4q.apps.googleusercontent.com',
                 FOLDER_ID: '0AKDyjXFIoWspUk9PVA',
-                SCOPES: 'https://www.googleapis.com/auth/drive.file',
+                SCOPES: 'https://www.googleapis.com/auth/drive',
                 DISCOVERY_DOCS: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest']
             };
 
@@ -956,7 +956,7 @@
                         fileContent +
                         close_delim;
 
-                    const response = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+                    const response = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&supportsAllDrives=true', {
                         method: 'POST',
                         headers: {
                             'Authorization': 'Bearer ' + accessToken,
