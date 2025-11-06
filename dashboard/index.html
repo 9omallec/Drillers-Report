@@ -174,7 +174,9 @@
                     const response = await window.gapi.client.drive.files.list({
                         q: `'${GOOGLE_DRIVE_CONFIG.FOLDER_ID}' in parents and mimeType='application/json' and trashed=false`,
                         fields: 'files(id, name, createdTime)',
-                        orderBy: 'createdTime desc'
+                        orderBy: 'createdTime desc',
+                        supportsAllDrives: true,
+                        includeItemsFromAllDrives: true
                     });
 
                     const files = response.result.files;
@@ -195,7 +197,8 @@
                         // Download and parse file
                         const fileData = await window.gapi.client.drive.files.get({
                             fileId: file.id,
-                            alt: 'media'
+                            alt: 'media',
+                            supportsAllDrives: true
                         });
 
                         const data = fileData.result;
