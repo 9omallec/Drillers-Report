@@ -740,37 +740,37 @@
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             <div>
                                                 <label className={`block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Customer</label>
-                                                <div className={`p-3 rounded ${darkMode ? 'bg-gray-700 text-white' : 'bg-white text-gray-900'}`}>
+                                                <div className={`p-3 rounded ${darkMode ? 'bg-gray-800 text-gray-100' : 'bg-white text-gray-900'}`}>
                                                     {viewingReport.customer || 'N/A'}
                                                 </div>
                                             </div>
                                             <div>
                                                 <label className={`block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Job Name / Number</label>
-                                                <div className={`p-3 rounded ${darkMode ? 'bg-gray-700 text-white' : 'bg-white text-gray-900'}`}>
+                                                <div className={`p-3 rounded ${darkMode ? 'bg-gray-800 text-gray-100' : 'bg-white text-gray-900'}`}>
                                                     {viewingReport.jobName || 'N/A'}
                                                 </div>
                                             </div>
                                             <div>
                                                 <label className={`block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Location</label>
-                                                <div className={`p-3 rounded ${darkMode ? 'bg-gray-700 text-white' : 'bg-white text-gray-900'}`}>
+                                                <div className={`p-3 rounded ${darkMode ? 'bg-gray-800 text-gray-100' : 'bg-white text-gray-900'}`}>
                                                     {viewingReport.location || 'N/A'}
                                                 </div>
                                             </div>
                                             <div>
                                                 <label className={`block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Driller</label>
-                                                <div className={`p-3 rounded ${darkMode ? 'bg-gray-700 text-white' : 'bg-white text-gray-900'}`}>
+                                                <div className={`p-3 rounded ${darkMode ? 'bg-gray-800 text-gray-100' : 'bg-white text-gray-900'}`}>
                                                     {viewingReport.driller || 'N/A'}
                                                 </div>
                                             </div>
                                             <div>
                                                 <label className={`block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Helper</label>
-                                                <div className={`p-3 rounded ${darkMode ? 'bg-gray-700 text-white' : 'bg-white text-gray-900'}`}>
+                                                <div className={`p-3 rounded ${darkMode ? 'bg-gray-800 text-gray-100' : 'bg-white text-gray-900'}`}>
                                                     {viewingReport.helper || 'N/A'}
                                                 </div>
                                             </div>
                                             <div>
                                                 <label className={`block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Per Diem (nights)</label>
-                                                <div className={`p-3 rounded ${darkMode ? 'bg-gray-700 text-white' : 'bg-white text-gray-900'}`}>
+                                                <div className={`p-3 rounded ${darkMode ? 'bg-gray-800 text-gray-100' : 'bg-white text-gray-900'}`}>
                                                     {viewingReport.perDiem || '0'}
                                                 </div>
                                             </div>
@@ -793,7 +793,7 @@
                                                     if (dayTotal === 0) return null;
                                                     
                                                     return (
-                                                        <div key={index} className={`p-4 rounded ${darkMode ? 'bg-gray-700' : 'bg-white'}`}>
+                                                        <div key={index} className={`p-4 rounded ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
                                                             <div className="font-bold mb-3">Day {index + 1} - {day.date || 'N/A'}</div>
                                                             
                                                             {/* Exact Times Section */}
@@ -861,55 +861,55 @@
                                         </h3>
                                         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                                             {viewingReport.equipment?.drillRig && (
-                                                <div className={`p-3 rounded ${darkMode ? 'bg-gray-700' : 'bg-white'}`}>
+                                                <div className={`p-3 rounded ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
                                                     <div className="text-sm text-gray-500">Drill Rig</div>
                                                     <div className="font-semibold">{viewingReport.equipment.drillRig}</div>
                                                 </div>
                                             )}
                                             {viewingReport.equipment?.truck && (
-                                                <div className={`p-3 rounded ${darkMode ? 'bg-gray-700' : 'bg-white'}`}>
+                                                <div className={`p-3 rounded ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
                                                     <div className="text-sm text-gray-500">Truck</div>
                                                     <div className="font-semibold">{viewingReport.equipment.truck}</div>
                                                 </div>
                                             )}
                                             {viewingReport.equipment?.trailer && (
-                                                <div className={`p-3 rounded ${darkMode ? 'bg-gray-700' : 'bg-white'}`}>
+                                                <div className={`p-3 rounded ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
                                                     <div className="text-sm text-gray-500">Trailer</div>
                                                     <div className="font-semibold">{viewingReport.equipment.trailer}</div>
                                                 </div>
                                             )}
                                             {viewingReport.equipment?.dumpTruck === 'Yes' && (
-                                                <div className={`p-3 rounded ${darkMode ? 'bg-gray-700' : 'bg-white'}`}>
+                                                <div className={`p-3 rounded ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
                                                     <div className="text-sm text-gray-500">Dump Truck</div>
                                                     <div className="font-semibold">Yes {viewingReport.equipment.dumpTruckTimes ? `(${viewingReport.equipment.dumpTruckTimes}x)` : ''}</div>
                                                 </div>
                                             )}
                                             {viewingReport.equipment?.coreMachine && (
-                                                <div className={`p-3 rounded ${darkMode ? 'bg-gray-700' : 'bg-white'}`}>
+                                                <div className={`p-3 rounded ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
                                                     <div className="text-sm text-gray-500">Core Machine</div>
                                                     <div className="font-semibold">✓ Yes</div>
                                                 </div>
                                             )}
                                             {viewingReport.equipment?.groutMachine && (
-                                                <div className={`p-3 rounded ${darkMode ? 'bg-gray-700' : 'bg-white'}`}>
+                                                <div className={`p-3 rounded ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
                                                     <div className="text-sm text-gray-500">Grout Machine</div>
                                                     <div className="font-semibold">✓ Yes</div>
                                                 </div>
                                             )}
                                             {viewingReport.equipment?.extruder && (
-                                                <div className={`p-3 rounded ${darkMode ? 'bg-gray-700' : 'bg-white'}`}>
+                                                <div className={`p-3 rounded ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
                                                     <div className="text-sm text-gray-500">Extruder</div>
                                                     <div className="font-semibold">✓ Yes</div>
                                                 </div>
                                             )}
                                             {viewingReport.equipment?.generator && (
-                                                <div className={`p-3 rounded ${darkMode ? 'bg-gray-700' : 'bg-white'}`}>
+                                                <div className={`p-3 rounded ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
                                                     <div className="text-sm text-gray-500">Generator</div>
                                                     <div className="font-semibold">✓ Yes</div>
                                                 </div>
                                             )}
                                             {viewingReport.equipment?.decon && (
-                                                <div className={`p-3 rounded ${darkMode ? 'bg-gray-700' : 'bg-white'}`}>
+                                                <div className={`p-3 rounded ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
                                                     <div className="text-sm text-gray-500">Decon</div>
                                                     <div className="font-semibold">✓ Yes</div>
                                                 </div>
@@ -927,7 +927,7 @@
                                                 {viewingReport.borings.map((boring, index) => {
                                                     if (!boring.footage || parseFloat(boring.footage) === 0) return null;
                                                     return (
-                                                        <div key={index} className={`p-4 rounded ${darkMode ? 'bg-gray-700' : 'bg-white'}`}>
+                                                        <div key={index} className={`p-4 rounded ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
                                                             <div className="flex items-center justify-between mb-2">
                                                                 <span className="font-bold text-lg">B-{index + 1}</span>
                                                                 <span className="text-brand-green-600 font-bold">{boring.footage} ft</span>
@@ -1003,7 +1003,7 @@
                                             <h3 className={`text-xl font-bold mb-4 ${darkMode ? 'text-brand-green-400' : 'text-brand-green-600'}`}>
                                                 💬 Comments / Labor
                                             </h3>
-                                            <div className={`p-4 rounded whitespace-pre-wrap ${darkMode ? 'bg-gray-700 text-white' : 'bg-white text-gray-900'}`}>
+                                            <div className={`p-4 rounded whitespace-pre-wrap ${darkMode ? 'bg-gray-800 text-gray-100' : 'bg-white text-gray-900'}`}>
                                                 {viewingReport.commentsLabor}
                                             </div>
                                         </div>
