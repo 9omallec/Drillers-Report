@@ -88,6 +88,8 @@
             const [searchTerm, setSearchTerm] = useState('');
             const [darkMode, setDarkMode] = useState(false);
             const [viewingReport, setViewingReport] = useState(null);
+            const [editingReport, setEditingReport] = useState(false);
+            const [editedReport, setEditedReport] = useState(null);
             const [showAnalytics, setShowAnalytics] = useState(false);
 
             // Load reports from localStorage on mount
@@ -237,6 +239,48 @@
                 }
             };
 
+            // Helper function to sync with a specific token
+            const syncFromDriveWithToken = async (token) => {
+                try {
+                    window.gapi.client.setToken({ access_token: token });
+                    const response = await window.gapi.client.drive.files.list({
+                        q: `'${GOOGLE_DRIVE_CONFIG.FOLDER_ID}' in parents and mimeType='application/json' and trashed=false`,
+                        fields: 'files(id, name, createdTime)',
+                        orderBy: 'createdTime desc',
+                        supportsAllDrives: true,
+                        includeItemsFromAllDrives: true
+                    });
+
+                    const files = response.result.files || [];
+                    const newReports = [];
+
+                    for (const file of files) {
+                        const fileResponse = await window.gapi.client.drive.files.get({
+                            fileId: file.id,
+                            alt: 'media',
+                            supportsAllDrives: true
+                        });
+                        const reportData = typeof fileResponse.body === 'string' 
+                            ? JSON.parse(fileResponse.body) 
+                            : fileResponse.result;
+                        
+                        newReports.push({
+                            ...reportData,
+                            id: file.id,
+                            syncedAt: new Date().toISOString()
+                        });
+                    }
+
+                    setReports(newReports);
+                    localStorage.setItem('bossReports', JSON.stringify(newReports));
+                    setDriveStatus(`✓ Synced ${newReports.length} reports`);
+                    setTimeout(() => setDriveStatus(''), 3000);
+                } catch (error) {
+                    console.error('Sync error:', error);
+                    setDriveStatus('Sync failed. Try again.');
+                }
+            };
+            
             // Sync reports from Google Drive
             const syncFromDrive = async () => {
                 try {
@@ -421,6 +465,18 @@
                 alert('Export complete! Import this CSV into QuickBooks Desktop:\n\n1. File → Utilities → Import → Excel Files\n2. Select the downloaded CSV\n3. Map columns as needed\n4. Import and review invoices');
             };
 
+
+            // Save edited report
+            const saveEditedReport = () => {
+                if (editedReport) {
+                    setReports(reports.map(r => 
+                        r.id === editedReport.id ? editedReport : r
+                    ));
+                    setViewingReport(editedReport);
+                    setEditingReport(false);
+                    alert('✓ Report saved successfully!');
+                }
+            };
             // Filter and search reports
             const filteredReports = reports.filter(report => {
                 const matchesStatus = filterStatus === 'all' || report.status === filterStatus;
@@ -695,7 +751,7 @@
                                                                 >
                                                                     👁
                                                                 </button>
-                                                                {report.status === 'pending' && (
+                                                                {report.status === 'pending' ? (
                                                                     <>
                                                                         <button
                                                                             onClick={() => approveReport(report.id)}
@@ -712,6 +768,18 @@
                                                                             ✎
                                                                         </button>
                                                                     </>
+                                                                ) : (
+                                                                    <button
+                                                                        onClick={() => {
+                                                                            setReports(reports.map(r => 
+                                                                                r.id === report.id ? { ...r, status: 'pending' } : r
+                                                                            ));
+                                                                        }}
+                                                                        className="px-4 py-2 md:px-3 md:py-1 bg-blue-600 text-white rounded text-base md:text-xs hover:bg-blue-700 min-h-[44px] md:min-h-0 flex items-center justify-center"
+                                                                        title="Reset to Pending"
+                                                                    >
+                                                                        ↺
+                                                                    </button>
                                                                 )}
                                                                 <button
                                                                     onClick={() => deleteReport(report.id)}
@@ -783,21 +851,48 @@
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             <div>
                                                 <label className={`block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Customer</label>
-                                                <div className={`p-3 rounded ${darkMode ? 'bg-gray-800 text-gray-100' : 'bg-white text-gray-900'}`}>
-                                                    {viewingReport.customer || 'N/A'}
-                                                </div>
+                                                {editingReport ? (
+                                                    <input
+                                                        type="text"
+                                                        value={editedReport.customer || ''}
+                                                        onChange={(e) => setEditedReport({...editedReport, customer: e.target.value})}
+                                                        className={`w-full p-3 rounded border ${darkMode ? 'bg-gray-700 text-gray-100 border-gray-600' : 'bg-white text-gray-900 border-gray-300'}`}
+                                                    />
+                                                ) : (
+                                                    <div className={`p-3 rounded ${darkMode ? 'bg-gray-800 text-gray-100' : 'bg-white text-gray-900'}`}>
+                                                        {viewingReport.customer || 'N/A'}
+                                                    </div>
+                                                )}
                                             </div>
                                             <div>
                                                 <label className={`block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Job Name / Number</label>
-                                                <div className={`p-3 rounded ${darkMode ? 'bg-gray-800 text-gray-100' : 'bg-white text-gray-900'}`}>
-                                                    {viewingReport.jobName || 'N/A'}
-                                                </div>
+                                                {editingReport ? (
+                                                    <input
+                                                        type="text"
+                                                        value={editedReport.jobName || ''}
+                                                        onChange={(e) => setEditedReport({...editedReport, jobName: e.target.value})}
+                                                        className={`w-full p-3 rounded border ${darkMode ? 'bg-gray-700 text-gray-100 border-gray-600' : 'bg-white text-gray-900 border-gray-300'}`}
+                                                    />
+                                                ) : (
+                                                    <div className={`p-3 rounded ${darkMode ? 'bg-gray-800 text-gray-100' : 'bg-white text-gray-900'}`}>
+                                                        {viewingReport.jobName || 'N/A'}
+                                                    </div>
+                                                )}
                                             </div>
                                             <div>
                                                 <label className={`block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Location</label>
-                                                <div className={`p-3 rounded ${darkMode ? 'bg-gray-800 text-gray-100' : 'bg-white text-gray-900'}`}>
-                                                    {viewingReport.location || 'N/A'}
-                                                </div>
+                                                {editingReport ? (
+                                                    <input
+                                                        type="text"
+                                                        value={editedReport.location || ''}
+                                                        onChange={(e) => setEditedReport({...editedReport, location: e.target.value})}
+                                                        className={`w-full p-3 rounded border ${darkMode ? 'bg-gray-700 text-gray-100 border-gray-600' : 'bg-white text-gray-900 border-gray-300'}`}
+                                                    />
+                                                ) : (
+                                                    <div className={`p-3 rounded ${darkMode ? 'bg-gray-800 text-gray-100' : 'bg-white text-gray-900'}`}>
+                                                        {viewingReport.location || 'N/A'}
+                                                    </div>
+                                                )}
                                             </div>
                                             <div>
                                                 <label className={`block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Driller</label>
@@ -1011,11 +1106,28 @@
                                             <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
                                                 {Object.entries(viewingReport.supplies).map(([key, value]) => {
                                                     if (!value || value === '' || key === 'misc') return null;
-                                                    // Format the key into readable label
-                                                    const label = key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+                                                    
+                                                    // Format the key into readable label with proper spacing and units
+                                                    let label = key
+                                                        .replace(/([A-Z])/g, ' $1')  // Add space before capitals
+                                                        .replace(/([0-9]+)/g, ' $1') // Add space before numbers
+                                                        .replace(/^./, str => str.toUpperCase())
+                                                        .trim();
+                                                    
+                                                    // Add units based on field name
+                                                    if (label.match(/\d+$/)) {
+                                                        if (label.toLowerCase().includes('cap') || label.toLowerCase().includes('pipe') || 
+                                                            label.toLowerCase().includes('casing')) {
+                                                            label = label.replace(/(\d+)$/, '$1"'); // Add inches
+                                                        } else if (label.toLowerCase().includes('concrete') || label.toLowerCase().includes('grout') ||
+                                                                   label.toLowerCase().includes('bentonite') || label.toLowerCase().includes('sand')) {
+                                                            label = label.replace(/(\d+)$/, '$1#'); // Add pounds
+                                                        }
+                                                    }
+                                                    
                                                     return (
-                                                        <div key={key} className={`p-2 rounded ${darkMode ? 'bg-gray-700' : 'bg-white'}`}>
-                                                            <span className="text-gray-500">{label}:</span> <strong>{value}</strong>
+                                                        <div key={key} className={`p-2 rounded ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
+                                                            <span className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>{label}:</span> <strong>{value}</strong>
                                                         </div>
                                                     );
                                                 })}
@@ -1035,9 +1147,18 @@
                                             <h3 className={`text-lg font-bold mb-3 ${darkMode ? 'text-brand-green-400' : 'text-brand-green-600'}`}>
                                                 💬 Comments / Labor
                                             </h3>
-                                            <div className={`p-4 rounded whitespace-pre-wrap ${darkMode ? 'bg-gray-800 text-gray-100' : 'bg-white text-gray-900'}`}>
-                                                {viewingReport.commentsLabor}
-                                            </div>
+                                            {editingReport ? (
+                                                <textarea
+                                                    value={editedReport.commentsLabor || ''}
+                                                    onChange={(e) => setEditedReport({...editedReport, commentsLabor: e.target.value})}
+                                                    className={`w-full p-4 rounded border min-h-[150px] ${darkMode ? 'bg-gray-700 text-gray-100 border-gray-600' : 'bg-white text-gray-900 border-gray-300'}`}
+                                                    rows={6}
+                                                />
+                                            ) : (
+                                                <div className={`p-4 rounded whitespace-pre-wrap ${darkMode ? 'bg-gray-700 text-gray-100' : 'bg-white text-gray-900'}`}>
+                                                    {viewingReport.commentsLabor}
+                                                </div>
+                                            )}
                                         </div>
                                     )}
 
