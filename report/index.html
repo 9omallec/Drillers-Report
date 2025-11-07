@@ -956,6 +956,36 @@
 
                 initGoogleDrive();
             }, []);
+            // Auto-save project data whenever formData, equipment, workDays, borings, or suppliesData changes
+            useEffect(() => {
+                if (projectId !== null) {
+                    const currentData = {
+                        formData,
+                        equipment,
+                        workDays,
+                        borings,
+                        suppliesData
+                    };
+                    
+                    // Save to localStorage
+                    if (projectId === '') {
+                        // Default project
+                        localStorage.setItem('reportData', JSON.stringify(formData));
+                        localStorage.setItem('equipment', JSON.stringify(equipment));
+                        localStorage.setItem('workDays', JSON.stringify(workDays));
+                        localStorage.setItem('borings', JSON.stringify(borings));
+                        localStorage.setItem('suppliesData', JSON.stringify(suppliesData));
+                    } else {
+                        // Named project
+                        localStorage.setItem(`${projectId}_reportData`, JSON.stringify(formData));
+                        localStorage.setItem(`${projectId}_equipment`, JSON.stringify(equipment));
+                        localStorage.setItem(`${projectId}_workDays`, JSON.stringify(workDays));
+                        localStorage.setItem(`${projectId}_borings`, JSON.stringify(borings));
+                        localStorage.setItem(`${projectId}_suppliesData`, JSON.stringify(suppliesData));
+                    }
+                }
+            }, [formData, equipment, workDays, borings, suppliesData, projectId]);
+
 
             // Sign in to Google Drive
             const signInToDrive = () => {
@@ -1162,46 +1192,60 @@
             };
             
             const switchProject = (selectedProjectId) => {
-                // Save current project data before switching
-                const currentData = {
-                    formData,
-                    equipment,
-                    workDays,
-                    borings,
-                    suppliesData
+                console.log('Switching to project:', selectedProjectId);
+                
+                // Save current project data first
+                const saveCurrentProject = () => {
+                    const currentId = projectId || '';
+                    const prefix = currentId === '' ? '' : `${currentId}_`;
+                    
+                    try {
+                        localStorage.setItem(`${prefix}reportData`, JSON.stringify(formData));
+                        localStorage.setItem(`${prefix}equipment`, JSON.stringify(equipment));
+                        localStorage.setItem(`${prefix}workDays`, JSON.stringify(workDays));
+                        localStorage.setItem(`${prefix}borings`, JSON.stringify(borings));
+                        localStorage.setItem(`${prefix}suppliesData`, JSON.stringify(suppliesData));
+                        console.log('Saved current project:', currentId || 'default');
+                    } catch (e) {
+                        console.error('Error saving project:', e);
+                    }
                 };
-                if (projectId) {
-                    localStorage.setItem(`${projectId}_reportData`, JSON.stringify(formData));
-                    localStorage.setItem(`${projectId}_equipment`, JSON.stringify(equipment));
-                    localStorage.setItem(`${projectId}_workDays`, JSON.stringify(workDays));
-                    localStorage.setItem(`${projectId}_borings`, JSON.stringify(borings));
-                    localStorage.setItem(`${projectId}_suppliesData`, JSON.stringify(suppliesData));
-                }
                 
-                // Handle default project (empty string)
-                if (selectedProjectId === '') {
-                    localStorage.setItem('currentProjectId', '');
+                saveCurrentProject();
+                
+                // Update current project
+                localStorage.setItem('currentProjectId', selectedProjectId || '');
+                
+                // Find project name
+                if (selectedProjectId === '' || selectedProjectId === null) {
                     localStorage.setItem('currentProjectName', 'Default Project');
-                    setTimeout(() => window.location.reload(), 100);
-                    return;
+                } else {
+                    const project = projects.find(p => p.id === selectedProjectId);
+                    if (project) {
+                        localStorage.setItem('currentProjectName', project.name);
+                    }
                 }
                 
-                // Handle named projects
-                const project = projects.find(p => p.id === selectedProjectId);
-                if (project) {
-                    localStorage.setItem('currentProjectId', project.id);
-                    localStorage.setItem('currentProjectName', project.name);
-                    setTimeout(() => window.location.reload(), 100);
-                }
+                // Reload to load new project
+                setTimeout(() => {
+                    window.location.reload();
+                }, 100);
             };
             
             const deleteProject = (projectIdToDelete) => {
-                if (confirm('Are you sure you want to delete this project? This cannot be undone.')) {
-                    // Remove from projects list
-                    const updatedProjects = projects.filter(p => p.id !== projectIdToDelete);
-                    setProjects(updatedProjects);
-                    
-                    // Clear data from localStorage
+                if (!projectIdToDelete) {
+                    alert('Cannot delete default project');
+                    return;
+                }
+                
+                if (!confirm(`Are you sure you want to delete project "${projects.find(p => p.id === projectIdToDelete)?.name || projectIdToDelete}"?\n\nThis cannot be undone.`)) {
+                    return;
+                }
+                
+                console.log('Deleting project:', projectIdToDelete);
+                
+                try {
+                    // Remove ALL related data from localStorage
                     const keysToDelete = [
                         `${projectIdToDelete}_reportData`,
                         `${projectIdToDelete}_equipment`,
@@ -1209,23 +1253,32 @@
                         `${projectIdToDelete}_borings`,
                         `${projectIdToDelete}_suppliesData`
                     ];
-                    keysToDelete.forEach(key => localStorage.removeItem(key));
                     
-                    // Remove from projects list in localStorage
+                    keysToDelete.forEach(key => {
+                        localStorage.removeItem(key);
+                        console.log('Removed:', key);
+                    });
+                    
+                    // Update projects list
+                    const updatedProjects = projects.filter(p => p.id !== projectIdToDelete);
                     localStorage.setItem('projects', JSON.stringify(updatedProjects));
+                    setProjects(updatedProjects);
                     
-                    // If deleting current project, switch to default or first available
+                    // If we deleted the current project, switch to default
                     if (projectIdToDelete === projectId) {
-                        // Switch to default project
                         localStorage.setItem('currentProjectId', '');
                         localStorage.setItem('currentProjectName', 'Default Project');
-                        
-                        // Force reload to ensure clean state
-                        setTimeout(() => window.location.reload(), 100);
-                    } else {
-                        // Just refresh the projects list
-                        setTimeout(() => window.location.reload(), 100);
+                        console.log('Deleted current project, switching to default');
                     }
+                    
+                    // Always reload to ensure clean state
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 100);
+                    
+                } catch (error) {
+                    console.error('Error deleting project:', error);
+                    alert('Error deleting project. Please try again.');
                 }
             };
 
