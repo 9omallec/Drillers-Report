@@ -905,34 +905,6 @@
 
                 initGoogleDrive();
             }, []);
-            
-            // Auto-save project data on changes
-            useEffect(() => {
-                if (projectId !== null && projectId !== undefined) {
-                    const saveData = () => {
-                        try {
-                            if (projectId === '') {
-                                localStorage.setItem('reportData', JSON.stringify(formData));
-                                localStorage.setItem('equipment', JSON.stringify(equipment));
-                                localStorage.setItem('workDays', JSON.stringify(workDays));
-                                localStorage.setItem('borings', JSON.stringify(borings));
-                                localStorage.setItem('suppliesData', JSON.stringify(suppliesData));
-                            } else {
-                                localStorage.setItem(`${projectId}_reportData`, JSON.stringify(formData));
-                                localStorage.setItem(`${projectId}_equipment`, JSON.stringify(equipment));
-                                localStorage.setItem(`${projectId}_workDays`, JSON.stringify(workDays));
-                                localStorage.setItem(`${projectId}_borings`, JSON.stringify(borings));
-                                localStorage.setItem(`${projectId}_suppliesData`, JSON.stringify(suppliesData));
-                            }
-                        } catch (error) {
-                            console.error('Auto-save error:', error);
-                        }
-                    };
-                    
-                    const timeoutId = setTimeout(saveData, 500);
-                    return () => clearTimeout(timeoutId);
-                }
-            }, [formData, equipment, workDays, borings, suppliesData, projectId]);
 
             // Sign in to Google Drive
             const signInToDrive = () => {
@@ -1143,7 +1115,9 @@
                 if (selectedProjectId === '') {
                     localStorage.setItem('currentProjectId', '');
                     localStorage.setItem('currentProjectName', 'Default Project');
-                    window.location.reload();
+                    setProjectName('Default Project');
+                    setProjectId('');
+                    setTimeout(() => window.location.reload(), 100);
                     return;
                 }
                 
@@ -1152,7 +1126,9 @@
                 if (project) {
                     localStorage.setItem('currentProjectId', project.id);
                     localStorage.setItem('currentProjectName', project.name);
-                    window.location.reload();
+                    setProjectName(project.name);
+                    setProjectId(project.id);
+                    setTimeout(() => window.location.reload(), 100);
                 }
             };
             
@@ -2212,7 +2188,7 @@
                                 <div className="w-full md:w-auto">
                                     <div className={`px-4 py-2 rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-gray-100'}`}>
                                         <label className={`text-xs font-semibold ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Current Project:</label>
-                                        <div key={projectId} className={`text-base md:text-lg font-bold mt-1 truncate ${darkMode ? 'text-brand-green-400' : 'text-brand-green-600'}`}>
+                                        <div className={`text-base md:text-lg font-bold mt-1 truncate ${darkMode ? 'text-brand-green-400' : 'text-brand-green-600'}`}>
                                             {projectName || 'Default Project'}
                                         </div>
                                         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 mt-2">
