@@ -423,86 +423,18 @@ const { useState, useEffect } = React;
                     createdAt: new Date().toISOString()
                 };
                 
-                setProjects([...projects, newProject]);
-                setProjectId(newId);
-                setProjectName(newProjectName.trim());
-                setNewProjectName('');
-                setShowProjectModal(false);
+                // Update projects list
+                const updatedProjects = [...projects, newProject];
+                setProjects(updatedProjects);
+                localStorage.setItem('projectsList', JSON.stringify(updatedProjects));
                 
-                // Clear current data for new project
-                setReportData({
-                    client: '',
-                    jobName: '',
-                    location: '',
-                    driller: '',
-                    helper: '',
-                    perDiem: '',
-                    commentsLabor: '',
-                    uploadedPhotosDetails: []
-                });
-                setWorkDays([{
-                    id: 1,
-                    date: new Date().toISOString().split('T')[0],
-                    timeLeftShop: '',
-                    arrivedOnSite: '',
-                    timeLeftSite: '',
-                    arrivedAtShop: '',
-                    hoursDriving: '',
-                    hoursOnSite: '',
-                    standbyHours: '',
-                    standbyMinutes: '',
-                    standbyReason: '',
-                    pitStopHours: '',
-                    pitStopMinutes: '',
-                    pitStopReason: '',
-                    collapsed: false
-                }]);
-                setBorings([{
-                    id: 1,
-                    method: '',
-                    footage: '',
-                    isEnvironmental: false,
-                    isGeotechnical: false,
-                    washboreSetup: false,
-                    washboreFootage: '',
-                    casingSetup: false,
-                    casingFootage: '',
-                    coreSetup: false,
-                    coreFootage: '',
-                    collapsed: false
-                }]);
-                setEquipment({
-                    drillRig: '',
-                    truck: '',
-                    dumpTruck: 'No',
-                    dumpTruckTimes: '',
-                    trailer: 'No',
-                    coreMachine: false,
-                    groutMachine: false,
-                    extruder: false,
-                    generator: false,
-                    decon: false
-                });
-                setSuppliesData({
-                    endCaps1: '', endCaps2: '', endCaps4: '', endCapsOther: '',
-                    lockingCaps1: '', lockingCaps2: '', lockingCaps4: '', lockingCapsOther: '',
-                    screen5_1: '', screen5_2: '', screen5_4: '', screen5Other: '',
-                    screen10_1: '', screen10_2: '', screen10_4: '', screen10Other: '',
-                    riser5_1: '', riser5_2: '', riser5_4: '', riser5Other: '',
-                    riser10_1: '', riser10_2: '', riser10_4: '', riser10Other: '',
-                    flushMounts7: '', flushMounts8: '', flushMountsOther: '',
-                    stickUpCovers4: '', stickUpCovers6: '', stickUpCoversOther: '',
-                    bollards3: '', bollards4: '', bollardsOther: '',
-                    concrete50: '', concrete60: '', concrete80: '',
-                    sand: '', drillingMud: '',
-                    bentoniteChips: '', bentonitePellets: '',
-                    bentoniteGrout: '', portlandGrout: '',
-                    buckets: '', shelbyTubes: '',
-                    numCoreBoxes: '',
-                    other: '',
-                    misc: '',
-                    uploadedPhotosSupplies: []
-                });
+                // Set as current project
+                localStorage.setItem('currentProjectId', newId);
+                localStorage.setItem('currentProjectName', newProjectName.trim());
+                
+                // Close modal and reload to load fresh empty state
+                setShowProjectModal(false);
+                setTimeout(() => window.location.reload(), 100);
             };
             
             const switchProject = (selectedProjectId) => {
