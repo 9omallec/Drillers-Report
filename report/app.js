@@ -135,25 +135,37 @@ const { useState, useEffect } = React;
             );
             
             // Auto-save to localStorage whenever data changes
+            // Manual save function for current project
+            const saveCurrentProjectData = () => {
+                if (projectId) {
+                    localStorage.setItem(makeStorageKey('reportData', projectId), JSON.stringify(reportData));
+                    localStorage.setItem(makeStorageKey('equipment', projectId), JSON.stringify(equipment));
+                    localStorage.setItem(makeStorageKey('workDays', projectId), JSON.stringify(workDays));
+                    localStorage.setItem(makeStorageKey('borings', projectId), JSON.stringify(borings));
+                    localStorage.setItem(makeStorageKey('suppliesData', projectId), JSON.stringify(suppliesData));
+                }
+            };
+            
+            // Save data periodically (but not on projectId change)
             useEffect(() => {
                 const key = makeStorageKey('reportData', projectId);
                 localStorage.setItem(key, JSON.stringify(reportData));
-            }, [reportData, projectId]);
+            }, [reportData]);
             
             useEffect(() => {
                 const key = makeStorageKey('equipment', projectId);
                 localStorage.setItem(key, JSON.stringify(equipment));
-            }, [equipment, projectId]);
+            }, [equipment]);
             
             useEffect(() => {
                 const key = makeStorageKey('workDays', projectId);
                 localStorage.setItem(key, JSON.stringify(workDays));
-            }, [workDays, projectId]);
+            }, [workDays]);
             
             useEffect(() => {
                 const key = makeStorageKey('borings', projectId);
                 localStorage.setItem(key, JSON.stringify(borings));
-            }, [borings, projectId]);
+            }, [borings]);
             
             // Auto-update project name based on client and job name
             useEffect(() => {
@@ -408,13 +420,7 @@ const { useState, useEffect } = React;
                 }
                 
                 // Save current project data before creating new one
-                if (projectId) {
-                    localStorage.setItem(makeStorageKey('reportData', projectId), JSON.stringify(reportData));
-                    localStorage.setItem(makeStorageKey('equipment', projectId), JSON.stringify(equipment));
-                    localStorage.setItem(makeStorageKey('workDays', projectId), JSON.stringify(workDays));
-                    localStorage.setItem(makeStorageKey('borings', projectId), JSON.stringify(borings));
-                    localStorage.setItem(makeStorageKey('suppliesData', projectId), JSON.stringify(suppliesData));
-                }
+                saveCurrentProjectData();
                 
                 const newId = `project_${Date.now()}`;
                 const newProject = {
@@ -429,43 +435,150 @@ const { useState, useEffect } = React;
                 localStorage.setItem('projectsList', JSON.stringify(updatedProjects));
                 
                 // Set as current project
+                setProjectId(newId);
+                setProjectName(newProjectName.trim());
                 localStorage.setItem('currentProjectId', newId);
                 localStorage.setItem('currentProjectName', newProjectName.trim());
                 
-                // Close modal and reload to load fresh empty state
+                // Clear state for new project (no saved data exists yet)
+                setReportData({
+                    client: '', jobName: '', location: '', driller: '', helper: '',
+                    perDiem: '', commentsLabor: '', uploadedPhotosDetails: []
+                });
+                setEquipment({
+                    drillRig: '', truck: '', dumpTruck: 'No', dumpTruckTimes: '',
+                    trailer: 'No', coreMachine: false, groutMachine: false,
+                    extruder: false, generator: false, decon: false
+                });
+                setWorkDays([{
+                    id: 1, date: new Date().toISOString().split('T')[0],
+                    timeLeftShop: '', arrivedOnSite: '', timeLeftSite: '', arrivedAtShop: '',
+                    hoursDriving: '', hoursOnSite: '', standbyHours: '', standbyMinutes: '',
+                    standbyReason: '', pitStopHours: '', pitStopMinutes: '', pitStopReason: '',
+                    collapsed: false
+                }]);
+                setBorings([{
+                    id: 1, method: '', footage: '', isEnvironmental: false, isGeotechnical: false,
+                    washboreSetup: false, washboreFootage: '', casingSetup: false, casingFootage: '',
+                    coreSetup: false, coreFootage: '', collapsed: false
+                }]);
+                setSuppliesData({
+                    endCaps1: '', endCaps2: '', endCaps4: '', endCapsOther: '',
+                    lockingCaps1: '', lockingCaps2: '', lockingCaps4: '', lockingCapsOther: '',
+                    screen5_1: '', screen5_2: '', screen5_4: '', screen5Other: '',
+                    screen10_1: '', screen10_2: '', screen10_4: '', screen10Other: '',
+                    riser5_1: '', riser5_2: '', riser5_4: '', riser5Other: '',
+                    riser10_1: '', riser10_2: '', riser10_4: '', riser10Other: '',
+                    flushMounts7: '', flushMounts8: '', flushMountsOther: '',
+                    stickUpCovers4: '', stickUpCovers6: '', stickUpCoversOther: '',
+                    bollards3: '', bollards4: '', bollardsOther: '',
+                    concrete50: '', concrete60: '', concrete80: '',
+                    sand: '', drillingMud: '', bentoniteChips: '', bentonitePellets: '',
+                    bentoniteGrout: '', portlandGrout: '', buckets: '', shelbyTubes: '',
+                    numCoreBoxes: '', other: '', misc: '', uploadedPhotosSupplies: []
+                });
+                
+                // Close modal
+                setNewProjectName('');
                 setShowProjectModal(false);
-                setTimeout(() => window.location.reload(), 100);
             };
             
             const switchProject = (selectedProjectId) => {
                 // Save current project data before switching
-                if (projectId) {
-                    const currentKey = makeStorageKey('reportData', projectId);
-                    localStorage.setItem(currentKey, JSON.stringify(reportData));
-                    localStorage.setItem(makeStorageKey('equipment', projectId), JSON.stringify(equipment));
-                    localStorage.setItem(makeStorageKey('workDays', projectId), JSON.stringify(workDays));
-                    localStorage.setItem(makeStorageKey('borings', projectId), JSON.stringify(borings));
-                    localStorage.setItem(makeStorageKey('suppliesData', projectId), JSON.stringify(suppliesData));
-                }
+                saveCurrentProjectData();
                 
                 // Handle default project (empty string)
                 if (selectedProjectId === '') {
+                    setProjectId('');
+                    setProjectName('Default Project');
                     localStorage.setItem('currentProjectId', '');
                     localStorage.setItem('currentProjectName', 'Default Project');
-                    setProjectName('Default Project');
-                    setProjectId('');
-                    setTimeout(() => window.location.reload(), 100);
+                    
+                    // Load default project data
+                    setReportData(loadFromStorage('reportData', {
+                        client: '', jobName: '', location: '', driller: '', helper: '', 
+                        perDiem: '', commentsLabor: '', uploadedPhotosDetails: []
+                    }, ''));
+                    setEquipment(loadFromStorage('equipment', {
+                        drillRig: '', truck: '', dumpTruck: 'No', dumpTruckTimes: '', 
+                        trailer: 'No', coreMachine: false, groutMachine: false, 
+                        extruder: false, generator: false, decon: false
+                    }, ''));
+                    setWorkDays(loadFromStorage('workDays', [{
+                        id: 1, date: new Date().toISOString().split('T')[0],
+                        timeLeftShop: '', arrivedOnSite: '', timeLeftSite: '', arrivedAtShop: '',
+                        hoursDriving: '', hoursOnSite: '', standbyHours: '', standbyMinutes: '',
+                        standbyReason: '', pitStopHours: '', pitStopMinutes: '', pitStopReason: '',
+                        collapsed: false
+                    }], ''));
+                    setBorings(loadFromStorage('borings', [{
+                        id: 1, method: '', footage: '', isEnvironmental: false, isGeotechnical: false,
+                        washboreSetup: false, washboreFootage: '', casingSetup: false, casingFootage: '',
+                        coreSetup: false, coreFootage: '', collapsed: false
+                    }], ''));
+                    setSuppliesData(loadFromStorage('suppliesData', {
+                        endCaps1: '', endCaps2: '', endCaps4: '', endCapsOther: '',
+                        lockingCaps1: '', lockingCaps2: '', lockingCaps4: '', lockingCapsOther: '',
+                        screen5_1: '', screen5_2: '', screen5_4: '', screen5Other: '',
+                        screen10_1: '', screen10_2: '', screen10_4: '', screen10Other: '',
+                        riser5_1: '', riser5_2: '', riser5_4: '', riser5Other: '',
+                        riser10_1: '', riser10_2: '', riser10_4: '', riser10Other: '',
+                        flushMounts7: '', flushMounts8: '', flushMountsOther: '',
+                        stickUpCovers4: '', stickUpCovers6: '', stickUpCoversOther: '',
+                        bollards3: '', bollards4: '', bollardsOther: '',
+                        concrete50: '', concrete60: '', concrete80: '',
+                        sand: '', drillingMud: '', bentoniteChips: '', bentonitePellets: '',
+                        bentoniteGrout: '', portlandGrout: '', buckets: '', shelbyTubes: '',
+                        numCoreBoxes: '', other: '', misc: '', uploadedPhotosSupplies: []
+                    }, ''));
                     return;
                 }
                 
                 // Handle named projects
                 const project = projects.find(p => p.id === selectedProjectId);
                 if (project) {
+                    setProjectId(project.id);
+                    setProjectName(project.name);
                     localStorage.setItem('currentProjectId', project.id);
                     localStorage.setItem('currentProjectName', project.name);
-                    setProjectName(project.name);
-                    setProjectId(project.id);
-                    setTimeout(() => window.location.reload(), 100);
+                    
+                    // Load project data
+                    setReportData(loadFromStorage('reportData', {
+                        client: '', jobName: '', location: '', driller: '', helper: '', 
+                        perDiem: '', commentsLabor: '', uploadedPhotosDetails: []
+                    }, project.id));
+                    setEquipment(loadFromStorage('equipment', {
+                        drillRig: '', truck: '', dumpTruck: 'No', dumpTruckTimes: '', 
+                        trailer: 'No', coreMachine: false, groutMachine: false, 
+                        extruder: false, generator: false, decon: false
+                    }, project.id));
+                    setWorkDays(loadFromStorage('workDays', [{
+                        id: 1, date: new Date().toISOString().split('T')[0],
+                        timeLeftShop: '', arrivedOnSite: '', timeLeftSite: '', arrivedAtShop: '',
+                        hoursDriving: '', hoursOnSite: '', standbyHours: '', standbyMinutes: '',
+                        standbyReason: '', pitStopHours: '', pitStopMinutes: '', pitStopReason: '',
+                        collapsed: false
+                    }], project.id));
+                    setBorings(loadFromStorage('borings', [{
+                        id: 1, method: '', footage: '', isEnvironmental: false, isGeotechnical: false,
+                        washboreSetup: false, washboreFootage: '', casingSetup: false, casingFootage: '',
+                        coreSetup: false, coreFootage: '', collapsed: false
+                    }], project.id));
+                    setSuppliesData(loadFromStorage('suppliesData', {
+                        endCaps1: '', endCaps2: '', endCaps4: '', endCapsOther: '',
+                        lockingCaps1: '', lockingCaps2: '', lockingCaps4: '', lockingCapsOther: '',
+                        screen5_1: '', screen5_2: '', screen5_4: '', screen5Other: '',
+                        screen10_1: '', screen10_2: '', screen10_4: '', screen10Other: '',
+                        riser5_1: '', riser5_2: '', riser5_4: '', riser5Other: '',
+                        riser10_1: '', riser10_2: '', riser10_4: '', riser10Other: '',
+                        flushMounts7: '', flushMounts8: '', flushMountsOther: '',
+                        stickUpCovers4: '', stickUpCovers6: '', stickUpCoversOther: '',
+                        bollards3: '', bollards4: '', bollardsOther: '',
+                        concrete50: '', concrete60: '', concrete80: '',
+                        sand: '', drillingMud: '', bentoniteChips: '', bentonitePellets: '',
+                        bentoniteGrout: '', portlandGrout: '', buckets: '', shelbyTubes: '',
+                        numCoreBoxes: '', other: '', misc: '', uploadedPhotosSupplies: []
+                    }, project.id));
                 }
             };
             
@@ -1521,55 +1634,6 @@ const { useState, useEffect } = React;
                                     </div>
                                 </div>
                                 
-                                {/* Project Selector */}
-                                <div className="w-full md:w-auto">
-                                    <div className={`px-4 py-2 rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-gray-100'}`}>
-                                        <label className={`text-xs font-semibold ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Current Project:</label>
-                                        <div className={`text-base md:text-lg font-bold mt-1 truncate ${darkMode ? 'text-brand-green-400' : 'text-brand-green-600'}`}>
-                                            {projectName || 'Default Project'}
-                                        </div>
-                                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 mt-2">
-                                            <select
-                                                value={projectId}
-                                                onChange={(e) => {
-                                                    if (confirm('Switch project? Make sure you clicked Save if you want to keep a backup.')) {
-                                                        switchProject(e.target.value);
-                                                    }
-                                                }}
-                                                className={`flex-1 px-3 py-2 border rounded font-semibold text-sm ${darkMode ? 'bg-gray-600 text-white border-gray-500' : 'bg-white border-gray-300'}`}
-                                            >
-                                                <option value="">Default Project</option>
-                                                {projects.map(project => (
-                                                    <option key={project.id} value={project.id}>
-                                                        {project.name}
-                                                    </option>
-                                                ))}
-                                            </select>
-                                            <div className="flex gap-2 w-full sm:w-auto">
-                                                <button
-                                                    onClick={() => setShowProjectModal(true)}
-                                                    className="flex-1 sm:flex-none px-3 py-2 bg-brand-green-600 text-white rounded hover:bg-brand-green-700 font-semibold text-sm whitespace-nowrap min-w-[80px]"
-                                                    title="Create New Project"
-                                                >
-                                                    + New
-                                                </button>
-                                                {projectId && (
-                                                    <button
-                                                        onClick={() => deleteProject(projectId)}
-                                                        className="flex-1 sm:flex-none px-3 py-2 bg-red-600 text-white rounded hover:bg-red-700 font-semibold text-sm min-w-[80px]"
-                                                        title="Delete Current Project"
-                                                    >
-                                                        🗑️ Delete
-                                                    </button>
-                                                )}
-                                            </div>
-                                        </div>
-                                        <div className={`text-xs mt-2 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                                            ✓ Auto-saves as you type
-                                        </div>
-                                    </div>
-                                </div>
-                                
                                 <div className="flex gap-2 items-center flex-wrap w-full md:w-auto justify-stretch md:justify-end">
                                     <button
                                         onClick={() => setDarkMode(!darkMode)}
@@ -1649,7 +1713,68 @@ const { useState, useEffect } = React;
                             </div>
                         </div>
 
-                        {/* Tabs */}
+                        {/* Project Tabs */}
+                        <div className={`shadow-lg rounded-lg mb-4 no-print overflow-hidden ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
+                            <div className="flex items-center overflow-x-auto">
+                                {/* Default Project Tab */}
+                                <button
+                                    onClick={() => switchProject('')}
+                                    className={`flex-shrink-0 py-3 px-4 text-center font-bold text-sm transition relative ${
+                                        projectId === ''
+                                            ? 'bg-brand-green-600 text-white shadow-md'
+                                            : `${darkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`
+                                    }`}
+                                >
+                                    Default
+                                    {projectId === '' && (
+                                        <div className="absolute bottom-0 left-0 right-0 h-1 bg-brand-green-400"></div>
+                                    )}
+                                </button>
+                                
+                                {/* Project Tabs */}
+                                {projects.map(project => (
+                                    <div key={project.id} className="flex items-center flex-shrink-0">
+                                        <button
+                                            onClick={() => switchProject(project.id)}
+                                            className={`py-3 px-4 text-center font-bold text-sm transition relative ${
+                                                projectId === project.id
+                                                    ? 'bg-brand-green-600 text-white shadow-md'
+                                                    : `${darkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`
+                                            }`}
+                                        >
+                                            {project.name || 'Unnamed'}
+                                            {projectId === project.id && (
+                                                <div className="absolute bottom-0 left-0 right-0 h-1 bg-brand-green-400"></div>
+                                            )}
+                                        </button>
+                                        {projectId === project.id && (
+                                            <button
+                                                onClick={() => deleteProject(project.id)}
+                                                className={`px-2 py-3 text-sm hover:bg-red-600 hover:text-white transition ${
+                                                    darkMode ? 'text-red-400' : 'text-red-600'
+                                                }`}
+                                                title="Delete this project"
+                                            >
+                                                ✕
+                                            </button>
+                                        )}
+                                    </div>
+                                ))}
+                                
+                                {/* New Project Button */}
+                                <button
+                                    onClick={() => setShowProjectModal(true)}
+                                    className={`flex-shrink-0 py-3 px-4 text-center font-bold text-sm transition ${
+                                        darkMode ? 'bg-gray-700 text-brand-green-400 hover:bg-gray-600' : 'bg-gray-100 text-brand-green-600 hover:bg-gray-200'
+                                    }`}
+                                    title="Create New Project"
+                                >
+                                    + New Project
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Job Details / Supplies Tabs */}
                         <div className={`shadow-lg rounded-lg mb-4 no-print overflow-hidden ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
                             <div className="flex">
                                 <button
