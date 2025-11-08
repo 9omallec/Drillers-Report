@@ -1,4 +1,4 @@
-        const { useState, useEffect } = React;
+const { useState, useEffect } = React;
 
         function DailyDrillReport() {
             // Get current project ID first - this is critical for loading correct data
