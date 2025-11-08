@@ -68,7 +68,7 @@
             // Report Data with localStorage
             const [reportData, setReportData] = useState(() => 
                 loadFromStorage('reportData', {
-                    customer: '',
+                    client: '',
                     jobName: '',
                     location: '',
                     driller: '',
@@ -154,6 +154,20 @@
                 const key = makeStorageKey('borings', projectId);
                 localStorage.setItem(key, JSON.stringify(borings));
             }, [borings, projectId]);
+            
+            // Auto-update project name based on client and job name
+            useEffect(() => {
+                if (projectId && (reportData.client || reportData.jobName)) {
+                    const autoName = `${reportData.client || 'Client'} - ${reportData.jobName || 'Job'}`;
+                    if (autoName !== projectName) {
+                        setProjectName(autoName);
+                        // Update in projects list
+                        setProjects(projects.map(p => 
+                            p.id === projectId ? { ...p, name: autoName } : p
+                        ));
+                    }
+                }
+            }, [reportData.client, reportData.jobName, projectId]);
 
             // ====== GOOGLE DRIVE API INTEGRATION (New GIS) ======
             const GOOGLE_DRIVE_CONFIG = {
@@ -331,7 +345,10 @@
                     
                     setDriveStatus('Uploading to Google Drive...');
                     
-                    const fileName = `DrillReport_${reportData.jobName || 'Unnamed'}_${new Date().toISOString().split('T')[0]}_${Date.now()}.json`;
+                    const clientName = reportData.client || 'Client';
+                    const jobName = reportData.jobName || 'Job';
+                    const startDate = workDays[0]?.date || new Date().toISOString().split('T')[0];
+                    const fileName = `${clientName} - ${jobName} - ${startDate}.json`;
                     const fileContent = JSON.stringify(reportJson, null, 2);
                     
                     const metadata = {
@@ -390,6 +407,15 @@
                     return;
                 }
                 
+                // Save current project data before creating new one
+                if (projectId) {
+                    localStorage.setItem(makeStorageKey('reportData', projectId), JSON.stringify(reportData));
+                    localStorage.setItem(makeStorageKey('equipment', projectId), JSON.stringify(equipment));
+                    localStorage.setItem(makeStorageKey('workDays', projectId), JSON.stringify(workDays));
+                    localStorage.setItem(makeStorageKey('borings', projectId), JSON.stringify(borings));
+                    localStorage.setItem(makeStorageKey('suppliesData', projectId), JSON.stringify(suppliesData));
+                }
+                
                 const newId = `project_${Date.now()}`;
                 const newProject = {
                     id: newId,
@@ -405,7 +431,7 @@
                 
                 // Clear current data for new project
                 setReportData({
-                    customer: '',
+                    client: '',
                     jobName: '',
                     location: '',
                     driller: '',
@@ -480,6 +506,16 @@
             };
             
             const switchProject = (selectedProjectId) => {
+                // Save current project data before switching
+                if (projectId) {
+                    const currentKey = makeStorageKey('reportData', projectId);
+                    localStorage.setItem(currentKey, JSON.stringify(reportData));
+                    localStorage.setItem(makeStorageKey('equipment', projectId), JSON.stringify(equipment));
+                    localStorage.setItem(makeStorageKey('workDays', projectId), JSON.stringify(workDays));
+                    localStorage.setItem(makeStorageKey('borings', projectId), JSON.stringify(borings));
+                    localStorage.setItem(makeStorageKey('suppliesData', projectId), JSON.stringify(suppliesData));
+                }
+                
                 // Handle default project (empty string)
                 if (selectedProjectId === '') {
                     localStorage.setItem('currentProjectId', '');
@@ -1176,7 +1212,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Daily Drill Report - ${reportData.customer || 'Report'}</title>
+    <title>Daily Drill Report - ${reportData.client || 'Report'}</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -1295,8 +1331,8 @@
         <h3>JOB INFORMATION</h3>
         <div class="info-grid">
             <div class="info-item">
-                <label>Customer</label>
-                <value>${reportData.customer || 'N/A'}</value>
+                <label>Client</label>
+                <value>${reportData.client || 'N/A'}</value>
             </div>
             <div class="info-item">
                 <label>Job Name/Number</label>
@@ -1436,7 +1472,7 @@
                 const boringStats = getBoringStats();
                 
                 // CSV Header
-                let csv = 'Date,Customer,Job Name/Number,Location,Driller,Helper,Drive Hours,On-Site Hours,Standby Hours,Total Hours,Total Footage,# of Borings,Equipment,Notes\n';
+                let csv = 'Date,Client,Job Name/Number,Location,Driller,Helper,Drive Hours,On-Site Hours,Standby Hours,Total Hours,Total Footage,# of Borings,Equipment,Notes\n';
                 
                 // Collect equipment list
                 const equipmentList = [];
@@ -1458,14 +1494,14 @@
                 
                 // Main data row
                 const date = new Date().toLocaleDateString();
-                const customer = (reportData.customer || '').replace(/"/g, '""');
+                const client = (reportData.client || '').replace(/"/g, '""');
                 const jobName = (reportData.jobName || '').replace(/"/g, '""');
                 const location = (reportData.location || '').replace(/"/g, '""');
                 const driller = (reportData.driller || '').replace(/"/g, '""');
                 const helper = (reportData.helper || '').replace(/"/g, '""');
                 const equipmentStr = equipmentList.join('; ').replace(/"/g, '""');
                 
-                csv += `"${date}","${customer}","${jobName}","${location}","${driller}","${helper}",${totals.driving},${totals.onSite},${totals.standby},${totals.total},${boringStats.totalFootage},${boringStats.numBorings},"${equipmentStr}","${notes}"\n`;
+                csv += `"${date}","${client}","${jobName}","${location}","${driller}","${helper}",${totals.driving},${totals.onSite},${totals.standby},${totals.total},${boringStats.totalFootage},${boringStats.numBorings},"${equipmentStr}","${notes}"\n`;
                 
                 // Add detailed work days breakdown
                 csv += '\n,Daily Breakdown:\n';
@@ -1722,14 +1758,14 @@
                                         JOB INFORMATION
                                     </h2>
                                     
-                                    {/* Customer, Job Name, Location on one line */}
+                                    {/* Client, Job Name, Location on one line */}
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
                                         <div>
-                                            <label className={`block text-base font-semibold mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Customer</label>
+                                            <label className={`block text-base font-semibold mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Client</label>
                                             <input
                                                 type="text"
-                                                value={reportData.customer}
-                                                onChange={(e) => handleReportChange('customer', e.target.value)}
+                                                value={reportData.client}
+                                                onChange={(e) => handleReportChange('client', e.target.value)}
                                                 className={`w-full px-3 py-2 border rounded focus:ring-2 focus:ring-brand-green-500 scrollable-input text-base ${darkMode ? 'border-gray-600 bg-gray-700 text-gray-100' : 'border-gray-300 bg-white'}`}
                                             />
                                         </div>
@@ -2663,7 +2699,7 @@
                                     Create New Project
                                 </h3>
                                 <p className={`mb-4 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-                                    Enter a name for your new project (e.g., customer name, job site, or job number):
+                                    Enter a name for your new project (e.g., client name, job site, or job number). Note: Project name will auto-update based on Client and Job Name fields.
                                 </p>
                                 <input
                                     type="text"
