@@ -1,582 +1,163 @@
-        /* Mobile and Touch Optimizations */
-        * {
-            -webkit-tap-highlight-color: rgba(22, 163, 74, 0.2);
-            touch-action: manipulation;
-        }
-        
-        /* Better touch targets */
-        button, a, label, input[type="checkbox"], input[type="radio"], select {
-            min-height: 44px;
-            min-width: 44px;
-        }
-        
-        /* Mobile-optimized inputs */
-        input, select, textarea {
-            font-size: 16px !important; /* Prevents zoom on iOS */
-            -webkit-appearance: none;
-            appearance: none;
-        }
-        
-        select {
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 8px center;
-            padding-right: 32px;
-        }
-        
-        /* Smooth scrolling */
-        html {
-            scroll-behavior: smooth;
-            -webkit-overflow-scrolling: touch;
-        }
-        
-        /* Prevent text selection on touch */
-        .no-select {
-            -webkit-user-select: none;
-            user-select: none;
-        }
-        
-        /* Mobile-friendly table scroll */
-        .table-container {
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-            max-width: 100%;
-        }
-        
-        /* Touch-friendly collapsible headers */
-        .collapsible-header {
-            cursor: pointer;
-            user-select: none;
-            -webkit-user-select: none;
-            touch-action: manipulation;
-        }
-        
-        /* Custom Checkbox Styling - Green Checkmarks */
-        input[type="checkbox"] {
-            appearance: none;
-            -webkit-appearance: none;
-            width: 22px;
-            height: 22px;
-            cursor: pointer;
-            border: 2px solid #d1d5db;
-            border-radius: 4px;
-            background-color: white;
-            position: relative;
-            transition: all 0.2s ease;
-        }
-        
-        .dark input[type="checkbox"] {
-            border-color: #6b7280;
-            background-color: #374151;
-        }
-        
-        input[type="checkbox"]:checked {
-            background-color: #16a34a;
-            border-color: #16a34a;
-        }
-        
-        /* Green Checkmark */
-        input[type="checkbox"]:checked::after {
-            content: '✓';
-            position: absolute;
-            color: white;
-            font-size: 18px;
-            font-weight: bold;
-            left: 3px;
-            top: -2px;
-        }
-        
-        input[type="checkbox"]:hover {
-            border-color: #16a34a;
-        }
-        
-        /* Mobile responsive adjustments */
-        @media (max-width: 768px) {
-            body {
-                font-size: 14px;
-            }
-            
-            .mobile-full-width {
-                width: 100% !important;
-            }
-            
-            /* Stack grids on mobile */
-            .mobile-stack > * {
-                grid-column: span 1 !important;
-            }
-            
-            /* Larger touch targets on mobile */
-            button, .button {
-                padding: 12px 16px;
-                font-size: 16px;
-            }
-            
-            /* Better mobile inputs */
-            input, select, textarea {
-                padding: 10px;
-                font-size: 16px !important;
-            }
-            
-            .tiny-input {
-                width: 55px;
-                padding: 8px 4px;
-                font-size: 16px !important;
-            }
-            
-            .small-input {
-                padding: 10px;
-                font-size: 16px !important;
-            }
-            
-            /* Mobile header */
-            h1 {
-                font-size: 1.5rem !important;
-                line-height: 1.3 !important;
-            }
-            
-            h2 {
-                font-size: 1.2rem !important;
-                line-height: 1.3 !important;
-            }
-            
-            h3 {
-                font-size: 1rem !important;
-                line-height: 1.3 !important;
-            }
-            
-            /* Mobile table optimizations */
-            table {
-                font-size: 13px;
-            }
-            
-            table td, table th {
-                padding: 6px 4px !important;
-                font-size: 13px !important;
-            }
-            
-            /* Optimize table container for mobile */
-            .table-container {
-                overflow-x: auto;
-                -webkit-overflow-scrolling: touch;
-                margin: 0 -0.5rem;
-                padding: 0 0.5rem;
-            }
-            
-            /* Mobile-friendly buttons */
-            .no-print button {
-                margin: 4px 0;
-                width: 100%;
-            }
-            
-            /* Larger checkboxes on mobile */
-            input[type="checkbox"] {
-                width: 24px;
-                height: 24px;
-            }
-            
-            /* Optimize spacing on mobile */
-            .space-y-4 > * + * {
-                margin-top: 0.75rem !important;
-            }
-            
-            .gap-4 {
-                gap: 0.75rem !important;
-            }
-            
-            /* Better mobile grid layouts */
-            .grid-cols-2 {
-                grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
-            }
-            
-            /* Optimize padding and margins */
-            .p-4 {
-                padding: 0.75rem !important;
-            }
-            
-            .p-6 {
-                padding: 1rem !important;
-            }
-            
-            .mb-6 {
-                margin-bottom: 1rem !important;
-            }
-            
-            /* Optimize logo size on mobile */
-            .w-16 {
-                width: 3rem !important;
-                height: 3rem !important;
-            }
-        }
-        
-        /* Extra small devices */
-        @media (max-width: 480px) {
-            .max-w-7xl {
-                padding-left: 0.5rem;
-                padding-right: 0.5rem;
-            }
-            
-            /* Even larger touch targets for small phones */
-            button, .button {
-                padding: 14px 18px;
-                font-size: 17px;
-            }
-            
-            /* Smaller fonts for very small screens */
-            body {
-                font-size: 13px;
-            }
-            
-            h1 {
-                font-size: 1.3rem !important;
-            }
-            
-            h2 {
-                font-size: 1.1rem !important;
-            }
-            
-            h3 {
-                font-size: 0.95rem !important;
-            }
-            
-            table {
-                font-size: 12px;
-            }
-            
-            table td, table th {
-                padding: 4px 2px !important;
-                font-size: 12px !important;
-            }
-            
-            .tiny-input {
-                width: 50px;
-                padding: 6px 2px;
-                font-size: 14px !important;
-            }
-        }
-        
-        @media print {
-            .no-print { display: none !important; }
-            .print-page-break { page-break-after: always; }
-            .print-hide-empty { display: none !important; }
-            
-            /* Force both tabs to display */
-            #job-details-tab, #supplies-tab {
-                display: block !important;
-            }
-            
-            /* Only show supplies tab if it has content */
-            #supplies-tab.no-content {
-                display: none !important;
-            }
-            
-            /* Remove page break to try to fit everything on one page */
-            #supplies-tab.has-content {
-                page-break-before: avoid;
-                margin-top: 0.2rem !important;
-            }
-            
-            /* Optimize for single page */
-            @page {
-                size: letter;
-                margin: 0.3in 0.4in;
-            }
-            
-            html, body {
-                height: auto;
-            }
-            
-            /* Force Light Mode for Printing */
-            * {
-                color: #000 !important;
-                background-color: #fff !important;
-                print-color-adjust: exact;
-                -webkit-print-color-adjust: exact;
-            }
-            
-            /* Preserve green accents for checkmarks only */
-            input[type="checkbox"]:checked {
-                background-color: #16a34a !important;
-                border-color: #16a34a !important;
-            }
-            
-            input[type="checkbox"]:checked::after {
-                color: white !important;
-            }
-            
-            /* Ultra-compact layout */
-            body {
-                font-size: 9px !important;
-                line-height: 1.2 !important;
-                margin: 0 !important;
-                padding: 0 !important;
-            }
-            
-            .max-w-7xl {
-                max-width: 100% !important;
-                padding: 0.2rem !important;
-                margin: 0 !important;
-            }
-            
-            /* Headers */
-            h1 {
-                font-size: 14px !important;
-                margin: 0.15rem 0 !important;
-                padding: 0 !important;
-                font-weight: bold !important;
-            }
-            
-            h2 {
-                font-size: 11px !important;
-                margin: 0.15rem 0 0.1rem 0 !important;
-                padding: 0 !important;
-                font-weight: bold !important;
-                border-bottom: 1px solid #000 !important;
-            }
-            
-            h3 {
-                font-size: 9px !important;
-                margin: 0.1rem 0 !important;
-                font-weight: bold !important;
-            }
-            
-            /* Remove ALL borders and styling from inputs */
-            input, select, textarea {
-                border: none !important;
-                background: transparent !important;
-                padding: 0 !important;
-                margin: 0 !important;
-                font-size: 8px !important;
-                height: auto !important;
-                min-height: 0 !important;
-                appearance: none !important;
-                -webkit-appearance: none !important;
-                box-shadow: none !important;
-                font-family: Arial, sans-serif !important;
-            }
-            
-            /* Make inputs look like regular text */
-            input[type="text"], input[type="date"], input[type="time"], select, textarea {
-                display: inline !important;
-                font-weight: normal !important;
-            }
-            
-            /* Hide empty inputs and their labels */
-            input:empty, input[value=""], textarea:empty {
-                display: none !important;
-            }
-            
-            /* Special handling for select dropdowns - show value only */
-            select {
-                color: #000 !important;
-                font-weight: normal !important;
-            }
-            
-            /* Hide select dropdown arrow */
-            select::-ms-expand {
-                display: none !important;
-            }
-            
-            /* Checkboxes */
-            input[type="checkbox"] {
-                width: 10px !important;
-                height: 10px !important;
-                min-width: 0 !important;
-                min-height: 0 !important;
-                border: 1px solid #333 !important;
-                margin-right: 2px !important;
-            }
-            
-            input[type="checkbox"]:checked::after {
-                font-size: 8px !important;
-                left: 0px !important;
-                top: -2px !important;
-            }
-            
-            /* Hide unchecked checkboxes and their labels */
-            input[type="checkbox"]:not(:checked) {
-                display: none !important;
-            }
-            
-            /* Remove shadows and rounded corners */
-            .shadow-sm, .shadow-lg, .shadow {
-                box-shadow: none !important;
-            }
-            
-            .rounded-lg, .rounded, .rounded-md {
-                border-radius: 0 !important;
-            }
-            
-            /* Minimize padding and margins */
-            .p-4, .p-3, .p-2, .p-1, .p-6 {
-                padding: 0.05rem !important;
-            }
-            
-            .mb-4, .mb-3, .mb-2, .mb-1, .mb-6 {
-                margin-bottom: 0.1rem !important;
-            }
-            
-            .mt-4, .mt-3, .mt-2, .mt-1 {
-                margin-top: 0.1rem !important;
-            }
-            
-            .gap-4, .gap-3, .gap-2 {
-                gap: 0.1rem !important;
-            }
-            
-            .space-y-4 > * + *, .space-y-3 > * + *, .space-y-2 > * + * {
-                margin-top: 0.1rem !important;
-            }
-            
-            /* Table optimizations */
-            table {
-                font-size: 8px !important;
-                border-collapse: collapse !important;
-                width: 100% !important;
-            }
-            
-            /* Clean table borders - minimal styling */
-            table td, table th {
-                padding: 2px 3px !important;
-                border: 0.5px solid #ccc !important;
-                vertical-align: top !important;
-            }
-            
-            table th {
-                font-weight: bold !important;
-                background-color: #f5f5f5 !important;
-            }
-            
-            /* Hide empty table cells */
-            table td:empty {
-                border: none !important;
-            }
-            
-            /* Hide table rows where all cells are empty */
-            table tr:has(td:empty:only-child) {
-                display: none !important;
-            }
-            
-            /* Logo smaller */
-            .w-16, .w-12 {
-                width: 1.5rem !important;
-                height: 1.5rem !important;
-            }
-            
-            /* Prevent awkward breaks */
-            .shadow-sm, h2, h3, tr {
-                page-break-inside: avoid !important;
-            }
-            
-            /* Compress grid layouts */
-            .grid {
-                gap: 0.05rem !important;
-            }
-            
-            /* Optimize borders */
-            .border-t, .border-b, .border {
-                border-width: 0px !important;
-            }
-            
-            /* Only show section borders under headers */
-            h2 {
-                border-bottom: 1px solid #333 !important;
-            }
-            
-            /* Reduce div spacing */
-            div {
-                margin: 0 !important;
-            }
-            
-            /* Labels should be inline with values */
-            label {
-                font-size: 8px !important;
-                font-weight: normal !important;
-                display: inline !important;
-                margin-right: 3px !important;
-            }
-            
-            /* Hide empty sections */
-            div:empty {
-                display: none !important;
-            }
-            
-            /* Text sizing */
-            .text-4xl, .text-3xl {
-                font-size: 14px !important;
-            }
-            
-            .text-2xl {
-                font-size: 11px !important;
-            }
-            
-            .text-xl {
-                font-size: 10px !important;
-            }
-            
-            .text-lg {
-                font-size: 9px !important;
-            }
-            
-            .text-base {
-                font-size: 8px !important;
-            }
-            
-            .text-sm {
-                font-size: 7px !important;
-            }
-            
-            .text-xs {
-                font-size: 6px !important;
-            }
-            
-            /* Optimize flex layouts for print */
-            .flex-col {
-                display: block !important;
-            }
-            
-            .flex {
-                display: block !important;
-            }
-            
-            /* Make two-column layouts stack to save space */
-            .md\:flex-row {
-                display: block !important;
-            }
-            
-            .flex-1 {
-                flex: none !important;
-            }
-        }
-        
-        .small-input {
-            padding: 0.375rem 0.5rem;
-            font-size: 16px;
-        }
-        .tiny-input {
-            width: 50px;
-            padding: 0.25rem;
-            font-size: 16px;
-            text-align: center;
-        }
-        .scrollable-input {
-            overflow-x: auto;
-            white-space: nowrap;
-        }
-        
-        /* Smooth transitions for better UX */
-        button, input, select, textarea {
-            transition: all 0.2s ease;
-        }
-        
-        /* Active/focus states for touch feedback */
-        button:active, 
-        .collapsible-header:active {
-            transform: scale(0.98);
-            opacity: 0.9;
-        }
-        
-        input:focus, select:focus, textarea:focus {
-            outline: none;
-            border-color: #16a34a !important;
-            box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1);
-        }
+/* Base Touch & Mobile Optimizations */
+
+- { -webkit-tap-highlight-color: rgba(22, 163, 74, 0.2); touch-action: manipulation; }
+  button, a, label, input[type=“checkbox”], input[type=“radio”], select { min-height: 44px; min-width: 44px; }
+  input, select, textarea { font-size: 16px !important; -webkit-appearance: none; appearance: none; }
+  select { background: url(“data:image/svg+xml,%3Csvg xmlns=‘http://www.w3.org/2000/svg’ width=‘12’ height=‘12’ viewBox=‘0 0 12 12’%3E%3Cpath fill=’%23333’ d=‘M6 9L1 4h10z’/%3E%3C/svg%3E”) no-repeat right 8px center; padding-right: 32px; }
+  html { scroll-behavior: smooth; -webkit-overflow-scrolling: touch; }
+  .no-select { -webkit-user-select: none; user-select: none; }
+  .table-container { overflow-x: auto; -webkit-overflow-scrolling: touch; max-width: 100%; }
+  .collapsible-header { cursor: pointer; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
+
+/* Checkboxes - Green Style */
+input[type=“checkbox”] { appearance: none; -webkit-appearance: none; width: 22px; height: 22px; cursor: pointer; border: 2px solid #d1d5db; border-radius: 4px; background: white; position: relative; transition: all 0.2s; }
+.dark input[type=“checkbox”] { border-color: #6b7280; background: #374151; }
+input[type=“checkbox”]:checked { background: #16a34a; border-color: #16a34a; }
+input[type=“checkbox”]:checked::after { content: ‘✓’; position: absolute; color: white; font-size: 18px; font-weight: bold; left: 3px; top: -2px; }
+input[type=“checkbox”]:hover { border-color: #16a34a; }
+
+/* Dark Mode Logo Fix */
+.dark img[alt*=“logo” i], .dark img[alt*=“Logo” i], .dark img[src*=“logo” i], .dark .logo-img { filter: brightness(0) invert(1); }
+
+/* Mobile Styles - Tablets & Phones */
+@media (max-width: 768px) {
+body { font-size: 14px; }
+h1 { font-size: 1.5rem !important; line-height: 1.3 !important; }
+h2 { font-size: 1.2rem !important; line-height: 1.3 !important; }
+h3 { font-size: 1rem !important; line-height: 1.3 !important; }
+button, .button { padding: 12px 16px; font-size: 16px; }
+input, select, textarea { padding: 10px; font-size: 16px !important; }
+.tiny-input { width: 55px; padding: 8px 4px; font-size: 16px !important; }
+.small-input { padding: 10px; font-size: 16px !important; }
+table { font-size: 13px; }
+table td, table th { padding: 6px 4px !important; font-size: 13px !important; }
+.table-container { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 0 -0.5rem; padding: 0 0.5rem; }
+input[type=“checkbox”] { width: 24px; height: 24px; }
+.mobile-full-width { width: 100% !important; }
+.mobile-stack > * { grid-column: span 1 !important; }
+.space-y-4 > * + * { margin-top: 0.75rem !important; }
+.gap-4 { gap: 0.75rem !important; }
+.grid-cols-2 { grid-template-columns: repeat(1, minmax(0, 1fr)) !important; }
+.p-4 { padding: 0.75rem !important; }
+.p-6 { padding: 1rem !important; }
+.mb-6 { margin-bottom: 1rem !important; }
+.w-16 { width: 3rem !important; height: 3rem !important; }
+
+```
+/* Button Fixes for Mobile */
+button[title*="theme" i], button[aria-label*="theme" i], .theme-toggle-btn { 
+    min-height: 44px !important; min-width: 44px !important; width: 44px !important; height: 44px !important; 
+    padding: 8px !important; display: inline-flex; align-items: center; justify-content: center; 
+}
+button[onclick*="signIn" i], button[onclick*="submitReport" i], button[onclick*="drive" i], .action-btn { 
+    width: auto !important; display: inline-flex; align-items: center; justify-content: center; 
+    white-space: nowrap; padding: 12px 20px !important; 
+}
+button[onclick*="newProject" i], button[onclick*="addProject" i], .new-project-btn { 
+    display: inline-flex !important; visibility: visible !important; opacity: 1 !important; 
+    margin: 8px 4px !important; width: auto !important; min-width: 120px; 
+}
+.no-print > button:not(.action-btn):not(.theme-toggle-btn):not(.new-project-btn) { margin: 4px 0; }
+```
+
+}
+
+/* Extra Small Devices */
+@media (max-width: 480px) {
+body { font-size: 13px; }
+h1 { font-size: 1.3rem !important; }
+h2 { font-size: 1.1rem !important; }
+h3 { font-size: 0.95rem !important; }
+button, .button { padding: 14px 18px; font-size: 17px; }
+button[title*=“theme” i], button[aria-label*=“theme” i], .theme-toggle-btn {
+min-height: 44px !important; min-width: 44px !important; width: 44px !important; height: 44px !important; padding: 8px !important;
+}
+table { font-size: 12px; }
+table td, table th { padding: 4px 2px !important; font-size: 12px !important; }
+.tiny-input { width: 50px; padding: 6px 2px; font-size: 14px !important; }
+.max-w-7xl { padding-left: 0.5rem; padding-right: 0.5rem; }
+}
+
+/* Print Styles - Compact Layout */
+@media print {
+.no-print { display: none !important; }
+.print-page-break { page-break-after: always; }
+#job-details-tab, #supplies-tab { display: block !important; }
+#supplies-tab.no-content { display: none !important; }
+#supplies-tab.has-content { page-break-before: avoid; margin-top: 0.2rem !important; }
+@page { size: letter; margin: 0.3in 0.4in; }
+
+```
+/* Force Light Mode */
+* { color: #000 !important; background: #fff !important; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+input[type="checkbox"]:checked { background: #16a34a !important; border-color: #16a34a !important; }
+input[type="checkbox"]:checked::after { color: white !important; }
+
+/* Compact Typography */
+body { font-size: 9px !important; line-height: 1.2 !important; margin: 0 !important; padding: 0 !important; }
+h1 { font-size: 14px !important; margin: 0.15rem 0 !important; padding: 0 !important; font-weight: bold !important; }
+h2 { font-size: 11px !important; margin: 0.15rem 0 0.1rem 0 !important; padding: 0 !important; font-weight: bold !important; border-bottom: 1px solid #000 !important; }
+h3 { font-size: 9px !important; margin: 0.1rem 0 !important; font-weight: bold !important; }
+.text-4xl, .text-3xl { font-size: 14px !important; }
+.text-2xl { font-size: 11px !important; }
+.text-xl { font-size: 10px !important; }
+.text-lg { font-size: 9px !important; }
+.text-base { font-size: 8px !important; }
+.text-sm { font-size: 7px !important; }
+.text-xs { font-size: 6px !important; }
+
+/* Clean Inputs */
+input, select, textarea { border: none !important; background: transparent !important; padding: 0 !important; margin: 0 !important; 
+    font-size: 8px !important; height: auto !important; min-height: 0 !important; appearance: none !important; 
+    -webkit-appearance: none !important; box-shadow: none !important; font-family: Arial, sans-serif !important; }
+input[type="text"], input[type="date"], input[type="time"], select, textarea { display: inline !important; font-weight: normal !important; }
+input:empty, input[value=""], textarea:empty { display: none !important; }
+select { color: #000 !important; font-weight: normal !important; }
+select::-ms-expand { display: none !important; }
+
+/* Checkboxes */
+input[type="checkbox"] { width: 10px !important; height: 10px !important; min-width: 0 !important; min-height: 0 !important; 
+    border: 1px solid #333 !important; margin-right: 2px !important; }
+input[type="checkbox"]:checked::after { font-size: 8px !important; left: 0px !important; top: -2px !important; }
+input[type="checkbox"]:not(:checked) { display: none !important; }
+
+/* Tables */
+table { font-size: 8px !important; border-collapse: collapse !important; width: 100% !important; }
+table td, table th { padding: 2px 3px !important; border: 0.5px solid #ccc !important; vertical-align: top !important; }
+table th { font-weight: bold !important; background: #f5f5f5 !important; }
+table td:empty { border: none !important; }
+table tr:has(td:empty:only-child) { display: none !important; }
+
+/* Spacing & Layout */
+.max-w-7xl { max-width: 100% !important; padding: 0.2rem !important; margin: 0 !important; }
+.shadow-sm, .shadow-lg, .shadow { box-shadow: none !important; }
+.rounded-lg, .rounded, .rounded-md { border-radius: 0 !important; }
+.p-4, .p-3, .p-2, .p-1, .p-6 { padding: 0.05rem !important; }
+.mb-4, .mb-3, .mb-2, .mb-1, .mb-6 { margin-bottom: 0.1rem !important; }
+.mt-4, .mt-3, .mt-2, .mt-1 { margin-top: 0.1rem !important; }
+.gap-4, .gap-3, .gap-2 { gap: 0.1rem !important; }
+.space-y-4 > * + *, .space-y-3 > * + *, .space-y-2 > * + * { margin-top: 0.1rem !important; }
+.grid { gap: 0.05rem !important; }
+.border-t, .border-b, .border { border-width: 0px !important; }
+div { margin: 0 !important; }
+div:empty { display: none !important; }
+.w-16, .w-12 { width: 1.5rem !important; height: 1.5rem !important; }
+.shadow-sm, h2, h3, tr { page-break-inside: avoid !important; }
+.flex-col, .flex, .md\:flex-row { display: block !important; }
+.flex-1 { flex: none !important; }
+
+/* Labels */
+label { font-size: 8px !important; font-weight: normal !important; display: inline !important; margin-right: 3px !important; }
+```
+
+}
+
+/* Utility Classes */
+.small-input { padding: 0.375rem 0.5rem; font-size: 16px; }
+.tiny-input { width: 50px; padding: 0.25rem; font-size: 16px; text-align: center; }
+.scrollable-input { overflow-x: auto; white-space: nowrap; }
+
+/* Transitions & Interactions */
+button, input, select, textarea { transition: all 0.2s ease; }
+button:active, .collapsible-header:active { transform: scale(0.98); opacity: 0.9; }
+input:focus, select:focus, textarea:focus { outline: none; border-color: #16a34a !important; box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1); }
