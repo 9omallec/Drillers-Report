@@ -35,10 +35,17 @@
     <script>
         // Wait for shared modules before loading main app
         window.addEventListener('sharedModulesLoaded', () => {
+            console.log('sharedModulesLoaded event received, loading dashboard-app.js...');
+            console.log('Babel available:', typeof Babel);
+
             const script = document.createElement('script');
             script.type = 'text/babel';
             script.src = 'dashboard-app.js';
+            script.onload = () => console.log('dashboard-app.js loaded');
+            script.onerror = (e) => console.error('Failed to load dashboard-app.js', e);
             document.body.appendChild(script);
+
+            console.log('Script element created and appended');
         });
     </script>
 </body>
