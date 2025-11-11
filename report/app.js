@@ -2431,38 +2431,6 @@ const { useState, useEffect } = React;
             );
         }
 
-        // Wait for shared modules to load before rendering
-        function initApp() {
-            console.log('initApp called');
-            console.log('StorageService:', typeof window.StorageService);
-            console.log('useDarkMode:', typeof window.useDarkMode);
-            console.log('CalculationUtils:', typeof window.CalculationUtils);
-
-            if (window.StorageService && window.useDarkMode && window.CalculationUtils) {
-                // Modules are ready, render immediately
-                console.log('Rendering app immediately...');
-                ReactDOM.render(<DailyDrillReport />, document.getElementById('root'));
-            } else {
-                // Modules not ready yet, wait for them
-                console.log('Waiting for shared modules...');
-                window.addEventListener('sharedModulesLoaded', () => {
-                    console.log('sharedModulesLoaded event received, rendering...');
-                    ReactDOM.render(<DailyDrillReport />, document.getElementById('root'));
-                }, { once: true });
-
-                // Fallback timeout in case event doesn't fire
-                setTimeout(() => {
-                    if (!document.getElementById('root').querySelector('div[class*="container"]')) {
-                        console.log('Timeout reached, attempting to render anyway...');
-                        ReactDOM.render(<DailyDrillReport />, document.getElementById('root'));
-                    }
-                }, 5000);
-            }
-        }
-
-        // Start app initialization
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initApp);
-        } else {
-            initApp();
-        }
+        // Render app immediately - modules are already loaded when this script runs
+        console.log('Report app script loaded, rendering...');
+        ReactDOM.render(<DailyDrillReport />, document.getElementById('root'));
