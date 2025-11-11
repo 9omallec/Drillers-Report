@@ -10,14 +10,14 @@ class GoogleDriveService {
         this.accessToken = null;
         this.tokenClient = null;
         this.isInitialized = false;
+        this.currentScopes = null;
         this.listeners = {
             onAuthChange: [],
             onStatusChange: [],
             onError: []
         };
 
-        // Load saved token on initialization
-        this.loadSavedToken();
+        // Don't load saved token yet - wait for initialize() to know the required scopes
     }
 
     // Event listener management
@@ -33,19 +33,25 @@ class GoogleDriveService {
         }
     }
 
-    // Load saved token from localStorage
-    loadSavedToken() {
+    // Load saved token from localStorage (only if scopes match)
+    loadSavedToken(requiredScopes) {
         const savedToken = localStorage.getItem('google_access_token');
         const tokenExpiry = localStorage.getItem('google_token_expiry');
+        const savedScopes = localStorage.getItem('google_token_scopes');
 
-        if (savedToken && tokenExpiry) {
+        if (savedToken && tokenExpiry && savedScopes) {
             const now = Date.now();
-            if (now < parseInt(tokenExpiry)) {
+            // Check if token is not expired AND scopes match
+            if (now < parseInt(tokenExpiry) && savedScopes === requiredScopes) {
                 this.accessToken = savedToken;
+                this.currentScopes = savedScopes;
                 this.emit('onAuthChange', { isSignedIn: true, token: savedToken });
                 console.log('✓ Restored saved Google session');
                 return true;
             } else {
+                if (savedScopes !== requiredScopes) {
+                    console.log('⚠️ Saved token has different scopes, clearing...');
+                }
                 this.clearToken();
             }
         }
@@ -56,18 +62,27 @@ class GoogleDriveService {
     clearToken() {
         localStorage.removeItem('google_access_token');
         localStorage.removeItem('google_token_expiry');
+        localStorage.removeItem('google_token_scopes');
         this.accessToken = null;
+        this.currentScopes = null;
     }
 
-    // Save token to localStorage
-    saveToken(token) {
+    // Save token to localStorage with scopes
+    saveToken(token, scopes) {
         this.accessToken = token;
+        this.currentScopes = scopes;
         localStorage.setItem('google_access_token', token);
         localStorage.setItem('google_token_expiry', (Date.now() + this.config.TOKEN_EXPIRY_MS).toString());
+        localStorage.setItem('google_token_scopes', scopes);
     }
 
     // Initialize Google Drive API
     async initialize(scopes = this.config.SCOPES_FULL) {
+        this.currentScopes = scopes;
+
+        // Try to load saved token with matching scopes
+        this.loadSavedToken(scopes);
+
         return new Promise((resolve, reject) => {
             const init = () => {
                 if (!window.gapi || !window.google?.accounts?.oauth2) {
@@ -110,7 +125,7 @@ class GoogleDriveService {
                                 }
 
                                 console.log('✓ Access token received');
-                                this.saveToken(response.access_token);
+                                this.saveToken(response.access_token, scopes);
                                 this.emit('onAuthChange', { isSignedIn: true, token: response.access_token });
                                 this.emit('onStatusChange', '✓ Signed in to Google Drive');
                             },

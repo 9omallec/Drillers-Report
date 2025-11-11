@@ -152,7 +152,7 @@ const { useState, useEffect } = React;
             }, [reportData.client, reportData.jobName, projectId]);
 
             // ====== GOOGLE DRIVE API INTEGRATION ======
-            // Use shared Google Drive hook
+            // Use shared Google Drive hook with full permissions for uploads
             const {
                 isSignedIn,
                 driveStatus,
@@ -160,7 +160,7 @@ const { useState, useEffect } = React;
                 signIn: signInToDrive,
                 signOut: signOutFromDrive,
                 uploadFile
-            } = window.useGoogleDrive();
+            } = window.useGoogleDrive(window.GOOGLE_DRIVE_CONFIG.SCOPES_FULL);
 
             // Upload report to Google Drive wrapper
             const uploadToDrive = async (reportJson) => {
