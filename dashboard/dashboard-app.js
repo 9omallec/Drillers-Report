@@ -460,9 +460,27 @@
                                                             <div className="flex gap-2">
                                                                 <button
                                                                     onClick={() => {
+                                                                        // Reconstruct report data structure for Report app
+                                                                        const reportData = {
+                                                                            report: {
+                                                                                client: report.client,
+                                                                                jobName: report.jobName,
+                                                                                location: report.location,
+                                                                                driller: report.driller,
+                                                                                helper: report.helper,
+                                                                                perDiem: report.perDiem,
+                                                                                commentsLabor: report.commentsLabor,
+                                                                                uploadedPhotosDetails: report.uploadedPhotosDetails || []
+                                                                            },
+                                                                            workDays: report.workDays || [],
+                                                                            borings: report.borings || [],
+                                                                            equipment: report.equipment || {},
+                                                                            supplies: report.supplies || {}
+                                                                        };
+
                                                                         // Store report data for Report app to read
                                                                         localStorage.setItem('editingReport', JSON.stringify({
-                                                                            reportData: report,
+                                                                            reportData: reportData,
                                                                             driveFileId: report.id,
                                                                             driveFileName: report.name,
                                                                             mode: 'edit'
@@ -477,22 +495,13 @@
                                                                     ✏️
                                                                 </button>
                                                                 {report.status === 'pending' ? (
-                                                                    <>
-                                                                        <button
-                                                                            onClick={() => approveReport(report.id)}
-                                                                            className="px-3 py-1 bg-green-600 text-white rounded text-xs hover:bg-green-700"
-                                                                            title="Approve"
-                                                                        >
-                                                                            ✓
-                                                                        </button>
-                                                                        <button
-                                                                            onClick={() => requestChanges(report.id)}
-                                                                            className="px-3 py-1 bg-orange-600 text-white rounded text-xs hover:bg-orange-700"
-                                                                            title="Request Changes"
-                                                                        >
-                                                                            ✎
-                                                                        </button>
-                                                                    </>
+                                                                    <button
+                                                                        onClick={() => approveReport(report.id)}
+                                                                        className="px-3 py-1 bg-green-600 text-white rounded text-xs hover:bg-green-700"
+                                                                        title="Approve"
+                                                                    >
+                                                                        ✓
+                                                                    </button>
                                                                 ) : (
                                                                     <button
                                                                         onClick={() => setReports(reports.map(r => r.id === report.id ? { ...r, status: 'pending' } : r))}
