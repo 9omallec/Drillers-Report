@@ -41,7 +41,13 @@
             const script = document.createElement('script');
             script.type = 'text/babel';
             script.src = 'dashboard-app.js';
-            script.onload = () => console.log('dashboard-app.js loaded');
+            script.onload = () => {
+                console.log('dashboard-app.js loaded, triggering Babel transformation...');
+                // Manually trigger Babel to transform the script
+                if (window.Babel && window.Babel.transformScriptTags) {
+                    window.Babel.transformScriptTags();
+                }
+            };
             script.onerror = (e) => console.error('Failed to load dashboard-app.js', e);
             document.body.appendChild(script);
 
