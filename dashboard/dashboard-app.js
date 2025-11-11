@@ -486,8 +486,8 @@
                                                                             mode: 'edit'
                                                                         }));
 
-                                                                        // Open Report app in new tab with edit mode flag
-                                                                        window.open('../report/index.html?mode=edit', '_blank');
+                                                                        // Open Report app in named window (reuses same tab for all edits)
+                                                                        window.open('../report/index.html?mode=edit', 'reportEditor');
                                                                     }}
                                                                     className="px-3 py-1 bg-blue-600 text-white rounded text-xs hover:bg-blue-700"
                                                                     title="Edit Report"
