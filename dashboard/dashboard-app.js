@@ -1025,16 +1025,36 @@
 
         // Wait for shared modules to load before rendering
         function initApp() {
+            console.log('Dashboard initApp called');
+            console.log('StorageService:', typeof window.StorageService);
+            console.log('useDarkMode:', typeof window.useDarkMode);
+            console.log('useGoogleDrive:', typeof window.useGoogleDrive);
+
             if (window.StorageService && window.useDarkMode && window.useGoogleDrive) {
                 // Modules are ready, render immediately
+                console.log('Rendering dashboard immediately...');
                 ReactDOM.render(<BossDashboard />, document.getElementById('root'));
             } else {
                 // Modules not ready yet, wait for them
+                console.log('Waiting for shared modules...');
                 window.addEventListener('sharedModulesLoaded', () => {
+                    console.log('sharedModulesLoaded event received, rendering dashboard...');
                     ReactDOM.render(<BossDashboard />, document.getElementById('root'));
                 }, { once: true });
+
+                // Fallback timeout in case event doesn't fire
+                setTimeout(() => {
+                    if (!document.getElementById('root').querySelector('div[class*="container"]')) {
+                        console.log('Timeout reached, attempting to render anyway...');
+                        ReactDOM.render(<BossDashboard />, document.getElementById('root'));
+                    }
+                }, 5000);
             }
         }
 
         // Start app initialization
-        initApp();
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initApp);
+        } else {
+            initApp();
+        }
