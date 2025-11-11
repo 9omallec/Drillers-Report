@@ -300,14 +300,9 @@
                                 {!isSignedIn ? (
                                     <button
                                         onClick={signInToDrive}
-                                        disabled={!gapiLoaded}
-                                        className={`px-5 py-2.5 rounded-lg font-semibold transition-all ${
-                                            gapiLoaded
-                                                ? 'bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white hover:shadow-lg'
-                                                : 'bg-gray-400 text-gray-200 cursor-not-allowed'
-                                        }`}
+                                        className="px-5 py-2.5 rounded-lg font-semibold transition-all bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white hover:shadow-lg"
                                     >
-                                        {gapiLoaded ? '🔐 Sign in to Drive' : '⏳ Loading...'}
+                                        🔐 Sign in to Drive
                                     </button>
                                 ) : (
                                     <>

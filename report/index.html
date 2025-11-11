@@ -34,7 +34,15 @@
     <!-- Shared Modules Loader -->
     <script src="../shared/loader.js"></script>
 
-    <!-- Main Application -->
-    <script type="text/babel" src="app.js"></script>
+    <!-- Main Application - Load after modules are ready -->
+    <script>
+        // Wait for shared modules before loading main app
+        window.addEventListener('sharedModulesLoaded', () => {
+            const script = document.createElement('script');
+            script.type = 'text/babel';
+            script.src = 'app.js';
+            document.body.appendChild(script);
+        });
+    </script>
 </body>
 </html>
