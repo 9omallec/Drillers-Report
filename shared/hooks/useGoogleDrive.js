@@ -77,6 +77,13 @@ function useGoogleDrive(scopes) {
         throw new Error('Drive service not initialized');
     };
 
+    const updateFile = async (fileId, fileName, fileContent, mimeType) => {
+        if (driveService) {
+            return await driveService.updateFile(fileId, fileName, fileContent, mimeType);
+        }
+        throw new Error('Drive service not initialized');
+    };
+
     return {
         isSignedIn,
         driveStatus,
@@ -84,6 +91,7 @@ function useGoogleDrive(scopes) {
         signIn,
         signOut,
         uploadFile,
+        updateFile,
         listFiles,
         downloadFile,
         driveService

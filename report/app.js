@@ -23,6 +23,11 @@ const { useState, useEffect } = React;
 
             const [activeTab, setActiveTab] = useState('details');
 
+            // Edit mode state
+            const [isEditMode, setIsEditMode] = useState(false);
+            const [editingReportId, setEditingReportId] = useState(null);
+            const [editingFileName, setEditingFileName] = useState(null);
+
             // Use shared dark mode hook
             const [darkMode, setDarkMode] = window.useDarkMode();
             
@@ -151,6 +156,51 @@ const { useState, useEffect } = React;
                 }
             }, [reportData.client, reportData.jobName, projectId]);
 
+            // Detect edit mode on load
+            useEffect(() => {
+                const urlParams = new URLSearchParams(window.location.search);
+                const mode = urlParams.get('mode');
+
+                if (mode === 'edit') {
+                    const editData = localStorage.getItem('editingReport');
+                    if (editData) {
+                        try {
+                            const { reportData: loadedReport, driveFileId, driveFileName } = JSON.parse(editData);
+
+                            // Set edit mode
+                            setIsEditMode(true);
+                            setEditingReportId(driveFileId);
+                            setEditingFileName(driveFileName);
+
+                            // Load report data into form
+                            if (loadedReport.report) {
+                                setReportData(loadedReport.report);
+                            }
+                            if (loadedReport.workDays) {
+                                setWorkDays(loadedReport.workDays);
+                            }
+                            if (loadedReport.borings) {
+                                setBorings(loadedReport.borings);
+                            }
+                            if (loadedReport.equipment) {
+                                setEquipment(loadedReport.equipment);
+                            }
+                            if (loadedReport.supplies) {
+                                setSuppliesData(loadedReport.supplies);
+                            }
+
+                            // Clean up localStorage
+                            localStorage.removeItem('editingReport');
+
+                            console.log('✓ Loaded report for editing');
+                        } catch (error) {
+                            console.error('Error loading report for editing:', error);
+                            alert('Error loading report for editing. Please try again.');
+                        }
+                    }
+                }
+            }, []); // Run once on mount
+
             // ====== GOOGLE DRIVE API INTEGRATION ======
             // Use shared Google Drive hook with full permissions for uploads
             const {
@@ -159,7 +209,8 @@ const { useState, useEffect } = React;
                 isInitialized,
                 signIn: signInToDrive,
                 signOut: signOutFromDrive,
-                uploadFile
+                uploadFile,
+                updateFile
             } = window.useGoogleDrive(window.GOOGLE_DRIVE_CONFIG.SCOPES_FULL);
 
             // Upload report to Google Drive wrapper
@@ -173,16 +224,169 @@ const { useState, useEffect } = React;
                     const clientName = reportData.client || 'Client';
                     const jobName = reportData.jobName || 'Job';
                     const startDate = workDays[0]?.date || new Date().toISOString().split('T')[0];
-                    const fileName = `${clientName} - ${jobName} - ${startDate}.json`;
-                    const fileContent = JSON.stringify(reportJson, null, 2);
+                    const baseFileName = `${clientName} - ${jobName} - ${startDate}`;
+                    const jsonFileName = `${baseFileName}.json`;
+                    const csvFileName = `${baseFileName}-Backup.csv`;
 
-                    const result = await uploadFile(fileName, fileContent, 'application/json');
-                    return result;
+                    const jsonContent = JSON.stringify(reportJson, null, 2);
+                    const csvContent = generateCSV(reportJson);
+
+                    // Check if we're in edit mode
+                    if (isEditMode && editingReportId) {
+                        // Update existing files
+                        console.log('Updating existing report...');
+                        await updateFile(editingReportId, jsonFileName, jsonContent, 'application/json');
+
+                        // For CSV, we need to find the CSV file ID or create new one
+                        // For simplicity, we'll upload a new CSV (Drive will handle duplicates)
+                        await uploadFile(csvFileName, csvContent, 'text/csv');
+
+                        return true;
+                    } else {
+                        // Upload new files
+                        console.log('Uploading new report...');
+                        await uploadFile(jsonFileName, jsonContent, 'application/json');
+                        await uploadFile(csvFileName, csvContent, 'text/csv');
+
+                        return true;
+                    }
                 } catch (error) {
                     console.error('Error uploading to Drive:', error);
                     alert('Upload failed:\n\n' + error.message + '\n\nPlease try again or check console (F12) for details.');
                     return false;
                 }
+            };
+
+            // CSV Generation Function
+            const generateCSV = (reportJson) => {
+                const escapeCSV = (value) => {
+                    if (value === null || value === undefined) return '';
+                    const str = String(value);
+                    // Escape quotes and wrap in quotes if contains comma, quote, or newline
+                    if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+                        return `"${str.replace(/"/g, '""')}"`;
+                    }
+                    return str;
+                };
+
+                const formatDate = (date) => {
+                    if (!date) return '';
+                    return new Date(date).toISOString().split('T')[0];
+                };
+
+                const formatTime = (time) => {
+                    if (!time) return '';
+                    return time; // Already in HH:MM format
+                };
+
+                let csv = '';
+
+                // REPORT INFO Section
+                csv += 'REPORT INFO\n';
+                csv += 'Date,Client,Job Name,Location,Driller,Helper\n';
+                const report = reportJson.report || {};
+                const workDays = reportJson.workDays || [];
+                csv += [
+                    formatDate(workDays[0]?.date),
+                    escapeCSV(report.client),
+                    escapeCSV(report.jobName),
+                    escapeCSV(report.location),
+                    escapeCSV(report.driller),
+                    escapeCSV(report.helper)
+                ].join(',') + '\n\n';
+
+                // WORK DAYS Section
+                csv += 'WORK DAYS\n';
+                csv += 'Date,Time Left Shop,Arrived On Site,Time Left Site,Arrived At Shop,Hours Driving,Hours On Site,Standby Hours,Standby Reason,Pit Stop Hours,Pit Stop Reason\n';
+                workDays.forEach(day => {
+                    csv += [
+                        formatDate(day.date),
+                        formatTime(day.timeLeftShop),
+                        formatTime(day.arrivedOnSite),
+                        formatTime(day.timeLeftSite),
+                        formatTime(day.arrivedAtShop),
+                        escapeCSV(day.hoursDriving),
+                        escapeCSV(day.hoursOnSite),
+                        escapeCSV((parseFloat(day.standbyHours || 0) + (parseFloat(day.standbyMinutes || 0) / 60)).toFixed(2)),
+                        escapeCSV(day.standbyReason),
+                        escapeCSV((parseFloat(day.pitStopHours || 0) + (parseFloat(day.pitStopMinutes || 0) / 60)).toFixed(2)),
+                        escapeCSV(day.pitStopReason)
+                    ].join(',') + '\n';
+                });
+                csv += '\n';
+
+                // BORINGS Section
+                csv += 'BORINGS\n';
+                csv += 'Boring #,Method,Footage,Type,Notes\n';
+                const borings = reportJson.borings || [];
+                borings.forEach((boring, index) => {
+                    if (boring.footage && parseFloat(boring.footage) > 0) {
+                        const types = [];
+                        if (boring.isEnvironmental) types.push('Environmental');
+                        if (boring.isGeotechnical) types.push('Geotechnical');
+                        csv += [
+                            `B-${index + 1}`,
+                            escapeCSV(boring.method),
+                            escapeCSV(boring.footage),
+                            escapeCSV(types.join('; ')),
+                            escapeCSV(boring.notes || '')
+                        ].join(',') + '\n';
+                    }
+                });
+                csv += '\n';
+
+                // EQUIPMENT Section
+                csv += 'EQUIPMENT\n';
+                csv += 'Equipment Name,Hours/Details,Notes\n';
+                const equip = reportJson.equipment || {};
+                if (equip.drillRig) csv += `Drill Rig,${escapeCSV(equip.drillRig)},\n`;
+                if (equip.truck) csv += `Truck,${escapeCSV(equip.truck)},\n`;
+                if (equip.dumpTruck && equip.dumpTruck !== 'No') csv += `Dump Truck,${escapeCSV(equip.dumpTruck)},${escapeCSV(equip.dumpTruckTimes)}\n`;
+                if (equip.trailer && equip.trailer !== 'No') csv += `Trailer,${escapeCSV(equip.trailer)},\n`;
+                if (equip.coreMachine) csv += `Core Machine,Yes,\n`;
+                if (equip.groutMachine) csv += `Grout Machine,Yes,\n`;
+                if (equip.extruder) csv += `Extruder,Yes,\n`;
+                if (equip.generator) csv += `Generator,Yes,\n`;
+                if (equip.decon) csv += `Decon,Yes,\n`;
+                csv += '\n';
+
+                // SUPPLIES Section
+                csv += 'SUPPLIES\n';
+                csv += 'Item,Quantity,Unit,Notes\n';
+                const supplies = reportJson.supplies || {};
+                const addSupply = (label, value) => {
+                    if (value && value.trim && value.trim()) {
+                        csv += `${escapeCSV(label)},${escapeCSV(value)},,\n`;
+                    }
+                };
+
+                addSupply('End Caps 1"', supplies.endCaps1);
+                addSupply('End Caps 2"', supplies.endCaps2);
+                addSupply('End Caps 4"', supplies.endCaps4);
+                addSupply('Locking Caps 1"', supplies.lockingCaps1);
+                addSupply('Locking Caps 2"', supplies.lockingCaps2);
+                addSupply('Locking Caps 4"', supplies.lockingCaps4);
+                addSupply('Screen 5\' 1"', supplies.screen5_1);
+                addSupply('Screen 5\' 2"', supplies.screen5_2);
+                addSupply('Screen 5\' 4"', supplies.screen5_4);
+                addSupply('Screen 10\' 1"', supplies.screen10_1);
+                addSupply('Screen 10\' 2"', supplies.screen10_2);
+                addSupply('Screen 10\' 4"', supplies.screen10_4);
+                addSupply('Riser 5\' 1"', supplies.riser5_1);
+                addSupply('Riser 5\' 2"', supplies.riser5_2);
+                addSupply('Riser 5\' 4"', supplies.riser5_4);
+                addSupply('Riser 10\' 1"', supplies.riser10_1);
+                addSupply('Riser 10\' 2"', supplies.riser10_2);
+                addSupply('Riser 10\' 4"', supplies.riser10_4);
+                addSupply('Concrete 50#', supplies.concrete50);
+                addSupply('Concrete 60#', supplies.concrete60);
+                addSupply('Concrete 80#', supplies.concrete80);
+                addSupply('Bentonite 50#', supplies.bentonite50);
+                addSupply('Sand 50#', supplies.sand50);
+                addSupply('3/8 Chips 50#', supplies.chips38_50);
+                addSupply('Grout', supplies.grout);
+
+                return csv;
             };
             // ====== END GOOGLE DRIVE API ======
 
@@ -726,18 +930,22 @@ const { useState, useEffect } = React;
                     alert('⚠️ Please sign in to Google Drive first!\n\nClick the "📁 Sign in to Drive" button above, then try submitting again.');
                     return;
                 }
-                
-                // Confirmation dialog
-                const confirmed = confirm(
-                    '📤 Ready to submit your report?\n\n' +
-                    'Your report will be uploaded directly to Google Drive.\n\n' +
-                    'Click OK to submit, or Cancel to continue editing.'
-                );
-                
+
+                // Confirmation dialog - different message for edit mode
+                const confirmMessage = isEditMode
+                    ? '📝 Ready to update this report?\n\n' +
+                      'This will overwrite the existing report on Google Drive.\n\n' +
+                      'Click OK to update, or Cancel to continue editing.'
+                    : '📤 Ready to submit your report?\n\n' +
+                      'Your report will be uploaded directly to Google Drive.\n\n' +
+                      'Click OK to submit, or Cancel to continue editing.';
+
+                const confirmed = confirm(confirmMessage);
+
                 if (!confirmed) {
                     return; // User wants to keep editing
                 }
-                
+
                 // Generate report data
                 const reportData_json = {
                     report: reportData,
@@ -750,16 +958,21 @@ const { useState, useEffect } = React;
 
                 // Upload to Google Drive (status messages handled by hook)
                 const uploaded = await uploadToDrive(reportData_json);
-                
+
                 if (uploaded) {
-                    // Success!
-                    alert(
-                        '✅ Report Submitted Successfully!\n\n' +
-                        '✓ Uploaded to Google Drive\n' +
-                        '✓ Your boss will see it when they sync\n\n' +
-                        'You can now start a new report or close this page.'
-                    );
-                    
+                    // Success! - different message for edit mode
+                    const successMessage = isEditMode
+                        ? '✅ Report Updated Successfully!\n\n' +
+                          '✓ Updated on Google Drive\n' +
+                          '✓ Changes are now visible in the dashboard\n\n' +
+                          'You can close this page or continue editing.'
+                        : '✅ Report Submitted Successfully!\n\n' +
+                          '✓ Uploaded to Google Drive\n' +
+                          '✓ Your boss will see it when they sync\n\n' +
+                          'You can now start a new report or close this page.';
+
+                    alert(successMessage);
+
                     // Optional: Ask if they want to view it in Drive
                     const viewInDrive = confirm('Would you like to view the report in Google Drive?');
                     if (viewInDrive) {
@@ -774,7 +987,7 @@ const { useState, useEffect } = React;
                         '• OK - Try again\n' +
                         '• Cancel - Download file manually instead'
                     );
-                    
+
                     if (retry) {
                         // Try again
                         handleSubmitReport();
@@ -787,13 +1000,43 @@ const { useState, useEffect } = React;
                         jsonLink.download = `Report-${reportData.jobName || 'Report'}-${new Date().toISOString().split('T')[0]}.json`;
                         jsonLink.click();
                         URL.revokeObjectURL(jsonUrl);
-                        
+
                         alert('File downloaded. Please upload it manually to Google Drive.');
                         window.open(`https://drive.google.com/drive/folders/${GOOGLE_DRIVE_CONFIG.FOLDER_ID}`, '_blank');
                     }
                 }
             };
-            
+
+            const handleDownloadCSV = () => {
+                // Generate report data
+                const reportData_json = {
+                    report: reportData,
+                    workDays: workDays,
+                    borings: borings,
+                    equipment: equipment,
+                    supplies: suppliesData,
+                    savedAt: new Date().toISOString()
+                };
+
+                // Generate CSV
+                const csvContent = generateCSV(reportData_json);
+                const clientName = reportData.client || 'Client';
+                const jobName = reportData.jobName || 'Job';
+                const startDate = workDays[0]?.date || new Date().toISOString().split('T')[0];
+                const fileName = `${clientName} - ${jobName} - ${startDate}-Backup.csv`;
+
+                // Download CSV file
+                const blob = new Blob([csvContent], { type: 'text/csv' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = fileName;
+                a.click();
+                URL.revokeObjectURL(url);
+
+                alert('✓ CSV backup downloaded successfully!\n\nYou can open this file in Excel or any text editor.');
+            };
+
             // Generate a standalone HTML report for attachment
             const generateHTMLReport = () => {
                 const totals = getTotalHours();
@@ -1318,16 +1561,23 @@ const { useState, useEffect } = React;
                                     )}
                                     <button
                                         onClick={handleSubmitReport}
-                                        className="flex-1 md:flex-none px-4 py-3 text-base font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition touch-manipulation"
-                                        title="Upload report directly to Google Drive (requires sign-in)"
+                                        className={`flex-1 md:flex-none px-4 py-3 text-base font-semibold text-white rounded-lg transition touch-manipulation ${isEditMode ? 'bg-blue-700 hover:bg-blue-800' : 'bg-blue-600 hover:bg-blue-700'}`}
+                                        title={isEditMode ? "Update existing report on Google Drive" : "Upload report directly to Google Drive (requires sign-in)"}
                                     >
-                                        📤 Submit Report
+                                        {isEditMode ? '📝 Update Report' : '📤 Submit Report'}
                                     </button>
                                     <button
                                         onClick={handlePrint}
                                         className={`flex-1 md:flex-none px-4 py-3 text-base font-semibold rounded-lg transition touch-manipulation ${darkMode ? 'bg-gray-700 text-white hover:bg-gray-600' : 'bg-gray-600 text-white hover:bg-gray-700'}`}
                                     >
                                         Print
+                                    </button>
+                                    <button
+                                        onClick={handleDownloadCSV}
+                                        className={`flex-1 md:flex-none px-4 py-3 text-base font-semibold rounded-lg transition touch-manipulation ${darkMode ? 'bg-green-700 text-white hover:bg-green-600' : 'bg-green-600 text-white hover:bg-green-700'}`}
+                                        title="Download CSV backup for offline use"
+                                    >
+                                        📥 Download CSV
                                     </button>
                                 </div>
                                 {/* Google Drive Status Message */}

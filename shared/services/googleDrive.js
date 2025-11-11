@@ -303,6 +303,63 @@ class GoogleDriveService {
         }
     }
 
+    // Update existing file on Google Drive
+    async updateFile(fileId, fileName, fileContent, mimeType = 'application/json') {
+        try {
+            if (!this.accessToken) {
+                throw new Error('Not signed in to Google Drive');
+            }
+
+            window.gapi.client.setToken({ access_token: this.accessToken });
+            this.emit('onStatusChange', 'Updating file on Google Drive...');
+
+            const boundary = '-------314159265358979323846';
+            const delimiter = "\r\n--" + boundary + "\r\n";
+            const close_delim = "\r\n--" + boundary + "--";
+
+            const metadata = {
+                name: fileName,
+                mimeType: mimeType
+            };
+
+            const multipartRequestBody =
+                delimiter +
+                'Content-Type: application/json; charset=UTF-8\r\n\r\n' +
+                JSON.stringify(metadata) +
+                delimiter +
+                `Content-Type: ${mimeType}\r\n\r\n` +
+                fileContent +
+                close_delim;
+
+            // Use PATCH to update existing file
+            const response = await fetch(`https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=multipart&supportsAllDrives=true`, {
+                method: 'PATCH',
+                headers: {
+                    'Authorization': 'Bearer ' + this.accessToken,
+                    'Content-Type': 'multipart/related; boundary="' + boundary + '"'
+                },
+                body: multipartRequestBody
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                console.log('✓ Update successful:', result);
+                this.emit('onStatusChange', '✓ Successfully updated on Google Drive!');
+                setTimeout(() => this.emit('onStatusChange', ''), 3000);
+                return result;
+            } else {
+                const errorText = await response.text();
+                console.error('Update failed:', response.status, errorText);
+                throw new Error('Update failed with status: ' + response.status);
+            }
+        } catch (error) {
+            console.error('Error updating file on Drive:', error);
+            this.emit('onStatusChange', '❌ Error updating file on Google Drive');
+            this.emit('onError', 'Update failed:\n\n' + error.message);
+            throw error;
+        }
+    }
+
     // Check if signed in
     isSignedIn() {
         return !!this.accessToken;

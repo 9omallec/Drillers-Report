@@ -459,11 +459,22 @@
                                                         <td className="px-4 py-3">
                                                             <div className="flex gap-2">
                                                                 <button
-                                                                    onClick={() => setViewingReport(report)}
+                                                                    onClick={() => {
+                                                                        // Store report data for Report app to read
+                                                                        localStorage.setItem('editingReport', JSON.stringify({
+                                                                            reportData: report,
+                                                                            driveFileId: report.id,
+                                                                            driveFileName: report.name,
+                                                                            mode: 'edit'
+                                                                        }));
+
+                                                                        // Open Report app in new tab with edit mode flag
+                                                                        window.open('../report/index.html?mode=edit', '_blank');
+                                                                    }}
                                                                     className="px-3 py-1 bg-blue-600 text-white rounded text-xs hover:bg-blue-700"
-                                                                    title="View Full Report"
+                                                                    title="Edit Report"
                                                                 >
-                                                                    👁
+                                                                    ✏️
                                                                 </button>
                                                                 {report.status === 'pending' ? (
                                                                     <>
