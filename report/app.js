@@ -747,9 +747,8 @@ const { useState, useEffect } = React;
                     supplies: suppliesData,
                     savedAt: new Date().toISOString()
                 };
-                
-                // Upload to Google Drive
-                setDriveStatus('📤 Uploading report to Google Drive...');
+
+                // Upload to Google Drive (status messages handled by hook)
                 const uploaded = await uploadToDrive(reportData_json);
                 
                 if (uploaded) {
