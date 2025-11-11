@@ -484,7 +484,7 @@ const { useState, useEffect } = React;
 
             // Supplies Data
             const [suppliesData, setSuppliesData] = useState(() =>
-                loadFromStorage('suppliesData', {
+                storageService.load('suppliesData', {
                     // Main table items
                     endCaps1: '', endCaps2: '', endCaps4: '', endCapsOther: '',
                     lockingCaps1: '', lockingCaps2: '', lockingCaps4: '', lockingCapsOther: '',
@@ -507,11 +507,10 @@ const { useState, useEffect } = React;
                     uploadedPhotosSupplies: []
                 }, currentProjectId)
             );
-            
+
             // Auto-save supplies data
             useEffect(() => {
-                const key = makeStorageKey('suppliesData', projectId);
-                localStorage.setItem(key, JSON.stringify(suppliesData));
+                storageService.save('suppliesData', suppliesData, projectId);
             }, [suppliesData, projectId]);
 
             const handleReportChange = (field, value) => {
