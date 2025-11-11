@@ -39,12 +39,8 @@
                         return;
                     }
 
-                    const files = await listFiles(
-                        window.GOOGLE_DRIVE_CONFIG.FOLDER_ID,
-                        "mimeType='application/json'",
-                        'files(id, name, createdTime)',
-                        'createdTime desc'
-                    );
+                    // Use default query which includes folder ID and mimeType filter
+                    const files = await listFiles();
 
                     if (!files || files.length === 0) {
                         alert('No reports found in Drive folder');
