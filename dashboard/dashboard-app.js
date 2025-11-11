@@ -1,184 +1,54 @@
         const { useState, useEffect } = React;
 
         function BossDashboard() {
-            const [reports, setReports] = useState([]);
+            // Initialize shared storage service
+            const storageService = new window.StorageService();
+
+            const [reports, setReports] = useState(() =>
+                storageService.loadGlobal('bossReports', [])
+            );
             const [selectedReports, setSelectedReports] = useState([]);
             const [filterStatus, setFilterStatus] = useState('all');
             const [searchTerm, setSearchTerm] = useState('');
-            const [darkMode, setDarkMode] = useState(false);
             const [viewingReport, setViewingReport] = useState(null);
             const [showAnalytics, setShowAnalytics] = useState(false);
 
-            // Load reports from localStorage on mount
-            useEffect(() => {
-                const savedReports = localStorage.getItem('bossReports');
-                if (savedReports) {
-                    setReports(JSON.parse(savedReports));
-                }
-            }, []);
+            // Use shared dark mode hook
+            const [darkMode, setDarkMode] = window.useDarkMode();
 
             // Save reports whenever they change
             useEffect(() => {
-                localStorage.setItem('bossReports', JSON.stringify(reports));
+                storageService.saveGlobal('bossReports', reports);
             }, [reports]);
 
-            // ====== GOOGLE DRIVE API INTEGRATION (New GIS) ======
-            const GOOGLE_DRIVE_CONFIG = {
-                CLIENT_ID: '13192191935-5bcljariebng92efk6u78f9vf0jqfu4q.apps.googleusercontent.com',
-                FOLDER_ID: '0AKDyjXFIoWspUk9PVA',
-                SCOPES: 'https://www.googleapis.com/auth/drive.readonly',
-                DISCOVERY_DOCS: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest']
-            };
+            // ====== GOOGLE DRIVE API INTEGRATION (Shared Hook) ======
+            const {
+                isSignedIn,
+                driveStatus,
+                setDriveStatus,
+                signIn: signInToDrive,
+                signOut: signOutFromDrive,
+                listFiles,
+                downloadFile
+            } = window.useGoogleDrive(window.GOOGLE_DRIVE_CONFIG.SCOPES_READONLY);
 
-            const [isSignedIn, setIsSignedIn] = useState(false);
-            const [driveStatus, setDriveStatus] = useState('');
-            const [gapiLoaded, setGapiLoaded] = useState(false);
-            const [tokenClient, setTokenClient] = useState(null);
-            const [accessToken, setAccessToken] = useState(null);
-
-            // Load saved token on mount
-            useEffect(() => {
-                const savedToken = localStorage.getItem('google_access_token');
-                const tokenExpiry = localStorage.getItem('google_token_expiry');
-                
-                if (savedToken && tokenExpiry) {
-                    const now = Date.now();
-                    if (now < parseInt(tokenExpiry)) {
-                        // Token is still valid
-                        setAccessToken(savedToken);
-                        setIsSignedIn(true);
-                        console.log('✓ Restored saved Google session');
-                    } else {
-                        // Token expired, clear it
-                        localStorage.removeItem('google_access_token');
-                        localStorage.removeItem('google_token_expiry');
-                    }
-                }
-            }, []);
-
-            // Initialize Google Drive API with new GIS
-            useEffect(() => {
-                const initGoogleDrive = () => {
-                    if (!window.gapi || !window.google?.accounts?.oauth2) {
-                        console.log('Waiting for Google libraries...');
-                        setTimeout(initGoogleDrive, 500);
-                        return;
-                    }
-
-                    console.log('Loading gapi client...');
-                    setDriveStatus('🔄 Connecting to Google Drive...');
-                    
-                    window.gapi.load('client', async () => {
-                        try {
-                            console.log('Initializing gapi client...');
-                            await window.gapi.client.init({
-                                discoveryDocs: GOOGLE_DRIVE_CONFIG.DISCOVERY_DOCS,
-                            });
-                            console.log('gapi client initialized');
-                            
-                            const client = window.google.accounts.oauth2.initTokenClient({
-                                client_id: GOOGLE_DRIVE_CONFIG.CLIENT_ID,
-                                scope: GOOGLE_DRIVE_CONFIG.SCOPES,
-                                callback: (response) => {
-                                    if (response.error) {
-                                        console.error('Token error:', response);
-                                        setDriveStatus('❌ Sign-in failed');
-                                        setIsSignedIn(false);
-                                        return;
-                                    }
-                                    
-                                    console.log('Access token received');
-                                    setAccessToken(response.access_token);
-                                    setIsSignedIn(true);
-                                    
-                                    // Save token to localStorage (expires in 30 days)
-                                    localStorage.setItem('google_access_token', response.access_token);
-                                    localStorage.setItem('google_token_expiry', (Date.now() + 2592000000).toString()); // 30 days
-                                    
-                                    setDriveStatus('✓ Signed in');
-                                    
-                                    // Auto-sync when signed in (only if token is new, not restored)
-                                    setTimeout(() => syncFromDrive(), 500);
-                                },
-                            });
-                            
-                            setTokenClient(client);
-                            setGapiLoaded(true);
-                            setDriveStatus('');
-                            console.log('Google Drive ready!');
-                            
-                        } catch (error) {
-                            console.error('Error initializing:', error);
-                            setDriveStatus('❌ Error connecting');
-                            alert('Google Drive Error:\n\n' + error.message + '\n\nPlease check console (F12) for details.');
-                        }
-                    });
-                };
-
-                initGoogleDrive();
-            }, []);
-
-            // Sign in to Google Drive
-            const signInToDrive = () => {
-                if (!gapiLoaded || !tokenClient) {
-                    alert('⚠️ Google Drive is still loading...\n\nPlease wait and try again.');
-                    return;
-                }
-                
-                try {
-                    console.log('Requesting access token...');
-                    setDriveStatus('🔄 Opening sign-in...');
-                    tokenClient.requestAccessToken({ prompt: 'consent' });
-                } catch (error) {
-                    console.error('Sign in error:', error);
-                    alert('Error signing in. Please refresh and try again.');
-                }
-            };
-
-            // Sign out from Google Drive
-            const signOutFromDrive = () => {
-                try {
-                    if (accessToken) {
-                        window.google.accounts.oauth2.revoke(accessToken, () => {
-                            console.log('Token revoked');
-                        });
-                    }
-                    // Clear saved token
-                    localStorage.removeItem('google_access_token');
-                    localStorage.removeItem('google_token_expiry');
-                    
-                    setAccessToken(null);
-                    setIsSignedIn(false);
-                    setDriveStatus('Signed out');
-                    setTimeout(() => setDriveStatus(''), 2000);
-                } catch (error) {
-                    console.error('Sign out error:', error);
-                }
-            };
-
-            // Sync reports from Google Drive
+            // Sync reports from Google Drive using shared hook
             const syncFromDrive = async () => {
                 try {
-                    if (!accessToken) {
+                    if (!isSignedIn) {
                         alert('⚠️ Please sign in to Google Drive first');
                         return;
                     }
-                    
-                    // Set the access token for gapi.client
-                    window.gapi.client.setToken({ access_token: accessToken });
-                    
-                    setDriveStatus('Syncing from Google Drive...');
-                    
-                    const response = await window.gapi.client.drive.files.list({
-                        q: `'${GOOGLE_DRIVE_CONFIG.FOLDER_ID}' in parents and mimeType='application/json' and trashed=false`,
-                        fields: 'files(id, name, createdTime)',
-                        orderBy: 'createdTime desc',
-                        supportsAllDrives: true,
-                        includeItemsFromAllDrives: true
-                    });
 
-                    const files = response.result.files;
-                    
+                    setDriveStatus('Syncing from Google Drive...');
+
+                    const files = await listFiles(
+                        window.GOOGLE_DRIVE_CONFIG.FOLDER_ID,
+                        "mimeType='application/json'",
+                        'files(id, name, createdTime)',
+                        'createdTime desc'
+                    );
+
                     if (!files || files.length === 0) {
                         setDriveStatus('No reports found in Drive folder');
                         setTimeout(() => setDriveStatus(''), 3000);
@@ -186,20 +56,15 @@
                     }
 
                     let importedCount = 0;
-                    
+
                     for (const file of files) {
                         // Check if already imported
                         const alreadyImported = reports.some(r => r.driveFileId === file.id);
                         if (alreadyImported) continue;
 
-                        // Download and parse file
-                        const fileData = await window.gapi.client.drive.files.get({
-                            fileId: file.id,
-                            alt: 'media',
-                            supportsAllDrives: true
-                        });
+                        // Download and parse file using shared hook
+                        const data = await downloadFile(file.id);
 
-                        const data = fileData.result;
                         const newReport = {
                             id: Date.now() + importedCount,
                             importedAt: file.createdTime,
@@ -212,7 +77,7 @@
                             equipment: data.equipment,
                             supplies: data.supplies
                         };
-                        
+
                         setReports(prev => [newReport, ...prev]);
                         importedCount++;
                     }

@@ -1,73 +1,47 @@
 const { useState, useEffect } = React;
 
         function DailyDrillReport() {
+            // Initialize shared services
+            const storageService = new window.StorageService();
+
             // Get current project ID first - this is critical for loading correct data
-            const currentProjectId = localStorage.getItem('currentProjectId') || '';
-            
-            // Helper to create storage key with project ID
-            const makeStorageKey = (key, projId) => {
-                return projId ? `${projId}_${key}` : key;
-            };
-            
-            // Helper function to load from localStorage with project ID
-            const loadFromStorage = (key, defaultValue, projId) => {
-                try {
-                    const storageKey = makeStorageKey(key, projId);
-                    const item = localStorage.getItem(storageKey);
-                    return item ? JSON.parse(item) : defaultValue;
-                } catch (error) {
-                    console.error('Error loading from storage:', error);
-                    return defaultValue;
-                }
-            };
+            const currentProjectId = storageService.getCurrentProjectId();
             
             // Project Management State
-            const [projects, setProjects] = useState(() => {
-                const saved = localStorage.getItem('projectsList');
-                return saved ? JSON.parse(saved) : [];
-            });
-            
+            const [projects, setProjects] = useState(() =>
+                storageService.loadGlobal('projectsList', [])
+            );
+
             const [projectId, setProjectId] = useState(currentProjectId);
-            
-            const [projectName, setProjectName] = useState(() => {
-                const saved = localStorage.getItem('currentProjectName');
-                return saved || 'Default Project';
-            });
-            
+
+            const [projectName, setProjectName] = useState(() =>
+                storageService.loadGlobal('currentProjectName', 'Default Project')
+            );
+
             const [showProjectModal, setShowProjectModal] = useState(false);
             const [newProjectName, setNewProjectName] = useState('');
-            
+
             const [activeTab, setActiveTab] = useState('details');
-            const [darkMode, setDarkMode] = useState(() => {
-                const saved = localStorage.getItem('darkMode');
-                return saved === 'true';
-            });
-            
-            useEffect(() => {
-                if (darkMode) {
-                    document.documentElement.classList.add('dark');
-                } else {
-                    document.documentElement.classList.remove('dark');
-                }
-                localStorage.setItem('darkMode', darkMode);
-            }, [darkMode]);
+
+            // Use shared dark mode hook
+            const [darkMode, setDarkMode] = window.useDarkMode();
             
             // Save projects list
             useEffect(() => {
-                localStorage.setItem('projectsList', JSON.stringify(projects));
+                storageService.saveGlobal('projectsList', projects);
             }, [projects]);
-            
+
             // Save project ID and name
             useEffect(() => {
                 if (projectId) {
-                    localStorage.setItem('currentProjectId', projectId);
-                    localStorage.setItem('currentProjectName', projectName);
+                    storageService.setCurrentProjectId(projectId);
+                    storageService.saveGlobal('currentProjectName', projectName);
                 }
             }, [projectId, projectName]);
             
             // Report Data with localStorage
-            const [reportData, setReportData] = useState(() => 
-                loadFromStorage('reportData', {
+            const [reportData, setReportData] = useState(() =>
+                storageService.load('reportData', {
                     client: '',
                     jobName: '',
                     location: '',
@@ -81,7 +55,7 @@ const { useState, useEffect } = React;
 
             // Equipment with localStorage
             const [equipment, setEquipment] = useState(() =>
-                loadFromStorage('equipment', {
+                storageService.load('equipment', {
                     drillRig: '',
                     truck: '',
                     dumpTruck: 'No',
@@ -97,7 +71,7 @@ const { useState, useEffect } = React;
 
             // Work Days with localStorage
             const [workDays, setWorkDays] = useState(() =>
-                loadFromStorage('workDays', [{
+                storageService.load('workDays', [{
                     id: 1,
                     date: new Date().toISOString().split('T')[0],
                     timeLeftShop: '',
@@ -118,7 +92,7 @@ const { useState, useEffect } = React;
 
             // Borings with localStorage
             const [borings, setBorings] = useState(() =>
-                loadFromStorage('borings', [{
+                storageService.load('borings', [{
                     id: 1,
                     method: '',
                     footage: '',
@@ -138,33 +112,29 @@ const { useState, useEffect } = React;
             // Manual save function for current project
             const saveCurrentProjectData = () => {
                 if (projectId) {
-                    localStorage.setItem(makeStorageKey('reportData', projectId), JSON.stringify(reportData));
-                    localStorage.setItem(makeStorageKey('equipment', projectId), JSON.stringify(equipment));
-                    localStorage.setItem(makeStorageKey('workDays', projectId), JSON.stringify(workDays));
-                    localStorage.setItem(makeStorageKey('borings', projectId), JSON.stringify(borings));
-                    localStorage.setItem(makeStorageKey('suppliesData', projectId), JSON.stringify(suppliesData));
+                    storageService.save('reportData', reportData, projectId);
+                    storageService.save('equipment', equipment, projectId);
+                    storageService.save('workDays', workDays, projectId);
+                    storageService.save('borings', borings, projectId);
+                    storageService.save('suppliesData', suppliesData, projectId);
                 }
             };
-            
+
             // Save data periodically (but not on projectId change)
             useEffect(() => {
-                const key = makeStorageKey('reportData', projectId);
-                localStorage.setItem(key, JSON.stringify(reportData));
+                storageService.save('reportData', reportData, projectId);
             }, [reportData]);
-            
+
             useEffect(() => {
-                const key = makeStorageKey('equipment', projectId);
-                localStorage.setItem(key, JSON.stringify(equipment));
+                storageService.save('equipment', equipment, projectId);
             }, [equipment]);
-            
+
             useEffect(() => {
-                const key = makeStorageKey('workDays', projectId);
-                localStorage.setItem(key, JSON.stringify(workDays));
+                storageService.save('workDays', workDays, projectId);
             }, [workDays]);
-            
+
             useEffect(() => {
-                const key = makeStorageKey('borings', projectId);
-                localStorage.setItem(key, JSON.stringify(borings));
+                storageService.save('borings', borings, projectId);
             }, [borings]);
             
             // Auto-update project name based on client and job name
@@ -181,231 +151,35 @@ const { useState, useEffect } = React;
                 }
             }, [reportData.client, reportData.jobName, projectId]);
 
-            // ====== GOOGLE DRIVE API INTEGRATION (New GIS) ======
-            const GOOGLE_DRIVE_CONFIG = {
-                CLIENT_ID: '13192191935-5bcljariebng92efk6u78f9vf0jqfu4q.apps.googleusercontent.com',
-                FOLDER_ID: '0AKDyjXFIoWspUk9PVA',
-                SCOPES: 'https://www.googleapis.com/auth/drive',
-                DISCOVERY_DOCS: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest']
-            };
+            // ====== GOOGLE DRIVE API INTEGRATION ======
+            // Use shared Google Drive hook
+            const {
+                isSignedIn,
+                driveStatus,
+                isInitialized,
+                signIn: signInToDrive,
+                signOut: signOutFromDrive,
+                uploadFile
+            } = window.useGoogleDrive();
 
-            const [isSignedIn, setIsSignedIn] = useState(false);
-            const [driveStatus, setDriveStatus] = useState('');
-            const [gapiLoaded, setGapiLoaded] = useState(false);
-            const [tokenClient, setTokenClient] = useState(null);
-            const [accessToken, setAccessToken] = useState(null);
-
-            // Load saved token on mount
-            useEffect(() => {
-                const savedToken = localStorage.getItem('google_access_token');
-                const tokenExpiry = localStorage.getItem('google_token_expiry');
-                
-                if (savedToken && tokenExpiry) {
-                    const now = Date.now();
-                    if (now < parseInt(tokenExpiry)) {
-                        // Token is still valid
-                        setAccessToken(savedToken);
-                        setIsSignedIn(true);
-                        console.log('✓ Restored saved Google session');
-                    } else {
-                        // Token expired, clear it
-                        localStorage.removeItem('google_access_token');
-                        localStorage.removeItem('google_token_expiry');
-                    }
-                }
-            }, []);
-
-            // Initialize Google Drive API with new GIS
-            useEffect(() => {
-                const initGoogleDrive = () => {
-                    // Check if both libraries are loaded
-                    if (!window.gapi || !window.google?.accounts?.oauth2) {
-                        console.log('Waiting for Google libraries to load...');
-                        setTimeout(initGoogleDrive, 500);
-                        return;
-                    }
-
-                    console.log('✓ Google libraries loaded');
-                    setDriveStatus('🔄 Initializing Google Drive...');
-                    
-                    // Initialize gapi client for Drive API
-                    window.gapi.load('client', async () => {
-                        try {
-                            console.log('Initializing gapi client...');
-                            await window.gapi.client.init({
-                                discoveryDocs: GOOGLE_DRIVE_CONFIG.DISCOVERY_DOCS,
-                            });
-                            console.log('✓ gapi client initialized');
-                            
-                            // Initialize OAuth2 token client
-                            const client = window.google.accounts.oauth2.initTokenClient({
-                                client_id: GOOGLE_DRIVE_CONFIG.CLIENT_ID,
-                                scope: GOOGLE_DRIVE_CONFIG.SCOPES,
-                                callback: (response) => {
-                                    if (response.error) {
-                                        console.error('❌ Token error:', response);
-                                        setDriveStatus('❌ Sign-in failed');
-                                        setIsSignedIn(false);
-                                        setTimeout(() => setDriveStatus(''), 2000);
-                                        
-                                        let errorMsg = '❌ Sign In Failed\n\n';
-                                        if (response.error === 'popup_closed_by_user') {
-                                            errorMsg += 'You closed the sign-in popup.\n\nPlease try again.';
-                                        } else {
-                                            errorMsg += 'Error: ' + response.error + '\n\n';
-                                            errorMsg += 'Check that:\n';
-                                            errorMsg += '1. Your email is in the test users list\n';
-                                            errorMsg += '2. Third-party cookies are enabled\n';
-                                            errorMsg += '3. Pop-ups are not blocked';
-                                        }
-                                        alert(errorMsg);
-                                        return;
-                                    }
-                                    
-                                    console.log('✓ Access token received');
-                                    setAccessToken(response.access_token);
-                                    setIsSignedIn(true);
-                                    
-                                    // Save token to localStorage (expires in 30 days)
-                                    localStorage.setItem('google_access_token', response.access_token);
-                                    localStorage.setItem('google_token_expiry', (Date.now() + 2592000000).toString()); // 30 days
-                                    
-                                    setDriveStatus('✓ Signed in to Google Drive');
-                                    setTimeout(() => setDriveStatus(''), 2000);
-                                },
-                            });
-                            
-                            setTokenClient(client);
-                            setGapiLoaded(true);
-                            setDriveStatus('');
-                            console.log('✓ Google Drive ready!');
-                            
-                        } catch (error) {
-                            console.error('❌ Error initializing Google Drive:', error);
-                            setDriveStatus('❌ Error initializing');
-                            setGapiLoaded(false);
-                            
-                            let errorMsg = '❌ Google Drive Connection Error\n\n';
-                            errorMsg += 'Error: ' + (error.message || 'Unknown error') + '\n\n';
-                            errorMsg += 'Common causes:\n';
-                            errorMsg += '1. OAuth not configured correctly\n';
-                            errorMsg += '2. Third-party cookies blocked\n';
-                            errorMsg += '3. Network issues\n\n';
-                            errorMsg += 'Try refreshing the page or check browser console (F12)';
-                            
-                            setTimeout(() => alert(errorMsg), 500);
-                        }
-                    });
-                };
-
-                initGoogleDrive();
-            }, []);
-
-            // Sign in to Google Drive
-            const signInToDrive = () => {
-                if (!gapiLoaded || !tokenClient) {
-                    alert('⚠️ Google Drive is still loading...\n\nPlease wait a moment and try again.');
-                    return;
-                }
-                
-                try {
-                    console.log('Requesting access token...');
-                    setDriveStatus('🔄 Opening sign-in...');
-                    
-                    // Request access token - this will open the Google sign-in popup
-                    tokenClient.requestAccessToken({ prompt: 'consent' });
-                    
-                } catch (error) {
-                    console.error('❌ Sign in error:', error);
-                    setDriveStatus('');
-                    alert('❌ Error signing in\n\n' + error.message + '\n\nPlease refresh the page and try again.');
-                }
-            };
-
-            // Sign out from Google Drive
-            const signOutFromDrive = () => {
-                try {
-                    if (accessToken) {
-                        // Revoke the token
-                        window.google.accounts.oauth2.revoke(accessToken, () => {
-                            console.log('Token revoked');
-                        });
-                    }
-                    // Clear saved token
-                    localStorage.removeItem('google_access_token');
-                    localStorage.removeItem('google_token_expiry');
-                    
-                    setAccessToken(null);
-                    setIsSignedIn(false);
-                    setDriveStatus('Signed out from Google Drive');
-                    setTimeout(() => setDriveStatus(''), 2000);
-                } catch (error) {
-                    console.error('Sign out error:', error);
-                }
-            };
-
-            // Upload report to Google Drive
+            // Upload report to Google Drive wrapper
             const uploadToDrive = async (reportJson) => {
                 try {
-                    if (!accessToken) {
+                    if (!isSignedIn) {
                         alert('⚠️ Please sign in to Google Drive first');
-                        return;
+                        return false;
                     }
-                    
-                    // Set the access token for gapi.client
-                    window.gapi.client.setToken({ access_token: accessToken });
-                    
-                    setDriveStatus('Uploading to Google Drive...');
-                    
+
                     const clientName = reportData.client || 'Client';
                     const jobName = reportData.jobName || 'Job';
                     const startDate = workDays[0]?.date || new Date().toISOString().split('T')[0];
                     const fileName = `${clientName} - ${jobName} - ${startDate}.json`;
                     const fileContent = JSON.stringify(reportJson, null, 2);
-                    
-                    const metadata = {
-                        name: fileName,
-                        mimeType: 'application/json',
-                        parents: [GOOGLE_DRIVE_CONFIG.FOLDER_ID]
-                    };
 
-                    // Use multipart upload with fetch directly to googleapis.com
-                    const boundary = '-------314159265358979323846';
-                    const delimiter = "\r\n--" + boundary + "\r\n";
-                    const close_delim = "\r\n--" + boundary + "--";
-
-                    const multipartRequestBody =
-                        delimiter +
-                        'Content-Type: application/json; charset=UTF-8\r\n\r\n' +
-                        JSON.stringify(metadata) +
-                        delimiter +
-                        'Content-Type: application/json\r\n\r\n' +
-                        fileContent +
-                        close_delim;
-
-                    const response = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&supportsAllDrives=true', {
-                        method: 'POST',
-                        headers: {
-                            'Authorization': 'Bearer ' + accessToken,
-                            'Content-Type': 'multipart/related; boundary="' + boundary + '"'
-                        },
-                        body: multipartRequestBody
-                    });
-
-                    if (response.ok) {
-                        const result = await response.json();
-                        console.log('✓ Upload successful:', result);
-                        setDriveStatus('✓ Successfully uploaded to Google Drive!');
-                        setTimeout(() => setDriveStatus(''), 3000);
-                        return true;
-                    } else {
-                        const errorText = await response.text();
-                        console.error('Upload failed:', response.status, errorText);
-                        throw new Error('Upload failed with status: ' + response.status + ' - ' + errorText);
-                    }
+                    const result = await uploadFile(fileName, fileContent, 'application/json');
+                    return result;
                 } catch (error) {
                     console.error('Error uploading to Drive:', error);
-                    setDriveStatus('❌ Error uploading to Google Drive');
                     alert('Upload failed:\n\n' + error.message + '\n\nPlease try again or check console (F12) for details.');
                     return false;
                 }
@@ -432,13 +206,13 @@ const { useState, useEffect } = React;
                 // Update projects list
                 const updatedProjects = [...projects, newProject];
                 setProjects(updatedProjects);
-                localStorage.setItem('projectsList', JSON.stringify(updatedProjects));
-                
+                storageService.saveGlobal('projectsList', updatedProjects);
+
                 // Set as current project
                 setProjectId(newId);
                 setProjectName(newProjectName.trim());
-                localStorage.setItem('currentProjectId', newId);
-                localStorage.setItem('currentProjectName', newProjectName.trim());
+                storageService.setCurrentProjectId(newId);
+                storageService.saveGlobal('currentProjectName', newProjectName.trim());
                 
                 // Clear state for new project (no saved data exists yet)
                 setReportData({
@@ -491,32 +265,32 @@ const { useState, useEffect } = React;
                 if (selectedProjectId === '') {
                     setProjectId('');
                     setProjectName('Default Project');
-                    localStorage.setItem('currentProjectId', '');
-                    localStorage.setItem('currentProjectName', 'Default Project');
-                    
+                    storageService.setCurrentProjectId('');
+                    storageService.saveGlobal('currentProjectName', 'Default Project');
+
                     // Load default project data
-                    setReportData(loadFromStorage('reportData', {
-                        client: '', jobName: '', location: '', driller: '', helper: '', 
+                    setReportData(storageService.load('reportData', {
+                        client: '', jobName: '', location: '', driller: '', helper: '',
                         perDiem: '', commentsLabor: '', uploadedPhotosDetails: []
                     }, ''));
-                    setEquipment(loadFromStorage('equipment', {
-                        drillRig: '', truck: '', dumpTruck: 'No', dumpTruckTimes: '', 
-                        trailer: 'No', coreMachine: false, groutMachine: false, 
+                    setEquipment(storageService.load('equipment', {
+                        drillRig: '', truck: '', dumpTruck: 'No', dumpTruckTimes: '',
+                        trailer: 'No', coreMachine: false, groutMachine: false,
                         extruder: false, generator: false, decon: false
                     }, ''));
-                    setWorkDays(loadFromStorage('workDays', [{
+                    setWorkDays(storageService.load('workDays', [{
                         id: 1, date: new Date().toISOString().split('T')[0],
                         timeLeftShop: '', arrivedOnSite: '', timeLeftSite: '', arrivedAtShop: '',
                         hoursDriving: '', hoursOnSite: '', standbyHours: '', standbyMinutes: '',
                         standbyReason: '', pitStopHours: '', pitStopMinutes: '', pitStopReason: '',
                         collapsed: false
                     }], ''));
-                    setBorings(loadFromStorage('borings', [{
+                    setBorings(storageService.load('borings', [{
                         id: 1, method: '', footage: '', isEnvironmental: false, isGeotechnical: false,
                         washboreSetup: false, washboreFootage: '', casingSetup: false, casingFootage: '',
                         coreSetup: false, coreFootage: '', collapsed: false
                     }], ''));
-                    setSuppliesData(loadFromStorage('suppliesData', {
+                    setSuppliesData(storageService.load('suppliesData', {
                         endCaps1: '', endCaps2: '', endCaps4: '', endCapsOther: '',
                         lockingCaps1: '', lockingCaps2: '', lockingCaps4: '', lockingCapsOther: '',
                         screen5_1: '', screen5_2: '', screen5_4: '', screen5Other: '',
@@ -539,32 +313,32 @@ const { useState, useEffect } = React;
                 if (project) {
                     setProjectId(project.id);
                     setProjectName(project.name);
-                    localStorage.setItem('currentProjectId', project.id);
-                    localStorage.setItem('currentProjectName', project.name);
-                    
+                    storageService.setCurrentProjectId(project.id);
+                    storageService.saveGlobal('currentProjectName', project.name);
+
                     // Load project data
-                    setReportData(loadFromStorage('reportData', {
-                        client: '', jobName: '', location: '', driller: '', helper: '', 
+                    setReportData(storageService.load('reportData', {
+                        client: '', jobName: '', location: '', driller: '', helper: '',
                         perDiem: '', commentsLabor: '', uploadedPhotosDetails: []
                     }, project.id));
-                    setEquipment(loadFromStorage('equipment', {
-                        drillRig: '', truck: '', dumpTruck: 'No', dumpTruckTimes: '', 
-                        trailer: 'No', coreMachine: false, groutMachine: false, 
+                    setEquipment(storageService.load('equipment', {
+                        drillRig: '', truck: '', dumpTruck: 'No', dumpTruckTimes: '',
+                        trailer: 'No', coreMachine: false, groutMachine: false,
                         extruder: false, generator: false, decon: false
                     }, project.id));
-                    setWorkDays(loadFromStorage('workDays', [{
+                    setWorkDays(storageService.load('workDays', [{
                         id: 1, date: new Date().toISOString().split('T')[0],
                         timeLeftShop: '', arrivedOnSite: '', timeLeftSite: '', arrivedAtShop: '',
                         hoursDriving: '', hoursOnSite: '', standbyHours: '', standbyMinutes: '',
                         standbyReason: '', pitStopHours: '', pitStopMinutes: '', pitStopReason: '',
                         collapsed: false
                     }], project.id));
-                    setBorings(loadFromStorage('borings', [{
+                    setBorings(storageService.load('borings', [{
                         id: 1, method: '', footage: '', isEnvironmental: false, isGeotechnical: false,
                         washboreSetup: false, washboreFootage: '', casingSetup: false, casingFootage: '',
                         coreSetup: false, coreFootage: '', collapsed: false
                     }], project.id));
-                    setSuppliesData(loadFromStorage('suppliesData', {
+                    setSuppliesData(storageService.load('suppliesData', {
                         endCaps1: '', endCaps2: '', endCaps4: '', endCapsOther: '',
                         lockingCaps1: '', lockingCaps2: '', lockingCaps4: '', lockingCapsOther: '',
                         screen5_1: '', screen5_2: '', screen5_4: '', screen5Other: '',
@@ -703,53 +477,10 @@ const { useState, useEffect } = React;
                 }));
             };
 
-            const calculateTimeDiff = (startTime, endTime) => {
-                if (!startTime || !endTime) return 0;
-                const [startHour, startMin] = startTime.split(':').map(Number);
-                const [endHour, endMin] = endTime.split(':').map(Number);
-                const startMinutes = startHour * 60 + startMin;
-                const endMinutes = endHour * 60 + endMin;
-                const diff = endMinutes - startMinutes;
-                return diff / 60;
-            };
-
-            const getTotalHours = () => {
-                const totalDriving = workDays.reduce((sum, day) => sum + (parseFloat(day.hoursDriving) || 0), 0);
-                const totalOnSite = workDays.reduce((sum, day) => sum + (parseFloat(day.hoursOnSite) || 0), 0);
-                const totalStandby = workDays.reduce((sum, day) => {
-                    const hours = parseFloat(day.standbyHours) || 0;
-                    const minutes = parseFloat(day.standbyMinutes) || 0;
-                    return sum + hours + (minutes / 60);
-                }, 0);
-                const totalPitStop = workDays.reduce((sum, day) => {
-                    const hours = parseFloat(day.pitStopHours) || 0;
-                    const minutes = parseFloat(day.pitStopMinutes) || 0;
-                    return sum + hours + (minutes / 60);
-                }, 0);
-                
-                return {
-                    driving: totalDriving.toFixed(2),
-                    onSite: totalOnSite.toFixed(2),
-                    standby: totalStandby.toFixed(2),
-                    pitStop: totalPitStop.toFixed(2),
-                    total: (totalDriving + totalOnSite + totalStandby).toFixed(2)
-                };
-            };
-
-            // Calculate total footage, number of borings, and depths
-            const getBoringStats = () => {
-                const totalFootage = borings.reduce((sum, b) => sum + (parseFloat(b.footage) || 0), 0);
-                const numBorings = borings.filter(b => b.footage && parseFloat(b.footage) > 0).length;
-                const depths = borings
-                    .filter(b => b.footage && parseFloat(b.footage) > 0)
-                    .map(b => b.footage)
-                    .join(', ');
-                return {
-                    totalFootage: totalFootage.toFixed(1),
-                    numBorings: numBorings,
-                    depths: depths
-                };
-            };
+            // Use shared calculation utilities
+            const calculateTimeDiff = window.CalculationUtils.calculateTimeDiff;
+            const getTotalHours = () => window.CalculationUtils.getTotalHours(workDays);
+            const getBoringStats = () => window.CalculationUtils.getBoringStats(borings);
 
             // Supplies Data
             const [suppliesData, setSuppliesData] = useState(() =>
@@ -844,116 +575,23 @@ const { useState, useEffect } = React;
                 }
             };
             
-            // Image compression function
-            const compressImage = (file) => {
-                return new Promise((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                        const img = new Image();
-                        img.onload = () => {
-                            // Create canvas
-                            const canvas = document.createElement('canvas');
-                            const ctx = canvas.getContext('2d');
-                            
-                            // Calculate new dimensions (max 1920px width)
-                            let width = img.width;
-                            let height = img.height;
-                            const maxWidth = 1920;
-                            
-                            if (width > maxWidth) {
-                                height = (height * maxWidth) / width;
-                                width = maxWidth;
-                            }
-                            
-                            canvas.width = width;
-                            canvas.height = height;
-                            
-                            // Draw and compress
-                            ctx.drawImage(img, 0, 0, width, height);
-                            
-                            canvas.toBlob(
-                                (blob) => {
-                                    if (blob) {
-                                        resolve(blob);
-                                    } else {
-                                        reject(new Error('Compression failed'));
-                                    }
-                                },
-                                'image/jpeg',
-                                0.85 // 85% quality
-                            );
-                        };
-                        img.onerror = reject;
-                        img.src = e.target.result;
-                    };
-                    reader.onerror = reject;
-                    reader.readAsDataURL(file);
-                });
-            };
+            // Use shared image compression utility
+            const compressImage = (file) => window.ImageUtils.compressImage(file, 1920, 0.85);
             
-            // GPS Location function
+            // GPS Location function using shared utility
             const [isGettingLocation, setIsGettingLocation] = useState(false);
-            
-            const getCurrentLocation = () => {
+
+            const getCurrentLocation = async () => {
                 setIsGettingLocation(true);
-                
-                if (!navigator.geolocation) {
-                    alert('GPS is not supported by your browser');
+
+                try {
+                    const result = await window.GeolocationUtils.getCurrentLocation(true);
+                    handleReportChange('location', result.address || result.coordinates);
+                } catch (error) {
+                    alert(error.message);
+                } finally {
                     setIsGettingLocation(false);
-                    return;
                 }
-                
-                navigator.geolocation.getCurrentPosition(
-                    async (position) => {
-                        const { latitude, longitude } = position.coords;
-                        
-                        // Try to get address from coordinates using reverse geocoding
-                        try {
-                            // Using OpenStreetMap's Nominatim API (free, no key required)
-                            const response = await fetch(
-                                `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
-                            );
-                            const data = await response.json();
-                            
-                            if (data && data.display_name) {
-                                handleReportChange('location', data.display_name);
-                            } else {
-                                // Fallback to coordinates if address not found
-                                handleReportChange('location', `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`);
-                            }
-                        } catch (error) {
-                            console.error('Geocoding error:', error);
-                            // Fallback to coordinates
-                            handleReportChange('location', `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`);
-                        }
-                        
-                        setIsGettingLocation(false);
-                    },
-                    (error) => {
-                        console.error('Location error:', error);
-                        let message = 'Unable to get location. ';
-                        switch(error.code) {
-                            case error.PERMISSION_DENIED:
-                                message += 'Please enable location permissions.';
-                                break;
-                            case error.POSITION_UNAVAILABLE:
-                                message += 'Location information unavailable.';
-                                break;
-                            case error.TIMEOUT:
-                                message += 'Location request timed out.';
-                                break;
-                            default:
-                                message += 'An unknown error occurred.';
-                        }
-                        alert(message);
-                        setIsGettingLocation(false);
-                    },
-                    {
-                        enableHighAccuracy: true,
-                        timeout: 10000,
-                        maximumAge: 0
-                    }
-                );
             };
 
             const removePhoto = (index, section) => {
