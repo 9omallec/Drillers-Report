@@ -1302,15 +1302,10 @@ const { useState, useEffect } = React;
                                     {!isSignedIn ? (
                                         <button
                                             onClick={signInToDrive}
-                                            disabled={!gapiLoaded}
-                                            className={`flex-1 md:flex-none px-4 py-3 text-base font-semibold rounded-lg transition touch-manipulation ${
-                                                gapiLoaded 
-                                                    ? 'bg-green-600 text-white hover:bg-green-700' 
-                                                    : 'bg-gray-400 text-gray-200 cursor-not-allowed'
-                                            }`}
-                                            title={gapiLoaded ? "Sign in to enable automatic upload to Google Drive" : "Loading Google Drive..."}
+                                            className="flex-1 md:flex-none px-4 py-3 text-base font-semibold rounded-lg transition touch-manipulation bg-green-600 text-white hover:bg-green-700"
+                                            title="Sign in to enable automatic upload to Google Drive"
                                         >
-                                            {gapiLoaded ? '📁 Sign in to Drive' : '⏳ Loading...'}
+                                            📁 Sign in to Drive
                                         </button>
                                     ) : (
                                         <button
