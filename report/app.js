@@ -1007,36 +1007,6 @@ const { useState, useEffect } = React;
                 }
             };
 
-            const handleDownloadCSV = () => {
-                // Generate report data
-                const reportData_json = {
-                    report: reportData,
-                    workDays: workDays,
-                    borings: borings,
-                    equipment: equipment,
-                    supplies: suppliesData,
-                    savedAt: new Date().toISOString()
-                };
-
-                // Generate CSV
-                const csvContent = generateCSV(reportData_json);
-                const clientName = reportData.client || 'Client';
-                const jobName = reportData.jobName || 'Job';
-                const startDate = workDays[0]?.date || new Date().toISOString().split('T')[0];
-                const fileName = `${clientName} - ${jobName} - ${startDate}-Backup.csv`;
-
-                // Download CSV file
-                const blob = new Blob([csvContent], { type: 'text/csv' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = fileName;
-                a.click();
-                URL.revokeObjectURL(url);
-
-                alert('✓ CSV backup downloaded successfully!\n\nYou can open this file in Excel or any text editor.');
-            };
-
             // Generate a standalone HTML report for attachment
             const generateHTMLReport = () => {
                 const totals = getTotalHours();
@@ -1571,13 +1541,6 @@ const { useState, useEffect } = React;
                                         className={`flex-1 md:flex-none px-4 py-3 text-base font-semibold rounded-lg transition touch-manipulation ${darkMode ? 'bg-gray-700 text-white hover:bg-gray-600' : 'bg-gray-600 text-white hover:bg-gray-700'}`}
                                     >
                                         Print
-                                    </button>
-                                    <button
-                                        onClick={handleDownloadCSV}
-                                        className={`flex-1 md:flex-none px-4 py-3 text-base font-semibold rounded-lg transition touch-manipulation ${darkMode ? 'bg-green-700 text-white hover:bg-green-600' : 'bg-green-600 text-white hover:bg-green-700'}`}
-                                        title="Download CSV backup for offline use"
-                                    >
-                                        📥 Download CSV
                                     </button>
                                 </div>
                                 {/* Google Drive Status Message */}
