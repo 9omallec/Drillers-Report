@@ -939,7 +939,7 @@
                                                                 <div className={`w-32 font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>{driller}</div>
                                                                 <div className="flex-1">
                                                                     <div className={`h-8 rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-gray-200'} overflow-hidden`}>
-                                                                        <div 
+                                                                        <div
                                                                             className="h-full bg-gradient-to-r from-green-500 to-green-600 flex items-center px-3 text-white font-bold text-sm"
                                                                             style={{ width: `${(hours / maxHours) * 100}%` }}
                                                                         >
@@ -953,23 +953,58 @@
                                                 </div>
                                             </div>
 
-                                            {/* Reports by Customer */}
+                                            {/* Footage by Driller */}
+                                            <div className={`p-6 rounded-xl mb-6 ${darkMode ? 'bg-gray-800' : 'bg-gray-50'}`}>
+                                                <h3 className={`text-xl font-bold mb-4 ${darkMode ? 'text-purple-400' : 'text-purple-600'}`}>
+                                                    🎯 Footage Drilled by Driller
+                                                </h3>
+                                                <div className="space-y-3">
+                                                    {(() => {
+                                                        const drillerFootage = {};
+                                                        reports.forEach(report => {
+                                                            const driller = report.driller || 'Unknown';
+                                                            const footage = (report.borings?.reduce((sum, boring) => {
+                                                                return sum + (parseFloat(boring.footage) || 0);
+                                                            }, 0) || 0);
+                                                            drillerFootage[driller] = (drillerFootage[driller] || 0) + footage;
+                                                        });
+                                                        const maxFootage = Math.max(...Object.values(drillerFootage));
+                                                        return Object.entries(drillerFootage).map(([driller, footage]) => (
+                                                            <div key={driller} className="flex items-center gap-4">
+                                                                <div className={`w-32 font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>{driller}</div>
+                                                                <div className="flex-1">
+                                                                    <div className={`h-8 rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-gray-200'} overflow-hidden`}>
+                                                                        <div
+                                                                            className="h-full bg-gradient-to-r from-purple-500 to-purple-600 flex items-center px-3 text-white font-bold text-sm"
+                                                                            style={{ width: `${(footage / maxFootage) * 100}%` }}
+                                                                        >
+                                                                            {footage.toFixed(0)} ft
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        ));
+                                                    })()}
+                                                </div>
+                                            </div>
+
+                                            {/* Reports by Client */}
                                             <div className={`p-6 rounded-xl mb-6 ${darkMode ? 'bg-gray-800' : 'bg-gray-50'}`}>
                                                 <h3 className={`text-xl font-bold mb-4 ${darkMode ? 'text-blue-400' : 'text-blue-600'}`}>
-                                                    🏢 Reports by Customer
+                                                    🏢 Reports by Client
                                                 </h3>
                                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                                                     {(() => {
-                                                        const customerCounts = {};
+                                                        const clientCounts = {};
                                                         reports.forEach(report => {
-                                                            const customer = report.customer || 'Unknown';
-                                                            customerCounts[customer] = (customerCounts[customer] || 0) + 1;
+                                                            const client = report.client || 'Unknown';
+                                                            clientCounts[client] = (clientCounts[client] || 0) + 1;
                                                         });
-                                                        return Object.entries(customerCounts)
+                                                        return Object.entries(clientCounts)
                                                             .sort((a, b) => b[1] - a[1])
-                                                            .map(([customer, count]) => (
-                                                                <div key={customer} className={`p-4 rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-white'} border-2 ${darkMode ? 'border-gray-600' : 'border-gray-200'}`}>
-                                                                    <div className={`font-semibold mb-1 ${darkMode ? 'text-gray-200' : 'text-gray-800'}`}>{customer}</div>
+                                                            .map(([client, count]) => (
+                                                                <div key={client} className={`p-4 rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-white'} border-2 ${darkMode ? 'border-gray-600' : 'border-gray-200'}`}>
+                                                                    <div className={`font-semibold mb-1 ${darkMode ? 'text-gray-200' : 'text-gray-800'}`}>{client}</div>
                                                                     <div className="flex items-center gap-2">
                                                                         <div className="text-2xl font-bold text-blue-600">{count}</div>
                                                                         <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>reports</div>
