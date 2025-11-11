@@ -34,24 +34,30 @@
     <!-- Main Application - Load after modules are ready -->
     <script>
         // Wait for shared modules before loading main app
-        window.addEventListener('sharedModulesLoaded', () => {
-            console.log('sharedModulesLoaded event received, loading dashboard-app.js...');
-            console.log('Babel available:', typeof Babel);
+        window.addEventListener('sharedModulesLoaded', async () => {
+            console.log('sharedModulesLoaded event received, fetching dashboard-app.js...');
 
-            const script = document.createElement('script');
-            script.type = 'text/babel';
-            script.src = 'dashboard-app.js';
-            script.onload = () => {
-                console.log('dashboard-app.js loaded, triggering Babel transformation...');
-                // Manually trigger Babel to transform the script
+            try {
+                // Fetch the script content
+                const response = await fetch('dashboard-app.js');
+                const code = await response.text();
+                console.log('dashboard-app.js fetched, creating inline script...');
+
+                // Create inline script with the code
+                const script = document.createElement('script');
+                script.type = 'text/babel';
+                script.textContent = code;
+                document.body.appendChild(script);
+
+                console.log('Script appended, triggering Babel transformation...');
+
+                // Trigger Babel transformation
                 if (window.Babel && window.Babel.transformScriptTags) {
                     window.Babel.transformScriptTags();
                 }
-            };
-            script.onerror = (e) => console.error('Failed to load dashboard-app.js', e);
-            document.body.appendChild(script);
-
-            console.log('Script element created and appended');
+            } catch (error) {
+                console.error('Failed to load dashboard-app.js:', error);
+            }
         });
     </script>
 </body>
