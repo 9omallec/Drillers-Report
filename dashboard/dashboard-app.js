@@ -481,8 +481,8 @@
                                                                         // Store report data for Report app to read
                                                                         localStorage.setItem('editingReport', JSON.stringify({
                                                                             reportData: reportData,
-                                                                            driveFileId: report.id,
-                                                                            driveFileName: report.name,
+                                                                            driveFileId: report.driveFileId,
+                                                                            driveFileName: report.driveFileName,
                                                                             mode: 'edit'
                                                                         }));
 
