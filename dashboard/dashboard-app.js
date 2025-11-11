@@ -1023,4 +1023,12 @@
             );
         }
 
-        ReactDOM.render(<BossDashboard />, document.getElementById('root'));
+        // Wait for shared modules to load before rendering
+        window.addEventListener('sharedModulesLoaded', () => {
+            ReactDOM.render(<BossDashboard />, document.getElementById('root'));
+        });
+
+        // If modules are already loaded (in case event fired before listener attached)
+        if (window.StorageService) {
+            ReactDOM.render(<BossDashboard />, document.getElementById('root'));
+        }
