@@ -16,8 +16,18 @@ input[type=“checkbox”]:checked { background: #16a34a; border-color: #16a34a;
 input[type=“checkbox”]:checked::after { content: ‘✓’; position: absolute; color: white; font-size: 18px; font-weight: bold; left: 3px; top: -2px; }
 input[type=“checkbox”]:hover { border-color: #16a34a; }
 
-/* Dark Mode Logo Fix */
-.dark img[alt*=“logo” i], .dark img[alt*=“Logo” i], .dark img[src*=“logo” i], .dark .logo-img { filter: brightness(0) invert(1); }
+/* Logo styling - prevent white box in dark mode, keep original colors */
+.app-logo {
+    width: 60px;
+    height: 60px;
+    object-fit: contain;
+}
+@media (max-width: 768px) {
+    .app-logo {
+        width: 48px;
+        height: 48px;
+    }
+}
 
 /* Mobile Styles - Tablets & Phones */
 @media (max-width: 768px) {

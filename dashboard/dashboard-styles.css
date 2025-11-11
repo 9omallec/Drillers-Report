@@ -4,3 +4,30 @@
         @media print {
             .no-print { display: none !important; }
         }
+
+        /* Logo styling - prevent white box in dark mode */
+        .app-logo {
+            width: 60px;
+            height: 60px;
+            object-fit: contain;
+        }
+
+        /* Mobile responsive improvements */
+        @media (max-width: 768px) {
+            .app-logo {
+                width: 48px;
+                height: 48px;
+            }
+
+            /* Ensure buttons don't overflow on mobile */
+            .header-buttons {
+                width: 100%;
+                justify-content: stretch;
+            }
+
+            .header-buttons button {
+                flex: 1;
+                min-width: 0;
+                white-space: nowrap;
+            }
+        }
