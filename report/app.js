@@ -2432,11 +2432,17 @@ const { useState, useEffect } = React;
         }
 
         // Wait for shared modules to load before rendering
-        window.addEventListener('sharedModulesLoaded', () => {
-            ReactDOM.render(<DailyDrillReport />, document.getElementById('root'));
-        });
-
-        // If modules are already loaded (in case event fired before listener attached)
-        if (window.StorageService) {
-            ReactDOM.render(<DailyDrillReport />, document.getElementById('root'));
+        function initApp() {
+            if (window.StorageService && window.useDarkMode && window.CalculationUtils) {
+                // Modules are ready, render immediately
+                ReactDOM.render(<DailyDrillReport />, document.getElementById('root'));
+            } else {
+                // Modules not ready yet, wait for them
+                window.addEventListener('sharedModulesLoaded', () => {
+                    ReactDOM.render(<DailyDrillReport />, document.getElementById('root'));
+                }, { once: true });
+            }
         }
+
+        // Start app initialization
+        initApp();
