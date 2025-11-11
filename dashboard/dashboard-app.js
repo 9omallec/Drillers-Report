@@ -25,7 +25,6 @@
             const {
                 isSignedIn,
                 driveStatus,
-                setDriveStatus,
                 signIn: signInToDrive,
                 signOut: signOutFromDrive,
                 listFiles,
@@ -40,8 +39,6 @@
                         return;
                     }
 
-                    setDriveStatus('Syncing from Google Drive...');
-
                     const files = await listFiles(
                         window.GOOGLE_DRIVE_CONFIG.FOLDER_ID,
                         "mimeType='application/json'",
@@ -50,8 +47,7 @@
                     );
 
                     if (!files || files.length === 0) {
-                        setDriveStatus('No reports found in Drive folder');
-                        setTimeout(() => setDriveStatus(''), 3000);
+                        alert('No reports found in Drive folder');
                         return;
                     }
 
@@ -83,15 +79,14 @@
                     }
 
                     if (importedCount > 0) {
-                        setDriveStatus(`✓ Imported ${importedCount} new report(s) from Drive!`);
+                        alert(`✓ Imported ${importedCount} new report(s) from Drive!`);
                     } else {
-                        setDriveStatus('All reports already imported');
+                        alert('All reports already imported');
                     }
-                    setTimeout(() => setDriveStatus(''), 3000);
 
                 } catch (error) {
                     console.error('Error syncing from Drive:', error);
-                    setDriveStatus('Error syncing from Google Drive');
+                    alert('Error syncing from Google Drive');
                 }
             };
             // ====== END GOOGLE DRIVE API ======
