@@ -976,10 +976,37 @@ const { useState, useEffect } = React;
                     if (files && files.length > 0) {
                         console.log('First file:', files[0]);
                     }
-                    if (!files || files.length === 0) {
-                        alert('No reports found in Google Drive');
-                        return;
+                    if (\!files || files.length === 0) {
+                        console.log('No files in folder. Searching ALL JSON files...');
+                        
+                        const fallbackResponse = await gapi.client.drive.files.list({
+                            q: "mimeType='application/json' and trashed=false",
+                            fields: 'files(id, name, modifiedTime, parents)',
+                            orderBy: 'modifiedTime desc',
+                            pageSize: 100
+                        });
+                        
+                        const allFiles = fallbackResponse.result.files;
+                        console.log('Total JSON files in Drive:', allFiles ? allFiles.length : 0);
+                        
+                        if (allFiles && allFiles.length > 0) {
+                            console.log('Files found:', allFiles);
+                            const reportFiles = allFiles.filter(f => f.name.includes(' - ') && f.name.endsWith('.json'));
+                            console.log('Report-like files:', reportFiles.length);
+                            
+                            if (reportFiles.length > 0) {
+                                files = reportFiles;
+                                alert('Found ' + reportFiles.length + ' reports using broad search.');
+                            } else {
+                                alert('Found JSON files but none look like reports. Check console.');
+                                return;
+                            }
+                        } else {
+                            alert('No JSON files found anywhere in your Drive.');
+                            return;
+                        }
                     }
+
 
                     let fileList = '';
                     for (let i = 0; i < files.length; i++) {
