@@ -923,6 +923,69 @@ const { useState, useEffect } = React;
                     reader.readAsText(file);
                 }
             };
+            const handleLoadFromDrive = async () => {
+                if (!isSignedIn) {
+                    alert('Please sign in to Google Drive first');
+                    return;
+                }
+
+                try {
+                    // List files in the Drillers Reports folder
+                    const response = await gapi.client.drive.files.list({
+                        q: "'" + folderId + "' in parents and mimeType='application/json' and trashed=false",
+                        fields: 'files(id, name, modifiedTime)',
+                        orderBy: 'modifiedTime desc',
+                        pageSize: 100
+                    });
+
+                    const files = response.result.files;
+                    if (!files || files.length === 0) {
+                        alert('No reports found in Google Drive');
+                        return;
+                    }
+
+                    // Create a selection dialog
+                    const fileList = files.map((file, index) => {
+                        const date = new Date(file.modifiedTime).toLocaleString();
+                        return `${index + 1}. ${file.name} (Modified: ${date})`;
+                    }).join('
+');
+
+                    const selection = prompt(`Select a report to load (enter number 1-${files.length}):
+
+${fileList}`);
+                    
+                    if (!selection) return;
+                    
+                    const index = parseInt(selection) - 1;
+                    if (isNaN(index) || index < 0 || index >= files.length) {
+                        alert('Invalid selection');
+                        return;
+                    }
+
+                    const selectedFile = files[index];
+                    
+                    // Download the file content
+                    const fileResponse = await gapi.client.drive.files.get({
+                        fileId: selectedFile.id,
+                        alt: 'media'
+                    });
+
+                    const data = JSON.parse(fileResponse.body);
+                    
+                    // Load the data
+                    if (data.report) setReportData(data.report);
+                    if (data.workDays) setWorkDays(data.workDays);
+                    if (data.borings) setBorings(data.borings);
+                    if (data.equipment) setEquipment(data.equipment);
+                    if (data.supplies) setSuppliesData(data.supplies);
+                    
+                    alert('Report loaded successfully from Google Drive');
+                } catch (error) {
+                    console.error('Error loading from Drive:', error);
+                    alert('Error loading report from Google Drive: ' + error.message);
+                }
+            };
 
             const handleSubmitReport = async () => {
                 // Check if user is signed in to Google Drive
@@ -1506,10 +1569,13 @@ const { useState, useEffect } = React;
                                     >
                                         Save
                                     </button>
-                                    <label className="px-1 py-0.5 md:px-4 md:py-2 text-xs md:text-base font-semibold bg-brand-green-700 text-white rounded-lg hover:bg-brand-green-800 transition cursor-pointer touch-manipulation text-center">
+                                    <button
+                                        onClick={handleLoadFromDrive}
+                                        className="px-1 py-0.5 md:px-4 md:py-2 text-xs md:text-base font-semibold bg-brand-green-700 text-white rounded-lg hover:bg-brand-green-800 transition touch-manipulation"
+                                        title="Load report from Google Drive"
+                                    >
                                         Load
-                                        <input type="file" accept=".json" onChange={handleLoad} className="hidden" />
-                                    </label>
+                                    </button>
                                     {/* Google Drive Integration */}
                                     {!isSignedIn ? (
                                         <button
