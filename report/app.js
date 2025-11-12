@@ -928,6 +928,102 @@ const { useState, useEffect } = React;
             };
             
 
+            const handleReset = () => {
+                if (!confirm('Are you sure you want to clear all fields and reset the form? This cannot be undone.')) {
+                    return;
+                }
+
+                // Reset all state to initial values
+                setReportData({
+                    client: '',
+                    jobName: '',
+                    location: '',
+                    driller: '',
+                    helper: '',
+                    perDiem: '',
+                    commentsLabor: '',
+                    uploadedPhotosDetails: []
+                });
+
+                setEquipment({
+                    drillRig: '',
+                    truck: '',
+                    dumpTruck: 'No',
+                    dumpTruckTimes: '',
+                    trailer: 'No',
+                    coreMachine: false,
+                    groutMachine: false,
+                    extruder: false,
+                    generator: false,
+                    decon: false
+                });
+
+                setWorkDays([{
+                    id: 1,
+                    date: new Date().toISOString().split('T')[0],
+                    timeLeftShop: '',
+                    arrivedOnSite: '',
+                    timeLeftSite: '',
+                    arrivedAtShop: '',
+                    hoursDriving: '',
+                    hoursOnSite: '',
+                    standbyHours: '',
+                    standbyMinutes: '',
+                    standbyReason: '',
+                    pitStopHours: '',
+                    pitStopMinutes: '',
+                    pitStopReason: '',
+                    collapsed: false
+                }]);
+
+                setBorings([{
+                    id: 1,
+                    method: '',
+                    footage: '',
+                    isEnvironmental: false,
+                    isGeotechnical: false,
+                    washboreSetup: false,
+                    washboreFootage: '',
+                    casingSetup: false,
+                    casingFootage: '',
+                    coreSetup: false,
+                    coreFootage: '',
+                    collapsed: false
+                }]);
+
+                setSuppliesData({
+                    endCaps1: '', endCaps2: '', endCaps4: '', endCapsOther: '',
+                    lockingCaps1: '', lockingCaps2: '', lockingCaps4: '', lockingCapsOther: '',
+                    screen5_1: '', screen5_2: '', screen5_4: '', screen5Other: '',
+                    screen10_1: '', screen10_2: '', screen10_4: '', screen10Other: '',
+                    riser5_1: '', riser5_2: '', riser5_4: '', riser5Other: '',
+                    riser10_1: '', riser10_2: '', riser10_4: '', riser10Other: '',
+                    flushMounts7: '', flushMounts8: '', flushMountsOther: '',
+                    stickUpCovers4: '', stickUpCovers6: '', stickUpCoversOther: '',
+                    bollards3: '', bollards4: '', bollardsOther: '',
+                    concrete50: '', concrete60: '', concrete80: '',
+                    sand: '', drillingMud: '',
+                    bentoniteChips: '', bentonitePellets: '',
+                    bentoniteGrout: '', portlandGrout: '',
+                    buckets: '', shelbyTubes: '',
+                    numCoreBoxes: '',
+                    other: '',
+                    misc: '',
+                    uploadedPhotosSupplies: []
+                });
+
+                // Clear localStorage for current project
+                if (projectId) {
+                    storageService.remove('reportData', projectId);
+                    storageService.remove('equipment', projectId);
+                    storageService.remove('workDays', projectId);
+                    storageService.remove('borings', projectId);
+                    storageService.remove('suppliesData', projectId);
+                }
+
+                alert('Form has been reset to default values.');
+            };
+
             const testFindAllFiles = async () => {
                 console.log('=== SEARCHING ALL DRIVE FILES ===');
                 try {
@@ -1673,6 +1769,13 @@ const { useState, useEffect } = React;
                                         className={`px-1 py-0.5 md:px-4 md:py-2 text-xs md:text-base font-semibold rounded-lg transition touch-manipulation ${darkMode ? 'bg-gray-700 text-white hover:bg-gray-600' : 'bg-gray-600 text-white hover:bg-gray-700'}`}
                                     >
                                         Print
+                                    </button>
+                                    <button
+                                        onClick={handleReset}
+                                        className="px-1 py-0.5 md:px-4 md:py-2 text-xs md:text-base font-semibold bg-red-600 text-white rounded-lg hover:bg-red-700 transition touch-manipulation"
+                                        title="Clear all fields and reset form"
+                                    >
+                                        Reset
                                     </button>
                                 </div>
                                 {/* Google Drive Status Message */}
