@@ -1466,7 +1466,7 @@ const { useState, useEffect } = React;
             {/* Fixed Dark Mode Toggle - Top Right Corner */}
             <button
                 onClick={() => setDarkMode(!darkMode)}
-                className={`fixed top-12 right-16 md:top-2 md:right-2 z-50 p-1.5 rounded-lg shadow-lg transition ${darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-white hover:bg-gray-100 border border-gray-300'}`}
+                className={`fixed top-12 right-16 md:top-2 md:right-2 z-[9999] p-1.5 rounded-lg shadow-2xl transition ${darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-white hover:bg-gray-100 border border-gray-300'}`}
                 title={darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
                 aria-label={darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
             >
