@@ -731,7 +731,7 @@ const { useState, useEffect } = React;
 
             const handlePhotoUpload = async (event, section) => {
                 const files = Array.from(event.target.files);
-                
+
                 // Compress and process each file
                 const processedFiles = await Promise.all(
                     files.map(async (file) => {
@@ -739,19 +739,22 @@ const { useState, useEffect } = React;
                         if (file.type.startsWith('image/')) {
                             try {
                                 const compressedFile = await compressImage(file);
+                                const dataURL = await window.ImageUtils.blobToDataURL(compressedFile);
                                 return {
                                     name: file.name,
                                     size: (compressedFile.size / 1024).toFixed(2) + ' KB',
                                     type: compressedFile.type,
-                                    data: compressedFile
+                                    dataURL: dataURL
                                 };
                             } catch (error) {
                                 console.error('Compression error:', error);
                                 // Fall back to original if compression fails
+                                const dataURL = await window.ImageUtils.blobToDataURL(file);
                                 return {
                                     name: file.name,
                                     size: (file.size / 1024).toFixed(2) + ' KB',
-                                    type: file.type
+                                    type: file.type,
+                                    dataURL: dataURL
                                 };
                             }
                         } else {
