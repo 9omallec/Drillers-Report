@@ -964,7 +964,11 @@ const { useState, useEffect } = React;
 
                 try {
                     const response = await gapi.client.drive.files.list({
-                        q: "'" + GOOGLE_DRIVE_CONFIG.FOLDER_ID + "' in parents and mimeType='application/json' and trashed=false",
+                        q: "mimeType='application/json' and trashed=false",
+                        driveId: GOOGLE_DRIVE_CONFIG.FOLDER_ID,
+                        corpora: 'drive',
+                        includeItemsFromAllDrives: true,
+                        supportsAllDrives: true,
                         fields: 'files(id, name, modifiedTime)',
                         orderBy: 'modifiedTime desc',
                         pageSize: 100
