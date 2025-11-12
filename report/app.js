@@ -952,14 +952,10 @@ const { useState, useEffect } = React;
 
             
             const handleLoadFromDrive = async () => {
-                // First, find ALL JSON files to see where they actually are
-                await testFindAllFiles();
-                return; // Stop here for now
                 
                 console.log('=== LOAD BUTTON CLICKED ===');
                 console.log('Signed in:', isSignedIn);
                 console.log('Folder ID:', GOOGLE_DRIVE_CONFIG.FOLDER_ID);
-                alert('Load button clicked - check console for folder ID');
                 
                 if (!isSignedIn) {
                     alert('Please sign in to Google Drive first');
