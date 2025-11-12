@@ -926,6 +926,11 @@ const { useState, useEffect } = React;
             
 
             const handleLoadFromDrive = async () => {
+                console.log('=== LOAD BUTTON CLICKED ===');
+                console.log('Signed in:', isSignedIn);
+                console.log('Folder ID:', GOOGLE_DRIVE_CONFIG.FOLDER_ID);
+                alert('Load button clicked - check console for folder ID');
+                
                 if (!isSignedIn) {
                     alert('Please sign in to Google Drive first');
                     return;
@@ -940,6 +945,11 @@ const { useState, useEffect } = React;
                     });
 
                     let files = response.result.files;
+                    console.log('API Response:', response);
+                    console.log('Files found:', files ? files.length : 0, 'files');
+                    if (files && files.length > 0) {
+                        console.log('First file:', files[0]);
+                    }
                     if (!files || files.length === 0) {
                         alert('No reports found in Google Drive');
                         return;
