@@ -13,6 +13,7 @@
     const modules = [
         // Constants first
         'constants/config.js',
+        'constants/defaultStates.js',
 
         // Services
         'services/storage.js',

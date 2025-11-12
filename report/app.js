@@ -47,71 +47,22 @@ const { useState, useEffect } = React;
             
             // Report Data with localStorage
             const [reportData, setReportData] = useState(() =>
-                storageService.load('reportData', {
-                    client: '',
-                    jobName: '',
-                    location: '',
-                    driller: '',
-                    helper: '',
-                    perDiem: '',
-                    commentsLabor: '',
-                    uploadedPhotosDetails: []
-                }, currentProjectId)
+                storageService.load('reportData', window.DEFAULT_STATES.reportData, currentProjectId)
             );
 
             // Equipment with localStorage
             const [equipment, setEquipment] = useState(() =>
-                storageService.load('equipment', {
-                    drillRig: '',
-                    truck: '',
-                    dumpTruck: 'No',
-                    dumpTruckTimes: '',
-                    trailer: 'No',
-                    coreMachine: false,
-                    groutMachine: false,
-                    extruder: false,
-                    generator: false,
-                    decon: false
-                }, currentProjectId)
+                storageService.load('equipment', window.DEFAULT_STATES.equipment, currentProjectId)
             );
 
             // Work Days with localStorage
             const [workDays, setWorkDays] = useState(() =>
-                storageService.load('workDays', [{
-                    id: 1,
-                    date: new Date().toISOString().split('T')[0],
-                    timeLeftShop: '',
-                    arrivedOnSite: '',
-                    timeLeftSite: '',
-                    arrivedAtShop: '',
-                    hoursDriving: '',
-                    hoursOnSite: '',
-                    standbyHours: '',
-                    standbyMinutes: '',
-                    standbyReason: '',
-                    pitStopHours: '',
-                    pitStopMinutes: '',
-                    pitStopReason: '',
-                    collapsed: false
-                }], currentProjectId)
+                storageService.load('workDays', [window.DEFAULT_STATES.createDefaultWorkDay()], currentProjectId)
             );
 
             // Borings with localStorage
             const [borings, setBorings] = useState(() =>
-                storageService.load('borings', [{
-                    id: 1,
-                    method: '',
-                    footage: '',
-                    isEnvironmental: false,
-                    isGeotechnical: false,
-                    washboreSetup: false,
-                    washboreFootage: '',
-                    casingSetup: false,
-                    casingFootage: '',
-                    coreSetup: false,
-                    coreFootage: '',
-                    collapsed: false
-                }], currentProjectId)
+                storageService.load('borings', [window.DEFAULT_STATES.createDefaultBoring()], currentProjectId)
             );
             
             // Auto-save to localStorage whenever data changes
@@ -412,28 +363,50 @@ const { useState, useEffect } = React;
                 addSupply('End Caps 1"', supplies.endCaps1);
                 addSupply('End Caps 2"', supplies.endCaps2);
                 addSupply('End Caps 4"', supplies.endCaps4);
+                addSupply('End Caps Other', supplies.endCapsOther);
                 addSupply('Locking Caps 1"', supplies.lockingCaps1);
                 addSupply('Locking Caps 2"', supplies.lockingCaps2);
                 addSupply('Locking Caps 4"', supplies.lockingCaps4);
+                addSupply('Locking Caps Other', supplies.lockingCapsOther);
                 addSupply('Screen 5\' 1"', supplies.screen5_1);
                 addSupply('Screen 5\' 2"', supplies.screen5_2);
                 addSupply('Screen 5\' 4"', supplies.screen5_4);
+                addSupply('Screen 5\' Other', supplies.screen5Other);
                 addSupply('Screen 10\' 1"', supplies.screen10_1);
                 addSupply('Screen 10\' 2"', supplies.screen10_2);
                 addSupply('Screen 10\' 4"', supplies.screen10_4);
+                addSupply('Screen 10\' Other', supplies.screen10Other);
                 addSupply('Riser 5\' 1"', supplies.riser5_1);
                 addSupply('Riser 5\' 2"', supplies.riser5_2);
                 addSupply('Riser 5\' 4"', supplies.riser5_4);
+                addSupply('Riser 5\' Other', supplies.riser5Other);
                 addSupply('Riser 10\' 1"', supplies.riser10_1);
                 addSupply('Riser 10\' 2"', supplies.riser10_2);
                 addSupply('Riser 10\' 4"', supplies.riser10_4);
+                addSupply('Riser 10\' Other', supplies.riser10Other);
+                addSupply('Flush Mounts 7"', supplies.flushMounts7);
+                addSupply('Flush Mounts 8"', supplies.flushMounts8);
+                addSupply('Flush Mounts Other', supplies.flushMountsOther);
+                addSupply('Stick-Up Covers 4"', supplies.stickUpCovers4);
+                addSupply('Stick-Up Covers 6"', supplies.stickUpCovers6);
+                addSupply('Stick-Up Covers Other', supplies.stickUpCoversOther);
+                addSupply('Bollards 3"', supplies.bollards3);
+                addSupply('Bollards 4"', supplies.bollards4);
+                addSupply('Bollards Other', supplies.bollardsOther);
                 addSupply('Concrete 50#', supplies.concrete50);
                 addSupply('Concrete 60#', supplies.concrete60);
                 addSupply('Concrete 80#', supplies.concrete80);
-                addSupply('Bentonite 50#', supplies.bentonite50);
-                addSupply('Sand 50#', supplies.sand50);
-                addSupply('3/8 Chips 50#', supplies.chips38_50);
-                addSupply('Grout', supplies.grout);
+                addSupply('Sand', supplies.sand);
+                addSupply('Drilling Mud', supplies.drillingMud);
+                addSupply('Bentonite Chips', supplies.bentoniteChips);
+                addSupply('Bentonite Pellets', supplies.bentonitePellets);
+                addSupply('Bentonite Grout', supplies.bentoniteGrout);
+                addSupply('Portland Grout', supplies.portlandGrout);
+                addSupply('Buckets', supplies.buckets);
+                addSupply('Shelby Tubes', supplies.shelbyTubes);
+                addSupply('Core Boxes', supplies.numCoreBoxes);
+                addSupply('Other', supplies.other);
+                addSupply('Misc', supplies.misc);
 
                 return csv;
             };
@@ -468,42 +441,12 @@ const { useState, useEffect } = React;
                 storageService.saveGlobal('currentProjectName', newProjectName.trim());
                 
                 // Clear state for new project (no saved data exists yet)
-                setReportData({
-                    client: '', jobName: '', location: '', driller: '', helper: '',
-                    perDiem: '', commentsLabor: '', uploadedPhotosDetails: []
-                });
-                setEquipment({
-                    drillRig: '', truck: '', dumpTruck: 'No', dumpTruckTimes: '',
-                    trailer: 'No', coreMachine: false, groutMachine: false,
-                    extruder: false, generator: false, decon: false
-                });
-                setWorkDays([{
-                    id: 1, date: new Date().toISOString().split('T')[0],
-                    timeLeftShop: '', arrivedOnSite: '', timeLeftSite: '', arrivedAtShop: '',
-                    hoursDriving: '', hoursOnSite: '', standbyHours: '', standbyMinutes: '',
-                    standbyReason: '', pitStopHours: '', pitStopMinutes: '', pitStopReason: '',
-                    collapsed: false
-                }]);
-                setBorings([{
-                    id: 1, method: '', footage: '', isEnvironmental: false, isGeotechnical: false,
-                    washboreSetup: false, washboreFootage: '', casingSetup: false, casingFootage: '',
-                    coreSetup: false, coreFootage: '', collapsed: false
-                }]);
-                setSuppliesData({
-                    endCaps1: '', endCaps2: '', endCaps4: '', endCapsOther: '',
-                    lockingCaps1: '', lockingCaps2: '', lockingCaps4: '', lockingCapsOther: '',
-                    screen5_1: '', screen5_2: '', screen5_4: '', screen5Other: '',
-                    screen10_1: '', screen10_2: '', screen10_4: '', screen10Other: '',
-                    riser5_1: '', riser5_2: '', riser5_4: '', riser5Other: '',
-                    riser10_1: '', riser10_2: '', riser10_4: '', riser10Other: '',
-                    flushMounts7: '', flushMounts8: '', flushMountsOther: '',
-                    stickUpCovers4: '', stickUpCovers6: '', stickUpCoversOther: '',
-                    bollards3: '', bollards4: '', bollardsOther: '',
-                    concrete50: '', concrete60: '', concrete80: '',
-                    sand: '', drillingMud: '', bentoniteChips: '', bentonitePellets: '',
-                    bentoniteGrout: '', portlandGrout: '', buckets: '', shelbyTubes: '',
-                    numCoreBoxes: '', other: '', misc: '', uploadedPhotosSupplies: []
-                });
+                const defaults = window.DEFAULT_STATES.getCompleteDefaults();
+                setReportData(defaults.reportData);
+                setEquipment(defaults.equipment);
+                setWorkDays(defaults.workDays);
+                setBorings(defaults.borings);
+                setSuppliesData(defaults.suppliesData);
                 
                 // Close modal
                 setNewProjectName('');
@@ -513,7 +456,10 @@ const { useState, useEffect } = React;
             const switchProject = (selectedProjectId) => {
                 // Save current project data before switching
                 saveCurrentProjectData();
-                
+
+                // Get default states once
+                const defaults = window.DEFAULT_STATES;
+
                 // Handle default project (empty string)
                 if (selectedProjectId === '') {
                     setProjectId('');
@@ -522,45 +468,14 @@ const { useState, useEffect } = React;
                     storageService.saveGlobal('currentProjectName', 'Default Project');
 
                     // Load default project data
-                    setReportData(storageService.load('reportData', {
-                        client: '', jobName: '', location: '', driller: '', helper: '',
-                        perDiem: '', commentsLabor: '', uploadedPhotosDetails: []
-                    }, ''));
-                    setEquipment(storageService.load('equipment', {
-                        drillRig: '', truck: '', dumpTruck: 'No', dumpTruckTimes: '',
-                        trailer: 'No', coreMachine: false, groutMachine: false,
-                        extruder: false, generator: false, decon: false
-                    }, ''));
-                    setWorkDays(storageService.load('workDays', [{
-                        id: 1, date: new Date().toISOString().split('T')[0],
-                        timeLeftShop: '', arrivedOnSite: '', timeLeftSite: '', arrivedAtShop: '',
-                        hoursDriving: '', hoursOnSite: '', standbyHours: '', standbyMinutes: '',
-                        standbyReason: '', pitStopHours: '', pitStopMinutes: '', pitStopReason: '',
-                        collapsed: false
-                    }], ''));
-                    setBorings(storageService.load('borings', [{
-                        id: 1, method: '', footage: '', isEnvironmental: false, isGeotechnical: false,
-                        washboreSetup: false, washboreFootage: '', casingSetup: false, casingFootage: '',
-                        coreSetup: false, coreFootage: '', collapsed: false
-                    }], ''));
-                    setSuppliesData(storageService.load('suppliesData', {
-                        endCaps1: '', endCaps2: '', endCaps4: '', endCapsOther: '',
-                        lockingCaps1: '', lockingCaps2: '', lockingCaps4: '', lockingCapsOther: '',
-                        screen5_1: '', screen5_2: '', screen5_4: '', screen5Other: '',
-                        screen10_1: '', screen10_2: '', screen10_4: '', screen10Other: '',
-                        riser5_1: '', riser5_2: '', riser5_4: '', riser5Other: '',
-                        riser10_1: '', riser10_2: '', riser10_4: '', riser10Other: '',
-                        flushMounts7: '', flushMounts8: '', flushMountsOther: '',
-                        stickUpCovers4: '', stickUpCovers6: '', stickUpCoversOther: '',
-                        bollards3: '', bollards4: '', bollardsOther: '',
-                        concrete50: '', concrete60: '', concrete80: '',
-                        sand: '', drillingMud: '', bentoniteChips: '', bentonitePellets: '',
-                        bentoniteGrout: '', portlandGrout: '', buckets: '', shelbyTubes: '',
-                        numCoreBoxes: '', other: '', misc: '', uploadedPhotosSupplies: []
-                    }, ''));
+                    setReportData(storageService.load('reportData', defaults.reportData, ''));
+                    setEquipment(storageService.load('equipment', defaults.equipment, ''));
+                    setWorkDays(storageService.load('workDays', [defaults.createDefaultWorkDay()], ''));
+                    setBorings(storageService.load('borings', [defaults.createDefaultBoring()], ''));
+                    setSuppliesData(storageService.load('suppliesData', defaults.suppliesData, ''));
                     return;
                 }
-                
+
                 // Handle named projects
                 const project = projects.find(p => p.id === selectedProjectId);
                 if (project) {
@@ -570,42 +485,11 @@ const { useState, useEffect } = React;
                     storageService.saveGlobal('currentProjectName', project.name);
 
                     // Load project data
-                    setReportData(storageService.load('reportData', {
-                        client: '', jobName: '', location: '', driller: '', helper: '',
-                        perDiem: '', commentsLabor: '', uploadedPhotosDetails: []
-                    }, project.id));
-                    setEquipment(storageService.load('equipment', {
-                        drillRig: '', truck: '', dumpTruck: 'No', dumpTruckTimes: '',
-                        trailer: 'No', coreMachine: false, groutMachine: false,
-                        extruder: false, generator: false, decon: false
-                    }, project.id));
-                    setWorkDays(storageService.load('workDays', [{
-                        id: 1, date: new Date().toISOString().split('T')[0],
-                        timeLeftShop: '', arrivedOnSite: '', timeLeftSite: '', arrivedAtShop: '',
-                        hoursDriving: '', hoursOnSite: '', standbyHours: '', standbyMinutes: '',
-                        standbyReason: '', pitStopHours: '', pitStopMinutes: '', pitStopReason: '',
-                        collapsed: false
-                    }], project.id));
-                    setBorings(storageService.load('borings', [{
-                        id: 1, method: '', footage: '', isEnvironmental: false, isGeotechnical: false,
-                        washboreSetup: false, washboreFootage: '', casingSetup: false, casingFootage: '',
-                        coreSetup: false, coreFootage: '', collapsed: false
-                    }], project.id));
-                    setSuppliesData(storageService.load('suppliesData', {
-                        endCaps1: '', endCaps2: '', endCaps4: '', endCapsOther: '',
-                        lockingCaps1: '', lockingCaps2: '', lockingCaps4: '', lockingCapsOther: '',
-                        screen5_1: '', screen5_2: '', screen5_4: '', screen5Other: '',
-                        screen10_1: '', screen10_2: '', screen10_4: '', screen10Other: '',
-                        riser5_1: '', riser5_2: '', riser5_4: '', riser5Other: '',
-                        riser10_1: '', riser10_2: '', riser10_4: '', riser10Other: '',
-                        flushMounts7: '', flushMounts8: '', flushMountsOther: '',
-                        stickUpCovers4: '', stickUpCovers6: '', stickUpCoversOther: '',
-                        bollards3: '', bollards4: '', bollardsOther: '',
-                        concrete50: '', concrete60: '', concrete80: '',
-                        sand: '', drillingMud: '', bentoniteChips: '', bentonitePellets: '',
-                        bentoniteGrout: '', portlandGrout: '', buckets: '', shelbyTubes: '',
-                        numCoreBoxes: '', other: '', misc: '', uploadedPhotosSupplies: []
-                    }, project.id));
+                    setReportData(storageService.load('reportData', defaults.reportData, project.id));
+                    setEquipment(storageService.load('equipment', defaults.equipment, project.id));
+                    setWorkDays(storageService.load('workDays', [defaults.createDefaultWorkDay()], project.id));
+                    setBorings(storageService.load('borings', [defaults.createDefaultBoring()], project.id));
+                    setSuppliesData(storageService.load('suppliesData', defaults.suppliesData, project.id));
                 }
             };
             
@@ -737,28 +621,7 @@ const { useState, useEffect } = React;
 
             // Supplies Data
             const [suppliesData, setSuppliesData] = useState(() =>
-                storageService.load('suppliesData', {
-                    // Main table items
-                    endCaps1: '', endCaps2: '', endCaps4: '', endCapsOther: '',
-                    lockingCaps1: '', lockingCaps2: '', lockingCaps4: '', lockingCapsOther: '',
-                    screen5_1: '', screen5_2: '', screen5_4: '', screen5Other: '',
-                    screen10_1: '', screen10_2: '', screen10_4: '', screen10Other: '',
-                    riser5_1: '', riser5_2: '', riser5_4: '', riser5Other: '',
-                    riser10_1: '', riser10_2: '', riser10_4: '', riser10Other: '',
-                    // Other items
-                    flushMounts7: '', flushMounts8: '', flushMountsOther: '',
-                    stickUpCovers4: '', stickUpCovers6: '', stickUpCoversOther: '',
-                    bollards3: '', bollards4: '', bollardsOther: '',
-                    concrete50: '', concrete60: '', concrete80: '',
-                    sand: '', drillingMud: '',
-                    bentoniteChips: '', bentonitePellets: '',
-                    bentoniteGrout: '', portlandGrout: '',
-                    buckets: '', shelbyTubes: '',
-                    numCoreBoxes: '',
-                    other: '',
-                    misc: '',
-                    uploadedPhotosSupplies: []
-                }, currentProjectId)
+                storageService.load('suppliesData', window.DEFAULT_STATES.suppliesData, currentProjectId)
             );
 
             // Auto-save supplies data
@@ -982,84 +845,13 @@ const { useState, useEffect } = React;
                     return;
                 }
 
-                // Reset all state to initial values
-                setReportData({
-                    client: '',
-                    jobName: '',
-                    location: '',
-                    driller: '',
-                    helper: '',
-                    perDiem: '',
-                    commentsLabor: '',
-                    uploadedPhotosDetails: []
-                });
-
-                setEquipment({
-                    drillRig: '',
-                    truck: '',
-                    dumpTruck: 'No',
-                    dumpTruckTimes: '',
-                    trailer: 'No',
-                    coreMachine: false,
-                    groutMachine: false,
-                    extruder: false,
-                    generator: false,
-                    decon: false
-                });
-
-                setWorkDays([{
-                    id: 1,
-                    date: new Date().toISOString().split('T')[0],
-                    timeLeftShop: '',
-                    arrivedOnSite: '',
-                    timeLeftSite: '',
-                    arrivedAtShop: '',
-                    hoursDriving: '',
-                    hoursOnSite: '',
-                    standbyHours: '',
-                    standbyMinutes: '',
-                    standbyReason: '',
-                    pitStopHours: '',
-                    pitStopMinutes: '',
-                    pitStopReason: '',
-                    collapsed: false
-                }]);
-
-                setBorings([{
-                    id: 1,
-                    method: '',
-                    footage: '',
-                    isEnvironmental: false,
-                    isGeotechnical: false,
-                    washboreSetup: false,
-                    washboreFootage: '',
-                    casingSetup: false,
-                    casingFootage: '',
-                    coreSetup: false,
-                    coreFootage: '',
-                    collapsed: false
-                }]);
-
-                setSuppliesData({
-                    endCaps1: '', endCaps2: '', endCaps4: '', endCapsOther: '',
-                    lockingCaps1: '', lockingCaps2: '', lockingCaps4: '', lockingCapsOther: '',
-                    screen5_1: '', screen5_2: '', screen5_4: '', screen5Other: '',
-                    screen10_1: '', screen10_2: '', screen10_4: '', screen10Other: '',
-                    riser5_1: '', riser5_2: '', riser5_4: '', riser5Other: '',
-                    riser10_1: '', riser10_2: '', riser10_4: '', riser10Other: '',
-                    flushMounts7: '', flushMounts8: '', flushMountsOther: '',
-                    stickUpCovers4: '', stickUpCovers6: '', stickUpCoversOther: '',
-                    bollards3: '', bollards4: '', bollardsOther: '',
-                    concrete50: '', concrete60: '', concrete80: '',
-                    sand: '', drillingMud: '',
-                    bentoniteChips: '', bentonitePellets: '',
-                    bentoniteGrout: '', portlandGrout: '',
-                    buckets: '', shelbyTubes: '',
-                    numCoreBoxes: '',
-                    other: '',
-                    misc: '',
-                    uploadedPhotosSupplies: []
-                });
+                // Reset all state to initial values using shared defaults
+                const defaults = window.DEFAULT_STATES.getCompleteDefaults();
+                setReportData(defaults.reportData);
+                setEquipment(defaults.equipment);
+                setWorkDays(defaults.workDays);
+                setBorings(defaults.borings);
+                setSuppliesData(defaults.suppliesData);
 
                 // Clear localStorage for current project
                 if (projectId) {
@@ -1073,32 +865,6 @@ const { useState, useEffect } = React;
                 alert('Form has been reset to default values.');
             };
 
-            const testFindAllFiles = async () => {
-                console.log('=== SEARCHING ALL DRIVE FILES ===');
-                try {
-                    // Search for all JSON files regardless of folder
-                    const response = await gapi.client.drive.files.list({
-                        q: "mimeType='application/json' and trashed=false",
-                        fields: 'files(id, name, parents, modifiedTime)',
-                        orderBy: 'modifiedTime desc',
-                        pageSize: 20
-                    });
-                    
-                    const files = response.result.files;
-                    console.log('Total JSON files in Drive:', files ? files.length : 0);
-                    if (files && files.length > 0) {
-                        console.log('Files:', files);
-                        alert('Found ' + files.length + ' JSON files. Check console for details including parent folder IDs.');
-                    } else {
-                        alert('No JSON files found anywhere in your Drive');
-                    }
-                } catch (error) {
-                    console.error('Error:', error);
-                    alert('Error: ' + error.message);
-                }
-            };
-
-            
             const handleLoadFromDrive = async () => {
                 
                 console.log('=== LOAD BUTTON CLICKED ===');
