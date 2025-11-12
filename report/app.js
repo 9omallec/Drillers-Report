@@ -1531,14 +1531,14 @@ const { useState, useEffect } = React;
                                     )}
                                     <button
                                         onClick={handleSubmitReport}
-                                        className={`flex-1 md:flex-none px-4 py-3 text-base font-semibold text-white rounded-lg transition touch-manipulation ${isEditMode ? 'bg-blue-700 hover:bg-blue-800' : 'bg-blue-600 hover:bg-blue-700'}`}
+                                        className={`flex-1 md:flex-none px-4 py-2.5 text-base font-semibold text-white rounded-lg transition touch-manipulation ${isEditMode ? 'bg-blue-700 hover:bg-blue-800' : 'bg-blue-600 hover:bg-blue-700'}`}
                                         title={isEditMode ? "Update existing report on Google Drive" : "Upload report directly to Google Drive (requires sign-in)"}
                                     >
                                         {isEditMode ? '📝 Update Report' : '📤 Submit Report'}
                                     </button>
                                     <button
                                         onClick={handlePrint}
-                                        className={`flex-1 md:flex-none px-4 py-3 text-base font-semibold rounded-lg transition touch-manipulation ${darkMode ? 'bg-gray-700 text-white hover:bg-gray-600' : 'bg-gray-600 text-white hover:bg-gray-700'}`}
+                                        className={`flex-1 md:flex-none px-4 py-2.5 text-base font-semibold rounded-lg transition touch-manipulation ${darkMode ? 'bg-gray-700 text-white hover:bg-gray-600' : 'bg-gray-600 text-white hover:bg-gray-700'}`}
                                     >
                                         Print
                                     </button>
@@ -1810,7 +1810,7 @@ const { useState, useEffect } = React;
                                                 type="checkbox"
                                                 checked={equipment.coreMachine}
                                                 onChange={(e) => handleEquipmentChange('coreMachine', e.target.checked)}
-                                                className="w-5 h-5 text-brand-green-600 rounded focus:ring-brand-green-500 cursor-pointer"
+                                                className="w-5 h-5 text-brand-green-600 bg-gray-100 border-gray-300 rounded focus:ring-2 focus:ring-brand-green-500 checked:bg-brand-green-600 checked:border-brand-green-600 cursor-pointer"
                                             />
                                             <span className={`text-sm font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Core Machine</span>
                                         </label>
@@ -1819,7 +1819,7 @@ const { useState, useEffect } = React;
                                                 type="checkbox"
                                                 checked={equipment.groutMachine}
                                                 onChange={(e) => handleEquipmentChange('groutMachine', e.target.checked)}
-                                                className="w-5 h-5 text-brand-green-600 rounded focus:ring-brand-green-500 cursor-pointer"
+                                                className="w-5 h-5 text-brand-green-600 bg-gray-100 border-gray-300 rounded focus:ring-2 focus:ring-brand-green-500 checked:bg-brand-green-600 checked:border-brand-green-600 cursor-pointer"
                                             />
                                             <span className={`text-sm font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Grout Machine</span>
                                         </label>
@@ -1828,7 +1828,7 @@ const { useState, useEffect } = React;
                                                 type="checkbox"
                                                 checked={equipment.extruder}
                                                 onChange={(e) => handleEquipmentChange('extruder', e.target.checked)}
-                                                className="w-5 h-5 text-brand-green-600 rounded focus:ring-brand-green-500 cursor-pointer"
+                                                className="w-5 h-5 text-brand-green-600 bg-gray-100 border-gray-300 rounded focus:ring-2 focus:ring-brand-green-500 checked:bg-brand-green-600 checked:border-brand-green-600 cursor-pointer"
                                             />
                                             <span className={`text-sm font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Extruder</span>
                                         </label>
@@ -1837,7 +1837,7 @@ const { useState, useEffect } = React;
                                                 type="checkbox"
                                                 checked={equipment.generator}
                                                 onChange={(e) => handleEquipmentChange('generator', e.target.checked)}
-                                                className="w-5 h-5 text-brand-green-600 rounded focus:ring-brand-green-500 cursor-pointer"
+                                                className="w-5 h-5 text-brand-green-600 bg-gray-100 border-gray-300 rounded focus:ring-2 focus:ring-brand-green-500 checked:bg-brand-green-600 checked:border-brand-green-600 cursor-pointer"
                                             />
                                             <span className={`text-sm font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Generator</span>
                                         </label>
@@ -1846,7 +1846,7 @@ const { useState, useEffect } = React;
                                                 type="checkbox"
                                                 checked={equipment.decon}
                                                 onChange={(e) => handleEquipmentChange('decon', e.target.checked)}
-                                                className="w-5 h-5 text-brand-green-600 rounded focus:ring-brand-green-500 cursor-pointer"
+                                                className="w-5 h-5 text-brand-green-600 bg-gray-100 border-gray-300 rounded focus:ring-2 focus:ring-brand-green-500 checked:bg-brand-green-600 checked:border-brand-green-600 cursor-pointer"
                                             />
                                             <span className={`text-sm font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Decon</span>
                                         </label>
