@@ -1462,26 +1462,7 @@ const { useState, useEffect } = React;
             const boringStats = getBoringStats();
 
             return (
-                <div className={`min-h-screen transition-colors ${darkMode ? 'bg-gray-900' : 'bg-white'}`}>
-            {/* Fixed Dark Mode Toggle - Top Right Corner */}
-            <button
-                onClick={() => setDarkMode(!darkMode)}
-                className={`fixed top-12 right-16 md:top-2 md:right-2 z-[9999] p-1.5 rounded-lg shadow-2xl transition ${darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-white hover:bg-gray-100 border border-gray-300'}`}
-                title={darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-                aria-label={darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-            >
-                {darkMode ? (
-                    <svg className="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clipRule="evenodd" />
-                    </svg>
-                ) : (
-                    <svg className="w-4 h-4 text-gray-700" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
-                    </svg>
-                )}
-            </button>
-
-                    <div className="max-w-7xl mx-auto p-3">
+                <div className={`min-h-screen transition-colors ${darkMode ? 'bg-gray-900' : 'bg-white'}`}><div className="max-w-7xl mx-auto p-3">
                         {/* Header with Logo and Company Name */}
                         <div className={`shadow-sm rounded-lg p-4 mb-4 no-print ${darkMode ? 'bg-gray-800' : 'bg-white border border-gray-200'}`}>
                             <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
