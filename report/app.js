@@ -923,6 +923,8 @@ const { useState, useEffect } = React;
                     reader.readAsText(file);
                 }
             };
+            
+
             const handleLoadFromDrive = async () => {
                 if (!isSignedIn) {
                     alert('Please sign in to Google Drive first');
@@ -943,15 +945,13 @@ const { useState, useEffect } = React;
                         return;
                     }
 
-                    const fileList = files.map((file, index) => {
-                        const date = new Date(file.modifiedTime).toLocaleString();
-                        return (index + 1) + '. ' + file.name + ' (Modified: ' + date + ')';
-                    }).join('
-');
+                    let fileList = '';
+                    for (let i = 0; i < files.length; i++) {
+                        const date = new Date(files[i].modifiedTime).toLocaleString();
+                        fileList += (i + 1) + '. ' + files[i].name + ' (Modified: ' + date + ')' + String.fromCharCode(10);
+                    }
 
-                    const selection = prompt('Select a report to load (enter number 1-' + files.length + '):
-
-' + fileList);
+                    const selection = prompt('Select a report to load (enter number 1-' + files.length + '):' + String.fromCharCode(10) + String.fromCharCode(10) + fileList);
                     
                     if (!selection) return;
                     
