@@ -939,7 +939,7 @@ const { useState, useEffect } = React;
                         pageSize: 100
                     });
 
-                    const files = response.result.files;
+                    let files = response.result.files;
                     if (!files || files.length === 0) {
                         alert('No reports found in Google Drive');
                         return;
