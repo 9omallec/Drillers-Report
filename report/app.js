@@ -925,7 +925,37 @@ const { useState, useEffect } = React;
             };
             
 
+            const testFindAllFiles = async () => {
+                console.log('=== SEARCHING ALL DRIVE FILES ===');
+                try {
+                    // Search for all JSON files regardless of folder
+                    const response = await gapi.client.drive.files.list({
+                        q: "mimeType='application/json' and trashed=false",
+                        fields: 'files(id, name, parents, modifiedTime)',
+                        orderBy: 'modifiedTime desc',
+                        pageSize: 20
+                    });
+                    
+                    const files = response.result.files;
+                    console.log('Total JSON files in Drive:', files ? files.length : 0);
+                    if (files && files.length > 0) {
+                        console.log('Files:', files);
+                        alert('Found ' + files.length + ' JSON files. Check console for details including parent folder IDs.');
+                    } else {
+                        alert('No JSON files found anywhere in your Drive');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('Error: ' + error.message);
+                }
+            };
+
+            
             const handleLoadFromDrive = async () => {
+                // First, find ALL JSON files to see where they actually are
+                await testFindAllFiles();
+                return; // Stop here for now
+                
                 console.log('=== LOAD BUTTON CLICKED ===');
                 console.log('Signed in:', isSignedIn);
                 console.log('Folder ID:', GOOGLE_DRIVE_CONFIG.FOLDER_ID);
@@ -993,6 +1023,7 @@ const { useState, useEffect } = React;
                 }
             };
 
+            
             const handleSubmitReport = async () => {
                 // Check if user is signed in to Google Drive
                 if (!isSignedIn) {
