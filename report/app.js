@@ -930,7 +930,6 @@ const { useState, useEffect } = React;
                 }
 
                 try {
-                    // List files in the Drillers Reports folder
                     const response = await gapi.client.drive.files.list({
                         q: "'" + folderId + "' in parents and mimeType='application/json' and trashed=false",
                         fields: 'files(id, name, modifiedTime)',
@@ -944,16 +943,15 @@ const { useState, useEffect } = React;
                         return;
                     }
 
-                    // Create a selection dialog
                     const fileList = files.map((file, index) => {
                         const date = new Date(file.modifiedTime).toLocaleString();
-                        return `${index + 1}. ${file.name} (Modified: ${date})`;
+                        return (index + 1) + '. ' + file.name + ' (Modified: ' + date + ')';
                     }).join('
 ');
 
-                    const selection = prompt(`Select a report to load (enter number 1-${files.length}):
+                    const selection = prompt('Select a report to load (enter number 1-' + files.length + '):
 
-${fileList}`);
+' + fileList);
                     
                     if (!selection) return;
                     
@@ -965,7 +963,6 @@ ${fileList}`);
 
                     const selectedFile = files[index];
                     
-                    // Download the file content
                     const fileResponse = await gapi.client.drive.files.get({
                         fileId: selectedFile.id,
                         alt: 'media'
@@ -973,7 +970,6 @@ ${fileList}`);
 
                     const data = JSON.parse(fileResponse.body);
                     
-                    // Load the data
                     if (data.report) setReportData(data.report);
                     if (data.workDays) setWorkDays(data.workDays);
                     if (data.borings) setBorings(data.borings);
