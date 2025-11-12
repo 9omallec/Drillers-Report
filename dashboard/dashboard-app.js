@@ -155,7 +155,7 @@
                     const report = reports.find(r => r.id === id);
                     if (report) {
                         const date = report.importedAt?.split('T')[0] || '';
-                        const customer = report.customer || '';
+                        const customer = report.client || report.customer || '';
                         const jobName = report.jobName || '';
                         const location = report.location || '';
                         const driller = report.driller || '';
@@ -202,7 +202,7 @@
             const filteredReports = reports.filter(report => {
                 const matchesStatus = filterStatus === 'all' || report.status === filterStatus;
                 const matchesSearch = searchTerm === '' || 
-                    report.customer?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    (report.client || report.customer)?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                     report.jobName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                     report.driller?.toLowerCase().includes(searchTerm.toLowerCase());
                 return matchesStatus && matchesSearch;
@@ -433,7 +433,7 @@
                                                             {report.importedAt?.split('T')[0] || 'N/A'}
                                                         </td>
                                                         <td className={`px-4 py-3 text-sm ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                                                            {report.customer || 'N/A'}
+                                                            {report.client || report.customer || 'N/A'}
                                                         </td>
                                                         <td className={`px-4 py-3 text-sm ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
                                                             {report.jobName || 'N/A'}
