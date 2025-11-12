@@ -980,7 +980,7 @@ const { useState, useEffect } = React;
                     if (files && files.length > 0) {
                         console.log('First file:', files[0]);
                     }
-                    if (\!files || files.length === 0) {
+                    if (!files || files.length === 0) {
                         console.log('No files in folder. Searching ALL JSON files...');
                         
                         const fallbackResponse = await gapi.client.drive.files.list({
