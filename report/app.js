@@ -26,6 +26,7 @@ const { useState, useEffect } = React;
             // Edit mode state
             const [isEditMode, setIsEditMode] = useState(false);
             const [editingReportId, setEditingReportId] = useState(null);
+            const [editingCsvId, setEditingCsvId] = useState(null);
             const [editingFileName, setEditingFileName] = useState(null);
 
             // Use shared dark mode hook
@@ -172,6 +173,49 @@ const { useState, useEffect } = React;
                             setEditingReportId(driveFileId);
                             setEditingFileName(driveFileName);
 
+                            // Find corresponding CSV file ID
+                            const findCsvFile = async () => {
+                                try {
+                                    // CSV filename is JSON filename with .csv extension
+                                    const csvFileName = driveFileName.replace('.json', '.csv');
+
+                                    const response = await gapi.client.drive.files.list({
+                                        q: "name='" + csvFileName + "' and mimeType='text/csv' and trashed=false",
+                                        driveId: GOOGLE_DRIVE_CONFIG.FOLDER_ID,
+                                        corpora: 'drive',
+                                        includeItemsFromAllDrives: true,
+                                        supportsAllDrives: true,
+                                        fields: 'files(id, name)',
+                                        pageSize: 1
+                                    });
+
+                                    if (response.result.files && response.result.files.length > 0) {
+                                        setEditingCsvId(response.result.files[0].id);
+                                        console.log('✓ Found CSV file for editing:', csvFileName);
+                                    } else {
+                                        console.warn('⚠ CSV file not found, will create new one on update');
+                                    }
+                                } catch (error) {
+                                    console.error('Error finding CSV file:', error);
+                                }
+                            };
+
+                            // Only search for CSV if user is signed in to Drive
+                            if (window.gapi && window.gapi.client && window.gapi.client.drive) {
+                                findCsvFile();
+                            } else {
+                                // Wait for gapi to load
+                                const checkGapi = setInterval(() => {
+                                    if (window.gapi && window.gapi.client && window.gapi.client.drive) {
+                                        clearInterval(checkGapi);
+                                        findCsvFile();
+                                    }
+                                }, 100);
+
+                                // Clear interval after 5 seconds if gapi not loaded
+                                setTimeout(() => clearInterval(checkGapi), 5000);
+                            }
+
                             // Load report data into form
                             if (loadedReport.report) {
                                 setReportData(loadedReport.report);
@@ -237,9 +281,14 @@ const { useState, useEffect } = React;
                         console.log('Updating existing report...');
                         await updateFile(editingReportId, jsonFileName, jsonContent, 'application/json');
 
-                        // For CSV, we need to find the CSV file ID or create new one
-                        // For simplicity, we'll upload a new CSV (Drive will handle duplicates)
-                        await uploadFile(csvFileName, csvContent, 'text/csv');
+                        // Update CSV file if we have the ID, otherwise create new one
+                        if (editingCsvId) {
+                            console.log('Updating existing CSV file...');
+                            await updateFile(editingCsvId, csvFileName, csvContent, 'text/csv');
+                        } else {
+                            console.log('CSV file ID not found, creating new CSV...');
+                            await uploadFile(csvFileName, csvContent, 'text/csv');
+                        }
 
                         return true;
                     } else {
