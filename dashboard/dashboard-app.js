@@ -496,10 +496,10 @@
                                                                 >
                                                                     ✏️
                                                                 </button>
-                                                                {report.uploadedPhotosDetails && report.uploadedPhotosDetails.length > 0 && (
+                                                                {Array.isArray(report.uploadedPhotosDetails) && report.uploadedPhotosDetails.length > 0 && report.uploadedPhotosDetails.some(img => img && img.dataURL) && (
                                                                     <button
                                                                         onClick={() => {
-                                                                            setViewingImages(report.uploadedPhotosDetails);
+                                                                            setViewingImages(report.uploadedPhotosDetails.filter(img => img && img.dataURL));
                                                                             setCurrentImageIndex(0);
                                                                         }}
                                                                         className="px-3 py-1 bg-purple-600 text-white rounded text-xs hover:bg-purple-700"
@@ -1118,11 +1118,22 @@
 
                                 {/* Image Display */}
                                 <div className="max-w-full max-h-full flex items-center justify-center">
-                                    <img
-                                        src={viewingImages[currentImageIndex].dataURL}
-                                        alt={viewingImages[currentImageIndex].name || `Image ${currentImageIndex + 1}`}
-                                        className="max-w-full max-h-[80vh] object-contain rounded-lg shadow-2xl"
-                                    />
+                                    {viewingImages[currentImageIndex] && viewingImages[currentImageIndex].dataURL ? (
+                                        <img
+                                            src={viewingImages[currentImageIndex].dataURL}
+                                            alt={viewingImages[currentImageIndex].name || `Image ${currentImageIndex + 1}`}
+                                            className="max-w-full max-h-[80vh] object-contain rounded-lg shadow-2xl"
+                                            onError={(e) => {
+                                                console.error('Failed to load image:', viewingImages[currentImageIndex]);
+                                                e.target.style.display = 'none';
+                                            }}
+                                        />
+                                    ) : (
+                                        <div className="text-white text-center p-8">
+                                            <div className="text-6xl mb-4">⚠️</div>
+                                            <div className="text-xl">Image not available</div>
+                                        </div>
+                                    )}
                                 </div>
 
                                 {/* Image Info */}
