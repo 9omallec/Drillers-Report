@@ -594,6 +594,8 @@
                         </div>
                         </div>
                     </div>
+                        </>
+                        )}
                     
                     {/* Full Report View Modal */}
                     {viewingReport && (
