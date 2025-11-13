@@ -243,12 +243,6 @@
                                 </div>
                                 <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 header-buttons w-full sm:w-auto">
                                     <button
-                                        onClick={() => setShowAnalytics(true)}
-                                        className={`px-5 py-2.5 rounded-lg font-semibold transition-all shadow-md hover:shadow-lg whitespace-nowrap ${darkMode ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-blue-500 hover:bg-blue-600 text-white'}`}
-                                    >
-                                        📈 Analytics
-                                    </button>
-                                    <button
                                         onClick={() => setDarkMode(!darkMode)}
                                         className={`px-4 py-2.5 rounded-lg font-semibold transition-all whitespace-nowrap ${darkMode ? 'bg-gray-700 text-gray-200 hover:bg-gray-600' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
                                     >
