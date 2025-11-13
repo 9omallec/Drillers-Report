@@ -15,6 +15,9 @@
         'constants/config.js',
         'constants/defaultStates.js',
 
+        // Components (before everything else so they're available)
+        'components/Loading.js',
+
         // Services
         'services/storage.js',
         'services/googleDrive.js',
