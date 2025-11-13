@@ -965,7 +965,85 @@ const { useState, useEffect } = React;
             };
 
             
+            const validateReport = () => {
+                const errors = [];
+
+                // Required fields validation
+                if (!reportData.client || !reportData.client.trim()) {
+                    errors.push('• Client name is required');
+                }
+                if (!reportData.jobName || !reportData.jobName.trim()) {
+                    errors.push('• Job name is required');
+                }
+                if (!reportData.location || !reportData.location.trim()) {
+                    errors.push('• Location is required');
+                }
+
+                // Work days validation
+                if (!workDays || workDays.length === 0) {
+                    errors.push('• At least one work day is required');
+                } else {
+                    // Check if at least one work day has a date
+                    const hasValidDay = workDays.some(day => day.date && day.date.trim());
+                    if (!hasValidDay) {
+                        errors.push('• At least one work day must have a date');
+                    }
+
+                    // Validate time logic for each work day
+                    workDays.forEach((day, index) => {
+                        if (day.timeLeftShop && day.arrivedOnSite) {
+                            const left = new Date(`2000-01-01T${day.timeLeftShop}`);
+                            const arrived = new Date(`2000-01-01T${day.arrivedOnSite}`);
+                            if (arrived < left) {
+                                errors.push(`• Work Day ${index + 1}: Cannot arrive on site before leaving shop`);
+                            }
+                        }
+                        if (day.arrivedOnSite && day.timeLeftSite) {
+                            const arrived = new Date(`2000-01-01T${day.arrivedOnSite}`);
+                            const left = new Date(`2000-01-01T${day.timeLeftSite}`);
+                            if (left < arrived) {
+                                errors.push(`• Work Day ${index + 1}: Cannot leave site before arriving`);
+                            }
+                        }
+                        if (day.timeLeftSite && day.arrivedAtShop) {
+                            const leftSite = new Date(`2000-01-01T${day.timeLeftSite}`);
+                            const arrivedShop = new Date(`2000-01-01T${day.arrivedAtShop}`);
+                            if (arrivedShop < leftSite) {
+                                errors.push(`• Work Day ${index + 1}: Cannot arrive at shop before leaving site`);
+                            }
+                        }
+                    });
+                }
+
+                // Borings validation - check for negative footage
+                if (borings && borings.length > 0) {
+                    borings.forEach((boring, index) => {
+                        if (boring.footage && parseFloat(boring.footage) < 0) {
+                            errors.push(`• Boring ${index + 1}: Footage cannot be negative`);
+                        }
+                        if (boring.washboreFootage && parseFloat(boring.washboreFootage) < 0) {
+                            errors.push(`• Boring ${index + 1}: Washbore footage cannot be negative`);
+                        }
+                        if (boring.casingFootage && parseFloat(boring.casingFootage) < 0) {
+                            errors.push(`• Boring ${index + 1}: Casing footage cannot be negative`);
+                        }
+                        if (boring.coreFootage && parseFloat(boring.coreFootage) < 0) {
+                            errors.push(`• Boring ${index + 1}: Core footage cannot be negative`);
+                        }
+                    });
+                }
+
+                return errors;
+            };
+
             const handleSubmitReport = async () => {
+                // Validate form before proceeding
+                const validationErrors = validateReport();
+                if (validationErrors.length > 0) {
+                    alert('⚠️ Please fix the following errors:\n\n' + validationErrors.join('\n'));
+                    return;
+                }
+
                 // Check if user is signed in to Google Drive
                 if (!isSignedIn) {
                     alert('⚠️ Please sign in to Google Drive first!\n\nClick the "📁 Sign in to Drive" button above, then try submitting again.');
