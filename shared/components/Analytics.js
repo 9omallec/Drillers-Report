@@ -148,21 +148,29 @@
                     footage: data.footage
                 }));
 
-            // Footage by method
-            const methodStats = {};
+            // Hours by driller
+            const drillerHoursStats = {};
             filteredReports.forEach(report => {
-                report.borings?.forEach(boring => {
-                    const method = boring.method || 'Unknown';
-                    const footage = parseFloat(boring.footage) || 0;
-                    if (footage > 0) {
-                        methodStats[method] = (methodStats[method] || 0) + footage;
-                    }
-                });
+                const driller = report.driller || 'Unknown';
+                const hours = report.workDays?.reduce((s, day) => s + (parseFloat(day.hoursOnSite) || 0), 0) || 0;
+                drillerHoursStats[driller] = (drillerHoursStats[driller] || 0) + hours;
             });
 
-            const footageByMethod = Object.entries(methodStats)
+            const hoursByDriller = Object.entries(drillerHoursStats)
                 .sort((a, b) => b[1] - a[1])
-                .map(([label, value]) => ({ label, value }));
+                .map(([label, value]) => ({ label, value: parseFloat(value.toFixed(1)) }));
+
+            // Footage by driller
+            const drillerFootageStats = {};
+            filteredReports.forEach(report => {
+                const driller = report.driller || 'Unknown';
+                const footage = report.borings?.reduce((s, b) => s + (parseFloat(b.footage) || 0), 0) || 0;
+                drillerFootageStats[driller] = (drillerFootageStats[driller] || 0) + footage;
+            });
+
+            const footageByDriller = Object.entries(drillerFootageStats)
+                .sort((a, b) => b[1] - a[1])
+                .map(([label, value]) => ({ label, value: parseFloat(value.toFixed(1)) }));
 
             // Reports by driller
             const drillerStats = {};
@@ -181,7 +189,8 @@
                 totalHours: totalHours.toFixed(1),
                 avgFootagePerReport: filteredReports.length > 0 ? (totalFootage / filteredReports.length).toFixed(1) : '0',
                 topClients,
-                footageByMethod,
+                hoursByDriller,
+                footageByDriller,
                 reportsByDriller
             };
         }, [reports, timeRange]);
@@ -257,9 +266,14 @@
                     title: 'Reports by Client',
                     darkMode
                 }),
-                analytics.footageByMethod.length > 0 && React.createElement(BarChart, {
-                    data: analytics.footageByMethod,
-                    title: 'Footage by Method',
+                analytics.hoursByDriller.length > 0 && React.createElement(BarChart, {
+                    data: analytics.hoursByDriller,
+                    title: 'Hours Worked by Driller',
+                    darkMode
+                }),
+                analytics.footageByDriller.length > 0 && React.createElement(BarChart, {
+                    data: analytics.footageByDriller,
+                    title: 'Footage Drilled by Driller',
                     darkMode
                 }),
                 analytics.reportsByDriller.length > 0 && React.createElement(BarChart, {
