@@ -592,8 +592,6 @@
                                 💡 Backup: Use "Import Report" if you need to manually upload a JSON file
                             </p>
                         </div>
-                        </div>
-                    </div>
                         </>
                         )}
                     
