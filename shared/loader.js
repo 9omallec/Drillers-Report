@@ -18,6 +18,7 @@
         // Components (before everything else so they're available)
         'components/Loading.js',
         'components/PhotoGallery.js',
+        'components/Analytics.js',
 
         // Services
         'services/storage.js',

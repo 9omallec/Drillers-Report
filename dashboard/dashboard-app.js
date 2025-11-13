@@ -334,6 +334,33 @@
                                         className="hidden"
                                     />
                                 </label>
+                                {/* View Toggle */}
+                                <div className="flex gap-2">
+                                    <button
+                                        onClick={() => setShowAnalytics(false)}
+                                        className={`px-4 py-2.5 rounded-lg font-medium transition-all ${
+                                            !showAnalytics
+                                                ? 'bg-green-600 text-white shadow-md'
+                                                : darkMode
+                                                ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                                                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                        }`}
+                                    >
+                                        📋 Reports
+                                    </button>
+                                    <button
+                                        onClick={() => setShowAnalytics(true)}
+                                        className={`px-4 py-2.5 rounded-lg font-medium transition-all ${
+                                            showAnalytics
+                                                ? 'bg-green-600 text-white shadow-md'
+                                                : darkMode
+                                                ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                                                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                        }`}
+                                    >
+                                        📊 Analytics
+                                    </button>
+                                </div>
                                 <select
                                     value={filterStatus}
                                     onChange={(e) => setFilterStatus(e.target.value)}
@@ -366,6 +393,13 @@
                             )}
                         </div>
 
+                        {/* Analytics or Reports View */}
+                        {showAnalytics ? (
+                            <div className="mb-6">
+                                <AnalyticsComponents.AnalyticsDashboard reports={reports} darkMode={darkMode} />
+                            </div>
+                        ) : (
+                            <>
                         {/* Reports Table */}
                         <div className={`rounded-xl shadow-lg overflow-hidden ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
                             {filteredReports.length === 0 ? (
