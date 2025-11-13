@@ -38,8 +38,8 @@
             console.log('sharedModulesLoaded event received, fetching dashboard-app.js...');
 
             try {
-                // Fetch the script content
-                const response = await fetch('dashboard-app.js');
+                // Fetch the script content with cache-busting
+                const response = await fetch(`dashboard-app.js?v=${Date.now()}`);
                 const code = await response.text();
                 console.log('dashboard-app.js fetched, creating inline script...');
 

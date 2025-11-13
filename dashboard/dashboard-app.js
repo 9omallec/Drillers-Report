@@ -1,3 +1,4 @@
+// Version: 1763066342.9972708
         const { useState, useEffect } = React;
 
         function BossDashboard() {
@@ -982,6 +983,8 @@
                         </div>
                     )}
                 </div>
+            </div>
+            </div>
             );
         }
 
