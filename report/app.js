@@ -2416,22 +2416,15 @@ const { useState, useEffect } = React;
                                             />
                                         </label>
                                     </div>
-                                    {reportData.uploadedPhotosDetails.length > 0 && (
-                                        <div className={`p-2 rounded ${darkMode ? 'bg-gray-700' : 'bg-gray-50'}`}>
-                                            <p className={`text-sm font-semibold mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Uploaded Files:</p>
-                                            {reportData.uploadedPhotosDetails.map((file, index) => (
-                                                <div key={index} className="flex justify-between items-center text-sm py-1">
-                                                    <span className={darkMode ? 'text-gray-300' : 'text-gray-700'}>{file.name} ({file.size})</span>
-                                                    <button
-                                                        onClick={() => removePhoto(index, 'details')}
-                                                        className="text-red-500 hover:text-red-700 font-bold"
-                                                    >
-                                                        ×
-                                                    </button>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
+                                    <PhotoGallery
+                                        photos={reportData.uploadedPhotosDetails}
+                                        onPhotosChange={(newPhotos) => setReportData(prev => ({
+                                            ...prev,
+                                            uploadedPhotosDetails: newPhotos
+                                        }))}
+                                        section="details"
+                                        darkMode={darkMode}
+                                    />
                                 </div>
                             </div>
                         )}
@@ -2699,22 +2692,15 @@ const { useState, useEffect } = React;
                                                 />
                                             </label>
                                         </div>
-                                        {suppliesData.uploadedPhotosSupplies.length > 0 && (
-                                            <div className={`p-2 rounded ${darkMode ? 'bg-gray-700' : 'bg-gray-50'}`}>
-                                                <p className={`text-sm font-semibold mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>Uploaded Files:</p>
-                                                {suppliesData.uploadedPhotosSupplies.map((file, index) => (
-                                                    <div key={index} className="flex justify-between items-center text-sm py-1">
-                                                        <span className={darkMode ? 'text-gray-300' : 'text-gray-700'}>{file.name} ({file.size})</span>
-                                                        <button
-                                                            onClick={() => removePhoto(index, 'supplies')}
-                                                            className="text-red-500 hover:text-red-700 font-bold"
-                                                        >
-                                                            ×
-                                                        </button>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        )}
+                                        <PhotoGallery
+                                            photos={suppliesData.uploadedPhotosSupplies}
+                                            onPhotosChange={(newPhotos) => setSuppliesData(prev => ({
+                                                ...prev,
+                                                uploadedPhotosSupplies: newPhotos
+                                            }))}
+                                            section="supplies"
+                                            darkMode={darkMode}
+                                        />
                                     </div>
                                 </div>
                             </div>
