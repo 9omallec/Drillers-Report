@@ -15,6 +15,8 @@
             const [currentView, setCurrentView] = useState('reports'); // 'reports', 'analytics', 'clients'
             const [viewingImages, setViewingImages] = useState(null);
             const [currentImageIndex, setCurrentImageIndex] = useState(0);
+            const [sortColumn, setSortColumn] = useState('date');
+            const [sortDirection, setSortDirection] = useState('desc'); // 'asc' or 'desc'
 
             // Use shared dark mode hook
             const [darkMode, setDarkMode] = window.useDarkMode();
@@ -202,12 +204,74 @@
             // Filter and search reports
             const filteredReports = reports.filter(report => {
                 const matchesStatus = filterStatus === 'all' || report.status === filterStatus;
-                const matchesSearch = searchTerm === '' || 
+                const matchesSearch = searchTerm === '' ||
                     (report.client || report.customer)?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                     report.jobName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                     report.driller?.toLowerCase().includes(searchTerm.toLowerCase());
                 return matchesStatus && matchesSearch;
             });
+
+            // Sort reports
+            const sortedReports = [...filteredReports].sort((a, b) => {
+                let aVal, bVal;
+
+                switch (sortColumn) {
+                    case 'date':
+                        aVal = new Date(a.date || a.importedAt || 0).getTime();
+                        bVal = new Date(b.date || b.importedAt || 0).getTime();
+                        break;
+                    case 'customer':
+                        aVal = (a.client || a.customer || '').toLowerCase();
+                        bVal = (b.client || b.customer || '').toLowerCase();
+                        break;
+                    case 'job':
+                        aVal = (a.jobName || '').toLowerCase();
+                        bVal = (b.jobName || '').toLowerCase();
+                        break;
+                    case 'driller':
+                        aVal = (a.driller || '').toLowerCase();
+                        bVal = (b.driller || '').toLowerCase();
+                        break;
+                    case 'hours':
+                        aVal = a.workDays?.reduce((sum, day) => {
+                            const drive = parseFloat(day.hoursDriving) || 0;
+                            const onSite = parseFloat(day.hoursOnSite) || 0;
+                            return sum + drive + onSite;
+                        }, 0) || 0;
+                        bVal = b.workDays?.reduce((sum, day) => {
+                            const drive = parseFloat(day.hoursDriving) || 0;
+                            const onSite = parseFloat(day.hoursOnSite) || 0;
+                            return sum + drive + onSite;
+                        }, 0) || 0;
+                        break;
+                    case 'footage':
+                        aVal = a.borings?.reduce((sum, boring) => sum + (parseFloat(boring.footage) || 0), 0) || 0;
+                        bVal = b.borings?.reduce((sum, boring) => sum + (parseFloat(boring.footage) || 0), 0) || 0;
+                        break;
+                    case 'status':
+                        aVal = (a.status || '').toLowerCase();
+                        bVal = (b.status || '').toLowerCase();
+                        break;
+                    default:
+                        return 0;
+                }
+
+                if (aVal < bVal) return sortDirection === 'asc' ? -1 : 1;
+                if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1;
+                return 0;
+            });
+
+            // Handle sort column click
+            const handleSort = (column) => {
+                if (sortColumn === column) {
+                    // Toggle direction if clicking the same column
+                    setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+                } else {
+                    // Set new column with default descending for most columns
+                    setSortColumn(column);
+                    setSortDirection(column === 'customer' || column === 'job' || column === 'driller' ? 'asc' : 'desc');
+                }
+            };
 
             // Calculate summary statistics
             const stats = {
@@ -413,7 +477,7 @@
                             <>
                         {/* Reports Table */}
                         <div className={`rounded-xl shadow-lg overflow-hidden ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
-                            {filteredReports.length === 0 ? (
+                            {sortedReports.length === 0 ? (
                                 <div className="p-8 text-center">
                                     <p className={`text-lg ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
                                         {reports.length === 0 
@@ -433,25 +497,60 @@
                                                         type="checkbox"
                                                         onChange={(e) => {
                                                             if (e.target.checked) {
-                                                                setSelectedReports(filteredReports.map(r => r.id));
+                                                                setSelectedReports(sortedReports.map(r => r.id));
                                                             } else {
                                                                 setSelectedReports([]);
                                                             }
                                                         }}
                                                     />
                                                 </th>
-                                                <th className={`px-4 py-3 text-left text-sm font-semibold ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>Date</th>
-                                                <th className={`px-4 py-3 text-left text-sm font-semibold ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>Customer</th>
-                                                <th className={`px-4 py-3 text-left text-sm font-semibold ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>Job</th>
-                                                <th className={`px-4 py-3 text-left text-sm font-semibold ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>Driller</th>
-                                                <th className={`px-4 py-3 text-left text-sm font-semibold ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>Hours</th>
-                                                <th className={`px-4 py-3 text-left text-sm font-semibold ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>Footage</th>
-                                                <th className={`px-4 py-3 text-left text-sm font-semibold ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>Status</th>
+                                                <th
+                                                    onClick={() => handleSort('date')}
+                                                    className={`px-4 py-3 text-left text-sm font-semibold cursor-pointer hover:bg-opacity-80 ${darkMode ? 'text-gray-200 hover:bg-gray-600' : 'text-gray-700 hover:bg-gray-100'}`}
+                                                >
+                                                    Date {sortColumn === 'date' && (sortDirection === 'asc' ? '▲' : '▼')}
+                                                </th>
+                                                <th
+                                                    onClick={() => handleSort('customer')}
+                                                    className={`px-4 py-3 text-left text-sm font-semibold cursor-pointer hover:bg-opacity-80 ${darkMode ? 'text-gray-200 hover:bg-gray-600' : 'text-gray-700 hover:bg-gray-100'}`}
+                                                >
+                                                    Customer {sortColumn === 'customer' && (sortDirection === 'asc' ? '▲' : '▼')}
+                                                </th>
+                                                <th
+                                                    onClick={() => handleSort('job')}
+                                                    className={`px-4 py-3 text-left text-sm font-semibold cursor-pointer hover:bg-opacity-80 ${darkMode ? 'text-gray-200 hover:bg-gray-600' : 'text-gray-700 hover:bg-gray-100'}`}
+                                                >
+                                                    Job {sortColumn === 'job' && (sortDirection === 'asc' ? '▲' : '▼')}
+                                                </th>
+                                                <th
+                                                    onClick={() => handleSort('driller')}
+                                                    className={`px-4 py-3 text-left text-sm font-semibold cursor-pointer hover:bg-opacity-80 ${darkMode ? 'text-gray-200 hover:bg-gray-600' : 'text-gray-700 hover:bg-gray-100'}`}
+                                                >
+                                                    Driller {sortColumn === 'driller' && (sortDirection === 'asc' ? '▲' : '▼')}
+                                                </th>
+                                                <th
+                                                    onClick={() => handleSort('hours')}
+                                                    className={`px-4 py-3 text-left text-sm font-semibold cursor-pointer hover:bg-opacity-80 ${darkMode ? 'text-gray-200 hover:bg-gray-600' : 'text-gray-700 hover:bg-gray-100'}`}
+                                                >
+                                                    Hours {sortColumn === 'hours' && (sortDirection === 'asc' ? '▲' : '▼')}
+                                                </th>
+                                                <th
+                                                    onClick={() => handleSort('footage')}
+                                                    className={`px-4 py-3 text-left text-sm font-semibold cursor-pointer hover:bg-opacity-80 ${darkMode ? 'text-gray-200 hover:bg-gray-600' : 'text-gray-700 hover:bg-gray-100'}`}
+                                                >
+                                                    Footage {sortColumn === 'footage' && (sortDirection === 'asc' ? '▲' : '▼')}
+                                                </th>
+                                                <th
+                                                    onClick={() => handleSort('status')}
+                                                    className={`px-4 py-3 text-left text-sm font-semibold cursor-pointer hover:bg-opacity-80 ${darkMode ? 'text-gray-200 hover:bg-gray-600' : 'text-gray-700 hover:bg-gray-100'}`}
+                                                >
+                                                    Status {sortColumn === 'status' && (sortDirection === 'asc' ? '▲' : '▼')}
+                                                </th>
                                                 <th className={`px-4 py-3 text-left text-sm font-semibold ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>Actions</th>
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y divide-gray-200">
-                                            {filteredReports.map(report => {
+                                            {sortedReports.map(report => {
                                                 const totalHours = (report.workDays?.reduce((sum, day) => {
                                                     const drive = parseFloat(day.hoursDriving) || 0;
                                                     const onSite = parseFloat(day.hoursOnSite) || 0;
