@@ -371,7 +371,7 @@
                                     placeholder="🔍 Search customer, job, or driller..."
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
-                                    className={`w-full md:flex-1 px-4 py-2.5 border rounded-lg transition-all ${darkMode ? 'bg-gray-700 text-white border-gray-600 placeholder-gray-400 focus:border-green-500' : 'bg-white border-gray-300 focus:border-green-500'}`}
+                                    className={`flex-1 px-4 py-2.5 border rounded-lg transition-all ${darkMode ? 'bg-gray-700 text-white border-gray-600 placeholder-gray-400 focus:border-green-500' : 'bg-white border-gray-300 focus:border-green-500'}`}
                                 />
                             </div>
                             {/* Google Drive Status Message */}
