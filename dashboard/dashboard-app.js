@@ -12,7 +12,7 @@
             const [filterStatus, setFilterStatus] = useState('all');
             const [searchTerm, setSearchTerm] = useState('');
             const [viewingReport, setViewingReport] = useState(null);
-            const [showAnalytics, setShowAnalytics] = useState(false);
+            const [currentView, setCurrentView] = useState('reports'); // 'reports', 'analytics', 'clients'
             const [viewingImages, setViewingImages] = useState(null);
             const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
@@ -332,9 +332,9 @@
                                 {/* View Toggle */}
                                 <div className="flex gap-2">
                                     <button
-                                        onClick={() => setShowAnalytics(false)}
+                                        onClick={() => setCurrentView('reports')}
                                         className={`px-4 py-2.5 rounded-lg font-medium transition-all ${
-                                            !showAnalytics
+                                            currentView === 'reports'
                                                 ? 'bg-green-600 text-white shadow-md'
                                                 : darkMode
                                                 ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
@@ -344,9 +344,9 @@
                                         📋 Reports
                                     </button>
                                     <button
-                                        onClick={() => setShowAnalytics(true)}
+                                        onClick={() => setCurrentView('analytics')}
                                         className={`px-4 py-2.5 rounded-lg font-medium transition-all ${
-                                            showAnalytics
+                                            currentView === 'analytics'
                                                 ? 'bg-green-600 text-white shadow-md'
                                                 : darkMode
                                                 ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
@@ -354,6 +354,18 @@
                                         }`}
                                     >
                                         📊 Analytics
+                                    </button>
+                                    <button
+                                        onClick={() => setCurrentView('clients')}
+                                        className={`px-4 py-2.5 rounded-lg font-medium transition-all ${
+                                            currentView === 'clients'
+                                                ? 'bg-green-600 text-white shadow-md'
+                                                : darkMode
+                                                ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                                                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                        }`}
+                                    >
+                                        👥 Clients
                                     </button>
                                 </div>
                                 <select
@@ -388,10 +400,14 @@
                             )}
                         </div>
 
-                        {/* Analytics or Reports View */}
-                        {showAnalytics ? (
+                        {/* View Switcher: Reports, Analytics, or Clients */}
+                        {currentView === 'analytics' ? (
                             <div className="mb-6">
                                 <AnalyticsComponents.AnalyticsDashboard reports={reports} darkMode={darkMode} />
+                            </div>
+                        ) : currentView === 'clients' ? (
+                            <div className="mb-6">
+                                <ClientManagementComponents.ClientManagement reports={reports} darkMode={darkMode} />
                             </div>
                         ) : (
                             <>

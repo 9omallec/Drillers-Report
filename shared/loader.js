@@ -19,9 +19,11 @@
         'components/Loading.js',
         'components/PhotoGallery.js',
         'components/Analytics.js',
+        'components/ClientManagement.js',
 
         // Services
         'services/storage.js',
+        'services/clientService.js',
         'services/googleDrive.js',
 
         // Utilities
