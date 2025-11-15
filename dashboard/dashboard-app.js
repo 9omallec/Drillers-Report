@@ -477,7 +477,7 @@
                             </div>
                         ) : currentView === 'clients' ? (
                             <div className="mb-6">
-                                <ClientManagementComponents.ClientManagement reports={reports} darkMode={darkMode} />
+                                <ClientManagementComponents.ClientManagement reports={reports} darkMode={darkMode} onViewReport={(report) => setViewingReport(report)} />
                             </div>
                         ) : (
                             <>

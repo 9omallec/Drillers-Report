@@ -292,12 +292,140 @@
         );
     }
 
+    // Client History Modal Component
+    function ClientHistory({ client, reports, onClose, onViewReport, darkMode }) {
+        const clientService = useMemo(() => {
+            return new window.ClientService(new window.StorageService());
+        }, []);
+
+        // Get all reports for this client
+        const clientReports = useMemo(() => {
+            return reports.filter(report =>
+                (report.client || report.customer) === client.name
+            ).sort((a, b) => {
+                const dateA = new Date(a.date || a.importedAt || 0);
+                const dateB = new Date(b.date || b.importedAt || 0);
+                return dateB - dateA; // Newest first
+            });
+        }, [reports, client.name]);
+
+        // Get client stats
+        const stats = useMemo(() => {
+            return clientService.getClientStats(client.name, reports);
+        }, [client.name, reports]);
+
+        return React.createElement(
+            'div',
+            {
+                className: 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50',
+                onClick: (e) => {
+                    if (e.target === e.currentTarget) onClose();
+                }
+            },
+            React.createElement('div', {
+                className: `max-w-4xl w-full max-h-[90vh] overflow-y-auto rounded-lg ${darkMode ? 'bg-gray-800' : 'bg-white'} p-6`
+            },
+                // Header
+                React.createElement('div', { className: 'flex justify-between items-start mb-4' },
+                    React.createElement('div', {},
+                        React.createElement('h2', {
+                            className: `text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`
+                        }, `${client.name} - History`),
+                        client.contactName && React.createElement('p', {
+                            className: `text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`
+                        }, `Contact: ${client.contactName}`)
+                    ),
+                    React.createElement('button', {
+                        onClick: onClose,
+                        className: `text-2xl font-bold ${darkMode ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-800'}`
+                    }, '×')
+                ),
+
+                // Stats Cards
+                React.createElement('div', { className: 'grid grid-cols-2 md:grid-cols-4 gap-4 mb-6' },
+                    React.createElement('div', { className: `rounded-lg p-4 ${darkMode ? 'bg-gray-700' : 'bg-gray-100'}` },
+                        React.createElement('div', { className: `text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'}` }, stats.totalReports),
+                        React.createElement('div', { className: `text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}` }, 'Total Reports')
+                    ),
+                    React.createElement('div', { className: `rounded-lg p-4 ${darkMode ? 'bg-gray-700' : 'bg-gray-100'}` },
+                        React.createElement('div', { className: `text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'}` }, `${stats.totalFootage} ft`),
+                        React.createElement('div', { className: `text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}` }, 'Total Footage')
+                    ),
+                    React.createElement('div', { className: `rounded-lg p-4 ${darkMode ? 'bg-gray-700' : 'bg-gray-100'}` },
+                        React.createElement('div', { className: `text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'}` }, `${stats.totalHours} hrs`),
+                        React.createElement('div', { className: `text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}` }, 'Total Hours')
+                    ),
+                    React.createElement('div', { className: `rounded-lg p-4 ${darkMode ? 'bg-gray-700' : 'bg-gray-100'}` },
+                        React.createElement('div', { className: 'text-2xl font-bold text-green-600' }, `$${stats.estimatedRevenue}`),
+                        React.createElement('div', { className: `text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}` }, 'Est. Revenue')
+                    )
+                ),
+
+                // Reports List
+                React.createElement('div', {},
+                    React.createElement('h3', {
+                        className: `text-lg font-bold mb-3 ${darkMode ? 'text-white' : 'text-gray-800'}`
+                    }, `Reports (${clientReports.length})`),
+
+                    clientReports.length === 0 ?
+                        React.createElement('p', {
+                            className: `text-center py-8 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`
+                        }, 'No reports found for this client') :
+
+                        React.createElement('div', { className: 'space-y-3' },
+                            clientReports.map(report =>
+                                React.createElement('div', {
+                                    key: report.id,
+                                    className: `p-4 rounded-lg border ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'} hover:shadow-md transition-shadow`
+                                },
+                                    React.createElement('div', { className: 'flex justify-between items-start' },
+                                        React.createElement('div', { className: 'flex-1' },
+                                            React.createElement('div', { className: 'flex items-center gap-3 mb-2' },
+                                                React.createElement('h4', {
+                                                    className: `font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`
+                                                }, report.jobName || 'Untitled Job'),
+                                                React.createElement('span', {
+                                                    className: `px-2 py-1 rounded text-xs ${
+                                                        report.status === 'approved' ? 'bg-green-600 text-white' :
+                                                        report.status === 'changes_requested' ? 'bg-yellow-600 text-white' :
+                                                        'bg-gray-500 text-white'
+                                                    }`
+                                                }, report.status === 'changes_requested' ? 'Changes Requested' :
+                                                   report.status === 'approved' ? 'Approved' : 'Pending')
+                                            ),
+                                            React.createElement('div', {
+                                                className: `text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'} grid grid-cols-2 md:grid-cols-4 gap-2`
+                                            },
+                                                React.createElement('div', {}, `Date: ${new Date(report.date || report.importedAt).toLocaleDateString()}`),
+                                                React.createElement('div', {}, `Driller: ${report.driller || 'Unknown'}`),
+                                                React.createElement('div', {}, `Footage: ${report.borings?.reduce((sum, b) => sum + (parseFloat(b.footage) || 0), 0).toFixed(1) || 0} ft`),
+                                                React.createElement('div', {}, `Hours: ${report.workDays?.reduce((sum, day) => {
+                                                    const drive = parseFloat(day.hoursDriving) || 0;
+                                                    const onSite = parseFloat(day.hoursOnSite) || 0;
+                                                    return sum + drive + onSite;
+                                                }, 0).toFixed(1) || 0} hrs`)
+                                            )
+                                        ),
+                                        onViewReport && React.createElement('button', {
+                                            onClick: () => onViewReport(report),
+                                            className: `ml-4 px-3 py-1.5 text-sm rounded-lg ${darkMode ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-500 hover:bg-blue-600'} text-white`
+                                        }, 'View')
+                                    )
+                                )
+                            )
+                        )
+                )
+            )
+        );
+    }
+
     // Main Client Management Component
-    function ClientManagement({ darkMode, reports }) {
+    function ClientManagement({ darkMode, reports, onViewReport }) {
         const [clients, setClients] = useState([]);
         const [searchTerm, setSearchTerm] = useState('');
         const [showForm, setShowForm] = useState(false);
         const [editingClient, setEditingClient] = useState(null);
+        const [viewingHistory, setViewingHistory] = useState(null);
         const [sortBy, setSortBy] = useState('name');
         const [sortOrder, setSortOrder] = useState('asc');
 
@@ -345,8 +473,7 @@
         };
 
         const handleViewHistory = (client) => {
-            // This will be implemented when we add the client history view
-            alert(`Client history view for "${client.name}" coming soon!`);
+            setViewingHistory(client);
         };
 
         const handleCancel = () => {
@@ -438,7 +565,16 @@
                             reports
                         })
                     )
-                )
+                ),
+
+                // Client History Modal
+                viewingHistory && React.createElement(ClientHistory, {
+                    client: viewingHistory,
+                    reports,
+                    onClose: () => setViewingHistory(null),
+                    onViewReport,
+                    darkMode
+                })
         );
     }
 
