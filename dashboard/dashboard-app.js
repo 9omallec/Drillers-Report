@@ -10,6 +10,7 @@
             );
             const [selectedReports, setSelectedReports] = useState([]);
             const [filterStatus, setFilterStatus] = useState('all');
+            const [filterQuality, setFilterQuality] = useState('all');
             const [searchTerm, setSearchTerm] = useState('');
             const [viewingReport, setViewingReport] = useState(null);
             const [currentView, setCurrentView] = useState('reports'); // 'reports', 'analytics', 'clients'
@@ -210,11 +211,25 @@
             // Filter and search reports
             const filteredReports = reports.filter(report => {
                 const matchesStatus = filterStatus === 'all' || report.status === filterStatus;
+
+                // Data quality filter
+                let matchesQuality = true;
+                if (filterQuality !== 'all' && window.ReportValidation) {
+                    const badge = window.ReportValidation.getValidationBadge(report);
+                    if (filterQuality === 'incomplete') {
+                        matchesQuality = badge.severity === 'critical';
+                    } else if (filterQuality === 'warnings') {
+                        matchesQuality = badge.severity === 'warning';
+                    } else if (filterQuality === 'complete') {
+                        matchesQuality = badge.severity === 'ok';
+                    }
+                }
+
                 const matchesSearch = searchTerm === '' ||
                     (report.client || report.customer)?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                     report.jobName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
                     report.driller?.toLowerCase().includes(searchTerm.toLowerCase());
-                return matchesStatus && matchesSearch;
+                return matchesStatus && matchesQuality && matchesSearch;
             });
 
             // Sort reports
@@ -453,6 +468,17 @@
                                     <option value="approved">Approved</option>
                                     <option value="changes_requested">Changes Requested</option>
                                 </select>
+                                <select
+                                    value={filterQuality}
+                                    onChange={(e) => setFilterQuality(e.target.value)}
+                                    className={`px-4 py-2.5 border rounded-lg font-medium transition-all ${darkMode ? 'bg-gray-700 text-white border-gray-600 hover:border-gray-500' : 'bg-white border-gray-300 hover:border-gray-400'}`}
+                                    title="Filter by data quality"
+                                >
+                                    <option value="all">All Quality</option>
+                                    <option value="incomplete">⚠ Incomplete</option>
+                                    <option value="warnings">⚡ Warnings</option>
+                                    <option value="complete">✓ Complete</option>
+                                </select>
                                 <input
                                     type="text"
                                     placeholder="🔍 Search customer, job, or driller..."
@@ -516,6 +542,9 @@
                                                         }}
                                                     />
                                                 </th>
+                                                <th className={`px-4 py-3 text-left text-sm font-semibold ${darkMode ? 'text-gray-200' : 'text-gray-700'}`} title="Data quality and completeness">
+                                                    Quality
+                                                </th>
                                                 <th
                                                     onClick={() => handleSort('date')}
                                                     className={`px-4 py-3 text-left text-sm font-semibold cursor-pointer hover:bg-opacity-80 ${darkMode ? 'text-gray-200 hover:bg-gray-600' : 'text-gray-700 hover:bg-gray-100'}`}
@@ -569,7 +598,10 @@
                                                     return sum + drive + onSite;
                                                 }, 0) || 0).toFixed(1);
                                                 const totalFootage = (report.borings?.reduce((sum, b) => sum + (parseFloat(b.footage) || 0), 0) || 0).toFixed(1);
-                                                
+
+                                                // Get validation badge
+                                                const badge = window.ReportValidation ? window.ReportValidation.getValidationBadge(report) : { text: '—', color: 'gray', icon: '', title: 'Validation not loaded' };
+
                                                 return (
                                                     <tr key={report.id} className={darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-50'}>
                                                         <td className="px-4 py-3">
@@ -584,6 +616,20 @@
                                                                     }
                                                                 }}
                                                             />
+                                                        </td>
+                                                        <td className="px-4 py-3">
+                                                            <span
+                                                                className={`inline-flex items-center px-2 py-1 rounded text-xs font-semibold ${
+                                                                    badge.color === 'red' ? 'bg-red-100 text-red-800' :
+                                                                    badge.color === 'yellow' ? 'bg-yellow-100 text-yellow-800' :
+                                                                    badge.color === 'blue' ? 'bg-blue-100 text-blue-800' :
+                                                                    badge.color === 'green' ? 'bg-green-100 text-green-800' :
+                                                                    'bg-gray-100 text-gray-800'
+                                                                }`}
+                                                                title={badge.title}
+                                                            >
+                                                                {badge.icon} {badge.text}
+                                                            </span>
                                                         </td>
                                                         <td className={`px-4 py-3 text-sm ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
                                                             {report.importedAt?.split('T')[0] || 'N/A'}

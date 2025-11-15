@@ -33,6 +33,7 @@
         'utils/dateTime.js',
         'utils/imageProcessing.js',
         'utils/geolocation.js',
+        'utils/reportValidation.js',
 
         // Hooks (depend on services and utilities)
         'hooks/useDarkMode.js',
