@@ -3,6 +3,110 @@
         }
         @media print {
             .no-print { display: none !important; }
+
+            /* Hide UI elements when printing */
+            .fixed { position: static !important; }
+            .sticky { position: static !important; }
+
+            /* Hide modal backdrop */
+            body > div:first-child > div:first-child {
+                background: white !important;
+                position: static !important;
+            }
+
+            /* Reset modal styles for print */
+            .max-w-5xl {
+                max-width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+
+            .overflow-y-auto {
+                overflow: visible !important;
+            }
+
+            .max-h-\[95vh\],
+            .max-h-\[90vh\] {
+                max-height: none !important;
+            }
+
+            /* Force white background and black text for print */
+            body,
+            div,
+            section {
+                background-color: white !important;
+                color: black !important;
+            }
+
+            /* Remove shadows and borders that don't print well */
+            .shadow-2xl,
+            .shadow-lg,
+            .shadow-md,
+            .shadow {
+                box-shadow: none !important;
+            }
+
+            .rounded-lg {
+                border-radius: 0 !important;
+            }
+
+            /* Ensure proper text colors for print */
+            h1, h2, h3, h4, h5, h6,
+            .text-white,
+            .text-gray-900,
+            .text-gray-800,
+            .text-gray-700,
+            .text-gray-300 {
+                color: black !important;
+            }
+
+            /* Keep section headers visible */
+            .text-brand-green-400,
+            .text-brand-green-600 {
+                color: #16a34a !important;
+            }
+
+            /* Print page breaks */
+            .print\:page-break-before {
+                page-break-before: always;
+            }
+
+            .print\:page-break-after {
+                page-break-after: always;
+            }
+
+            .print\:break-inside-avoid {
+                page-break-inside: avoid;
+            }
+
+            /* Set proper page margins */
+            @page {
+                margin: 0.5in;
+                size: letter;
+            }
+
+            /* Make tables print well */
+            table {
+                page-break-inside: avoid;
+            }
+
+            thead {
+                display: table-header-group;
+            }
+
+            tr {
+                page-break-inside: avoid;
+            }
+
+            /* Print report title */
+            .print\:show {
+                display: block !important;
+            }
+
+            /* Hide toast notifications */
+            [aria-live] {
+                display: none !important;
+            }
         }
 
         /* Logo styling - prevent white box in dark mode */

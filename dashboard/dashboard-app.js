@@ -785,24 +785,33 @@
                     {/* Full Report View Modal */}
                     {viewingReport && (
                         <div
-                            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4"
+                            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4 print:bg-white print:static print:p-0"
                             onClick={() => setViewingReport(null)}
                         >
                             <div
-                                className={`w-full max-w-5xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto rounded-lg shadow-2xl ${darkMode ? 'bg-gray-900' : 'bg-white'}`}
+                                className={`w-full max-w-5xl max-h-[95vh] sm:max-h-[90vh] overflow-y-auto rounded-lg shadow-2xl ${darkMode ? 'bg-gray-900' : 'bg-white'} print:max-w-full print:shadow-none print:overflow-visible print:max-h-none`}
                                 onClick={(e) => e.stopPropagation()}
                             >
                                 {/* Modal Header */}
-                                <div className={`sticky top-0 z-10 flex items-center justify-between p-4 sm:p-6 border-b ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
+                                <div className={`sticky top-0 z-10 flex items-center justify-between p-4 sm:p-6 border-b ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} print:hidden`}>
                                     <h2 className={`text-lg sm:text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
                                         📋 {viewingReport.jobName || 'Drill Report'}
                                     </h2>
-                                    <button
-                                        onClick={() => setViewingReport(null)}
-                                        className="text-2xl sm:text-3xl font-bold text-gray-500 hover:text-gray-700 ml-2"
-                                    >
-                                        ×
-                                    </button>
+                                    <div className="flex gap-2 items-center">
+                                        <button
+                                            onClick={() => window.print()}
+                                            className={`px-4 py-2 rounded-lg font-medium transition-all ${darkMode ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-blue-500 hover:bg-blue-600 text-white'}`}
+                                            title="Print or save as PDF"
+                                        >
+                                            🖨️ Print
+                                        </button>
+                                        <button
+                                            onClick={() => setViewingReport(null)}
+                                            className="text-2xl sm:text-3xl font-bold text-gray-500 hover:text-gray-700"
+                                        >
+                                            ×
+                                        </button>
+                                    </div>
                                 </div>
                                 
                                 {/* Report Content - Matching Driller App Layout */}
