@@ -472,8 +472,9 @@
 
                         {/* View Switcher: Reports, Analytics, or Clients */}
                         {currentView === 'analytics' ? (
-                            <div className="mb-6">
+                            <div className="mb-6 space-y-6">
                                 <AnalyticsComponents.AnalyticsDashboard reports={reports} darkMode={darkMode} />
+                                <AdvancedAnalyticsComponents.AdvancedAnalyticsDashboard reports={reports} darkMode={darkMode} />
                             </div>
                         ) : currentView === 'clients' ? (
                             <div className="mb-6">

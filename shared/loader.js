@@ -19,6 +19,7 @@
         'components/Loading.js',
         'components/PhotoGallery.js',
         'components/Analytics.js',
+        'components/AdvancedAnalytics.js',
         'components/ClientManagement.js',
         'components/Toast.js',
 
