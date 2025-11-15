@@ -20,6 +20,7 @@
         'components/PhotoGallery.js',
         'components/Analytics.js',
         'components/ClientManagement.js',
+        'components/Toast.js',
 
         // Services
         'services/storage.js',
@@ -35,7 +36,8 @@
         // Hooks (depend on services and utilities)
         'hooks/useDarkMode.js',
         'hooks/useLocalStorage.js',
-        'hooks/useGoogleDrive.js'
+        'hooks/useGoogleDrive.js',
+        'hooks/useToast.js'
     ];
 
     // Function to load a single script

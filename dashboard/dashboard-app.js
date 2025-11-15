@@ -21,6 +21,9 @@
             // Use shared dark mode hook
             const [darkMode, setDarkMode] = window.useDarkMode();
 
+            // Use toast notifications
+            const toast = window.useToast();
+
             // Save reports whenever they change
             useEffect(() => {
                 storageService.saveGlobal('bossReports', reports);
@@ -40,7 +43,7 @@
             const syncFromDrive = async () => {
                 try {
                     if (!isSignedIn) {
-                        alert('⚠️ Please sign in to Google Drive first');
+                        toast.warning('Please sign in to Google Drive first');
                         return;
                     }
 
@@ -48,7 +51,7 @@
                     const files = await listFiles();
 
                     if (!files || files.length === 0) {
-                        alert('No reports found in Drive folder');
+                        toast.info('No reports found in Drive folder');
                         return;
                     }
 
@@ -80,14 +83,14 @@
                     }
 
                     if (importedCount > 0) {
-                        alert(`✓ Imported ${importedCount} new report(s) from Drive!`);
+                        toast.success(`Imported ${importedCount} new report(s) from Drive!`);
                     } else {
-                        alert('All reports already imported');
+                        toast.info('All reports already imported');
                     }
 
                 } catch (error) {
                     console.error('Error syncing from Drive:', error);
-                    alert('Error syncing from Google Drive');
+                    toast.error('Error syncing from Google Drive');
                 }
             };
             // ====== END GOOGLE DRIVE API ======
@@ -111,9 +114,9 @@
                                 supplies: data.supplies
                             };
                             setReports([newReport, ...reports]);
-                            alert('Report imported successfully!');
+                            toast.success('Report imported successfully!');
                         } catch (error) {
-                            alert('Error importing report. Please ensure it\'s a valid report file.');
+                            toast.error('Error importing report. Please ensure it\'s a valid report file.');
                         }
                     };
                     reader.readAsText(file);
@@ -147,7 +150,7 @@
             // Export selected reports to CSV for QuickBooks Desktop
             const exportToQuickBooks = () => {
                 if (selectedReports.length === 0) {
-                    alert('Please select reports to export');
+                    toast.warning('Please select reports to export');
                     return;
                 }
 
@@ -197,8 +200,11 @@
                 a.download = `QuickBooks-Desktop-Export-${new Date().toISOString().split('T')[0]}.csv`;
                 a.click();
                 URL.revokeObjectURL(url);
-                
-                alert('Export complete! Import this CSV into QuickBooks Desktop:\n\n1. File → Utilities → Import → Excel Files\n2. Select the downloaded CSV\n3. Map columns as needed\n4. Import and review invoices');
+
+                toast.success('Export complete! Check your downloads folder for the CSV file.', {
+                    title: 'QuickBooks Export Ready',
+                    duration: 6000
+                });
             };
 
             // Filter and search reports
@@ -1093,6 +1099,9 @@
                     )}
                 </div>
             </div>
+
+            {/* Toast Notifications */}
+            <ToastComponents.ToastContainer toasts={toast.toasts} removeToast={toast.removeToast} position="top-right" darkMode={darkMode} />
             </div>
             );
         }
