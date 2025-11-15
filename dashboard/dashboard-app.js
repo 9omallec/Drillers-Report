@@ -215,13 +215,18 @@
                 // Data quality filter
                 let matchesQuality = true;
                 if (filterQuality !== 'all' && window.ReportValidation) {
-                    const badge = window.ReportValidation.getValidationBadge(report);
-                    if (filterQuality === 'incomplete') {
-                        matchesQuality = badge.severity === 'critical';
-                    } else if (filterQuality === 'warnings') {
-                        matchesQuality = badge.severity === 'warning';
-                    } else if (filterQuality === 'complete') {
-                        matchesQuality = badge.severity === 'ok';
+                    if (filterQuality === 'duplicates') {
+                        const dupInfo = window.ReportValidation.checkForDuplicates(report, reports);
+                        matchesQuality = dupInfo.hasDuplicates;
+                    } else {
+                        const badge = window.ReportValidation.getValidationBadge(report);
+                        if (filterQuality === 'incomplete') {
+                            matchesQuality = badge.severity === 'critical';
+                        } else if (filterQuality === 'warnings') {
+                            matchesQuality = badge.severity === 'warning';
+                        } else if (filterQuality === 'complete') {
+                            matchesQuality = badge.severity === 'ok';
+                        }
                     }
                 }
 
@@ -478,6 +483,7 @@
                                     <option value="incomplete">⚠ Incomplete</option>
                                     <option value="warnings">⚡ Warnings</option>
                                     <option value="complete">✓ Complete</option>
+                                    <option value="duplicates">🔄 Duplicates</option>
                                 </select>
                                 <input
                                     type="text"
@@ -602,6 +608,9 @@
                                                 // Get validation badge
                                                 const badge = window.ReportValidation ? window.ReportValidation.getValidationBadge(report) : { text: '—', color: 'gray', icon: '', title: 'Validation not loaded' };
 
+                                                // Check for duplicates
+                                                const duplicateInfo = window.ReportValidation ? window.ReportValidation.checkForDuplicates(report, reports) : { hasDuplicates: false, count: 0 };
+
                                                 return (
                                                     <tr key={report.id} className={darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-50'}>
                                                         <td className="px-4 py-3">
@@ -618,18 +627,28 @@
                                                             />
                                                         </td>
                                                         <td className="px-4 py-3">
-                                                            <span
-                                                                className={`inline-flex items-center px-2 py-1 rounded text-xs font-semibold ${
-                                                                    badge.color === 'red' ? 'bg-red-100 text-red-800' :
-                                                                    badge.color === 'yellow' ? 'bg-yellow-100 text-yellow-800' :
-                                                                    badge.color === 'blue' ? 'bg-blue-100 text-blue-800' :
-                                                                    badge.color === 'green' ? 'bg-green-100 text-green-800' :
-                                                                    'bg-gray-100 text-gray-800'
-                                                                }`}
-                                                                title={badge.title}
-                                                            >
-                                                                {badge.icon} {badge.text}
-                                                            </span>
+                                                            <div className="flex gap-1 items-center">
+                                                                <span
+                                                                    className={`inline-flex items-center px-2 py-1 rounded text-xs font-semibold ${
+                                                                        badge.color === 'red' ? 'bg-red-100 text-red-800' :
+                                                                        badge.color === 'yellow' ? 'bg-yellow-100 text-yellow-800' :
+                                                                        badge.color === 'blue' ? 'bg-blue-100 text-blue-800' :
+                                                                        badge.color === 'green' ? 'bg-green-100 text-green-800' :
+                                                                        'bg-gray-100 text-gray-800'
+                                                                    }`}
+                                                                    title={badge.title}
+                                                                >
+                                                                    {badge.icon} {badge.text}
+                                                                </span>
+                                                                {duplicateInfo.hasDuplicates && (
+                                                                    <span
+                                                                        className="inline-flex items-center px-2 py-1 rounded text-xs font-semibold bg-orange-100 text-orange-800"
+                                                                        title={`${duplicateInfo.count} potential duplicate(s) found`}
+                                                                    >
+                                                                        🔄 Dup
+                                                                    </span>
+                                                                )}
+                                                            </div>
                                                         </td>
                                                         <td className={`px-4 py-3 text-sm ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
                                                             {report.importedAt?.split('T')[0] || 'N/A'}

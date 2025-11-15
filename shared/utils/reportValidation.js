@@ -230,6 +230,169 @@
     }
 
     /**
+     * Find duplicate reports based on key fields
+     * @param {Array} reports - Array of report objects
+     * @param {Object} options - Options for duplicate detection
+     * @returns {Array} Array of duplicate groups
+     */
+    function findDuplicates(reports, options = {}) {
+        const {
+            checkFields = ['client', 'jobName', 'date', 'driller'], // Fields to compare
+            fuzzyMatch = false, // Use fuzzy matching for strings
+            dateThreshold = 1 // Days threshold for date comparison
+        } = options;
+
+        const duplicateGroups = [];
+        const processedIds = new Set();
+
+        reports.forEach((report, index) => {
+            if (processedIds.has(report.id)) return;
+
+            const duplicates = [report];
+
+            // Compare with remaining reports
+            for (let i = index + 1; i < reports.length; i++) {
+                const other = reports[i];
+                if (processedIds.has(other.id)) continue;
+
+                let isDuplicate = true;
+
+                // Check each field
+                for (const field of checkFields) {
+                    const val1 = getReportValue(report, field);
+                    const val2 = getReportValue(other, field);
+
+                    if (field === 'date') {
+                        // Date comparison with threshold
+                        if (!compareDates(val1, val2, dateThreshold)) {
+                            isDuplicate = false;
+                            break;
+                        }
+                    } else if (typeof val1 === 'string' && typeof val2 === 'string') {
+                        // String comparison (case-insensitive)
+                        if (fuzzyMatch) {
+                            if (calculateSimilarity(val1, val2) < 0.8) {
+                                isDuplicate = false;
+                                break;
+                            }
+                        } else {
+                            if (val1.toLowerCase().trim() !== val2.toLowerCase().trim()) {
+                                isDuplicate = false;
+                                break;
+                            }
+                        }
+                    } else {
+                        // Direct comparison
+                        if (val1 !== val2) {
+                            isDuplicate = false;
+                            break;
+                        }
+                    }
+                }
+
+                if (isDuplicate) {
+                    duplicates.push(other);
+                    processedIds.add(other.id);
+                }
+            }
+
+            if (duplicates.length > 1) {
+                duplicateGroups.push(duplicates);
+                duplicates.forEach(d => processedIds.add(d.id));
+            }
+        });
+
+        return duplicateGroups;
+    }
+
+    /**
+     * Get value from report, handling field name variations
+     */
+    function getReportValue(report, field) {
+        if (field === 'client') {
+            return report.client || report.customer || '';
+        }
+        if (field === 'jobName') {
+            return report.jobName || report.job || '';
+        }
+        if (field === 'date') {
+            return report.date || report.importedAt || '';
+        }
+        return report[field] || '';
+    }
+
+    /**
+     * Compare dates with threshold
+     */
+    function compareDates(date1, date2, thresholdDays) {
+        if (!date1 || !date2) return date1 === date2;
+
+        const d1 = new Date(date1);
+        const d2 = new Date(date2);
+
+        if (isNaN(d1) || isNaN(d2)) return date1 === date2;
+
+        const diffMs = Math.abs(d1 - d2);
+        const diffDays = diffMs / (1000 * 60 * 60 * 24);
+
+        return diffDays <= thresholdDays;
+    }
+
+    /**
+     * Calculate string similarity (simple Levenshtein-based)
+     */
+    function calculateSimilarity(str1, str2) {
+        str1 = (str1 || '').toLowerCase().trim();
+        str2 = (str2 || '').toLowerCase().trim();
+
+        if (str1 === str2) return 1;
+        if (!str1 || !str2) return 0;
+
+        const longer = str1.length > str2.length ? str1 : str2;
+        const shorter = str1.length > str2.length ? str2 : str1;
+
+        if (longer.length === 0) return 1;
+
+        // Simple containment check
+        if (longer.includes(shorter)) {
+            return shorter.length / longer.length;
+        }
+
+        // Count matching characters
+        let matches = 0;
+        for (let i = 0; i < shorter.length; i++) {
+            if (longer.includes(shorter[i])) matches++;
+        }
+
+        return matches / longer.length;
+    }
+
+    /**
+     * Check if a specific report has duplicates
+     * @param {Object} report - Report to check
+     * @param {Array} allReports - All reports to compare against
+     * @returns {Object} Duplicate info
+     */
+    function checkForDuplicates(report, allReports) {
+        const duplicateGroups = findDuplicates(allReports);
+        const group = duplicateGroups.find(g => g.some(r => r.id === report.id));
+
+        if (group) {
+            return {
+                hasDuplicates: true,
+                count: group.length - 1, // Exclude the report itself
+                duplicates: group.filter(r => r.id !== report.id)
+            };
+        }
+
+        return {
+            hasDuplicates: false,
+            count: 0,
+            duplicates: []
+        };
+    }
+
+    /**
      * Get validation badge info for a report
      * @param {Object} report - Report object
      * @returns {Object} Badge info with color, text, and icon
@@ -281,6 +444,8 @@
         validateReport,
         validateReports,
         getValidationBadge,
+        findDuplicates,
+        checkForDuplicates,
         SEVERITY
     };
 
