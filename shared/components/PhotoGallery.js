@@ -117,13 +117,13 @@
         return React.createElement(
             'div',
             {
-                className: 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4',
+                className: 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-2 sm:p-4',
                 onClick: onClose
             },
             React.createElement(
                 'div',
                 {
-                    className: 'relative max-w-5xl max-h-full',
+                    className: 'relative max-w-4xl w-full max-h-full',
                     onClick: (e) => e.stopPropagation()
                 },
                 // Close button
@@ -131,7 +131,7 @@
                     'button',
                     {
                         onClick: onClose,
-                        className: 'absolute -top-10 right-0 text-white text-3xl font-bold hover:text-gray-300',
+                        className: 'absolute -top-8 sm:-top-10 right-0 text-white text-2xl sm:text-3xl font-bold hover:text-gray-300',
                         title: 'Close preview'
                     },
                     '×'
@@ -140,7 +140,7 @@
                 React.createElement('img', {
                     src: photo.dataURL,
                     alt: photo.name,
-                    className: 'max-w-full max-h-[90vh] object-contain rounded shadow-2xl'
+                    className: 'max-w-full max-h-[85vh] sm:max-h-[90vh] object-contain rounded shadow-2xl'
                 }),
                 // Caption
                 photo.caption && React.createElement(

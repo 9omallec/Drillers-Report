@@ -59,9 +59,9 @@
 
         return React.createElement(
             'form',
-            { onSubmit: handleSubmit, className: `p-6 ${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg` },
+            { onSubmit: handleSubmit, className: `p-4 sm:p-6 ${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg` },
             React.createElement('h3', {
-                className: `text-xl font-bold mb-4 ${darkMode ? 'text-white' : 'text-gray-800'}`
+                className: `text-lg sm:text-xl font-bold mb-4 ${darkMode ? 'text-white' : 'text-gray-800'}`
             }, client ? 'Edit Client' : 'New Client'),
 
             // Name
@@ -317,27 +317,27 @@
         return React.createElement(
             'div',
             {
-                className: 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50',
+                className: 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-2 sm:p-4 z-50',
                 onClick: (e) => {
                     if (e.target === e.currentTarget) onClose();
                 }
             },
             React.createElement('div', {
-                className: `max-w-4xl w-full max-h-[90vh] overflow-y-auto rounded-lg ${darkMode ? 'bg-gray-800' : 'bg-white'} p-6`
+                className: `max-w-3xl w-full max-h-[95vh] sm:max-h-[90vh] overflow-y-auto rounded-lg ${darkMode ? 'bg-gray-800' : 'bg-white'} p-4 sm:p-6`
             },
                 // Header
                 React.createElement('div', { className: 'flex justify-between items-start mb-4' },
                     React.createElement('div', {},
                         React.createElement('h2', {
-                            className: `text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`
+                            className: `text-lg sm:text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`
                         }, `${client.name} - History`),
                         client.contactName && React.createElement('p', {
-                            className: `text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`
+                            className: `text-xs sm:text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`
                         }, `Contact: ${client.contactName}`)
                     ),
                     React.createElement('button', {
                         onClick: onClose,
-                        className: `text-2xl font-bold ${darkMode ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-800'}`
+                        className: `text-xl sm:text-2xl font-bold ${darkMode ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-800'} ml-2`
                     }, '×')
                 ),
 
@@ -525,13 +525,13 @@
 
             // Form Modal
             showForm && React.createElement('div', {
-                className: 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50',
+                className: 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-2 sm:p-4 z-50',
                 onClick: (e) => {
                     if (e.target === e.currentTarget) handleCancel();
                 }
             },
                 React.createElement('div', {
-                    className: 'max-w-2xl w-full max-h-[90vh] overflow-y-auto'
+                    className: 'max-w-2xl w-full max-h-[95vh] sm:max-h-[90vh] overflow-y-auto'
                 },
                     React.createElement(ClientForm, {
                         client: editingClient,
