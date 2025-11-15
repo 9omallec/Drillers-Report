@@ -9,12 +9,54 @@
   .table-container { overflow-x: auto; -webkit-overflow-scrolling: touch; max-width: 100%; }
   .collapsible-header { cursor: pointer; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
 
-/* Checkboxes - Green Style */
-input[type=“checkbox”] { appearance: none; -webkit-appearance: none; width: 22px; height: 22px; cursor: pointer; border: 2px solid #d1d5db; border-radius: 4px; background: white; position: relative; transition: all 0.2s; }
-.dark input[type=“checkbox”] { border-color: #6b7280; background: #374151; }
-input[type=“checkbox”]:checked { background: #16a34a; border-color: #16a34a; }
-input[type=“checkbox”]:checked::after { content: ‘✓’; position: absolute; color: white; font-size: 18px; font-weight: bold; left: 3px; top: -2px; }
-input[type=“checkbox”]:hover { border-color: #16a34a; }
+/* Checkboxes - Green Style - Enhanced Visibility */
+input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 22px;
+    height: 22px;
+    cursor: pointer;
+    border: 2px solid #9ca3af;
+    border-radius: 4px;
+    background: white;
+    position: relative;
+    transition: all 0.2s;
+    flex-shrink: 0;
+    display: inline-block;
+}
+
+.dark input[type="checkbox"] {
+    border-color: #9ca3af;
+    background: #1f2937;
+}
+
+input[type="checkbox"]:checked {
+    background: #16a34a;
+    border-color: #16a34a;
+}
+
+input[type="checkbox"]:checked::after {
+    content: '✓';
+    position: absolute;
+    color: white;
+    font-size: 16px;
+    font-weight: 900;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    line-height: 1;
+}
+
+input[type="checkbox"]:hover {
+    border-color: #16a34a;
+    box-shadow: 0 0 0 2px rgba(22, 163, 74, 0.1);
+}
+
+input[type="checkbox"]:focus {
+    outline: none;
+    border-color: #16a34a;
+    box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.2);
+}
 
 /* Logo styling - prevent white box in dark mode, keep original colors */
 .app-logo {
