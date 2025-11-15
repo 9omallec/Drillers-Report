@@ -348,7 +348,8 @@
 
                         {/* Actions Bar */}
                         <div className={`rounded-xl p-5 mb-6 shadow-lg ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
-                            <div className="flex flex-col md:flex-row gap-3 items-center">
+                            {/* Action Buttons Row */}
+                            <div className="flex flex-wrap gap-3 mb-3">
                                 <button
                                     onClick={() => window.open(`https://drive.google.com/drive/folders/${GOOGLE_DRIVE_CONFIG.FOLDER_ID}`, '_blank')}
                                     className="px-5 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-lg hover:shadow-lg font-semibold transition-all"
@@ -381,8 +382,8 @@
                                 <button
                                     onClick={exportToQuickBooks}
                                     className={`px-5 py-2.5 rounded-lg font-semibold transition-all ${
-                                        selectedReports.length === 0 
-                                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
+                                        selectedReports.length === 0
+                                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                                         : 'bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white hover:shadow-lg'
                                     }`}
                                     disabled={selectedReports.length === 0}
@@ -399,6 +400,10 @@
                                         className="hidden"
                                     />
                                 </label>
+                            </div>
+
+                            {/* View Toggle and Filters Row */}
+                            <div className="flex flex-wrap gap-3 items-center">
                                 {/* View Toggle */}
                                 <div className="flex gap-2">
                                     <button
@@ -453,7 +458,7 @@
                                     placeholder="🔍 Search customer, job, or driller..."
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
-                                    className={`flex-1 px-4 py-2.5 border rounded-lg transition-all ${darkMode ? 'bg-gray-700 text-white border-gray-600 placeholder-gray-400 focus:border-green-500' : 'bg-white border-gray-300 focus:border-green-500'}`}
+                                    className={`flex-1 min-w-[250px] px-4 py-2.5 border rounded-lg transition-all ${darkMode ? 'bg-gray-700 text-white border-gray-600 placeholder-gray-400 focus:border-green-500' : 'bg-white border-gray-300 focus:border-green-500'}`}
                                 />
                             </div>
                             {/* Google Drive Status Message */}
