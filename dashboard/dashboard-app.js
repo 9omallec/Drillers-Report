@@ -18,6 +18,7 @@
             const [currentImageIndex, setCurrentImageIndex] = useState(0);
             const [sortColumn, setSortColumn] = useState('date');
             const [sortDirection, setSortDirection] = useState('desc'); // 'asc' or 'desc'
+            const [viewingValidation, setViewingValidation] = useState(null);
 
             // Use shared dark mode hook
             const [darkMode, setDarkMode] = window.useDarkMode();
@@ -628,18 +629,19 @@
                                                         </td>
                                                         <td className="px-4 py-3">
                                                             <div className="flex gap-1 items-center">
-                                                                <span
-                                                                    className={`inline-flex items-center px-2 py-1 rounded text-xs font-semibold ${
-                                                                        badge.color === 'red' ? 'bg-red-100 text-red-800' :
-                                                                        badge.color === 'yellow' ? 'bg-yellow-100 text-yellow-800' :
-                                                                        badge.color === 'blue' ? 'bg-blue-100 text-blue-800' :
-                                                                        badge.color === 'green' ? 'bg-green-100 text-green-800' :
-                                                                        'bg-gray-100 text-gray-800'
+                                                                <button
+                                                                    onClick={() => setViewingValidation(report)}
+                                                                    className={`inline-flex items-center px-2 py-1 rounded text-xs font-semibold hover:opacity-80 transition-opacity cursor-pointer ${
+                                                                        badge.color === 'red' ? 'bg-red-100 text-red-800 hover:bg-red-200' :
+                                                                        badge.color === 'yellow' ? 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200' :
+                                                                        badge.color === 'blue' ? 'bg-blue-100 text-blue-800 hover:bg-blue-200' :
+                                                                        badge.color === 'green' ? 'bg-green-100 text-green-800 hover:bg-green-200' :
+                                                                        'bg-gray-100 text-gray-800 hover:bg-gray-200'
                                                                     }`}
-                                                                    title={badge.title}
+                                                                    title="Click to view details"
                                                                 >
                                                                     {badge.icon} {badge.text}
-                                                                </span>
+                                                                </button>
                                                                 {duplicateInfo.hasDuplicates && (
                                                                     <span
                                                                         className="inline-flex items-center px-2 py-1 rounded text-xs font-semibold bg-orange-100 text-orange-800"
@@ -1173,6 +1175,158 @@
                                     {viewingImages[currentImageIndex].description && (
                                         <div className="text-sm mt-1">{viewingImages[currentImageIndex].description}</div>
                                     )}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Validation Details Modal */}
+                    {viewingValidation && window.ReportValidation && (
+                        <div
+                            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4"
+                            onClick={() => setViewingValidation(null)}
+                        >
+                            <div
+                                className={`w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-lg shadow-2xl ${darkMode ? 'bg-gray-800' : 'bg-white'}`}
+                                onClick={(e) => e.stopPropagation()}
+                            >
+                                {/* Modal Header */}
+                                <div className={`sticky top-0 z-10 flex items-center justify-between p-4 sm:p-6 border-b ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
+                                    <h2 className={`text-lg sm:text-xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                                        Data Quality Report
+                                    </h2>
+                                    <button
+                                        onClick={() => setViewingValidation(null)}
+                                        className="text-2xl font-bold text-gray-500 hover:text-gray-700"
+                                    >
+                                        ×
+                                    </button>
+                                </div>
+
+                                {/* Validation Content */}
+                                <div className="p-4 sm:p-6">
+                                    {(() => {
+                                        const validation = window.ReportValidation.validateReport(viewingValidation);
+                                        const duplicateInfo = window.ReportValidation.checkForDuplicates(viewingValidation, reports);
+
+                                        return (
+                                            <>
+                                                {/* Report Info */}
+                                                <div className={`mb-6 p-4 rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-gray-50'}`}>
+                                                    <h3 className={`font-bold mb-2 ${darkMode ? 'text-white' : 'text-gray-800'}`}>
+                                                        {viewingValidation.jobName || 'Untitled Report'}
+                                                    </h3>
+                                                    <div className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                                                        <div>Client: {viewingValidation.client || viewingValidation.customer || 'N/A'}</div>
+                                                        <div>Driller: {viewingValidation.driller || 'N/A'}</div>
+                                                        <div>Date: {new Date(viewingValidation.date || viewingValidation.importedAt).toLocaleDateString()}</div>
+                                                    </div>
+                                                </div>
+
+                                                {/* Summary */}
+                                                <div className="mb-6">
+                                                    <h3 className={`font-bold mb-3 ${darkMode ? 'text-white' : 'text-gray-800'}`}>Summary</h3>
+                                                    <div className="grid grid-cols-3 gap-3">
+                                                        <div className={`p-3 rounded-lg text-center ${validation.summary.critical > 0 ? 'bg-red-100' : darkMode ? 'bg-gray-700' : 'bg-gray-100'}`}>
+                                                            <div className={`text-2xl font-bold ${validation.summary.critical > 0 ? 'text-red-800' : darkMode ? 'text-white' : 'text-gray-800'}`}>
+                                                                {validation.summary.critical}
+                                                            </div>
+                                                            <div className={`text-xs ${validation.summary.critical > 0 ? 'text-red-700' : darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                                                                Critical
+                                                            </div>
+                                                        </div>
+                                                        <div className={`p-3 rounded-lg text-center ${validation.summary.warning > 0 ? 'bg-yellow-100' : darkMode ? 'bg-gray-700' : 'bg-gray-100'}`}>
+                                                            <div className={`text-2xl font-bold ${validation.summary.warning > 0 ? 'text-yellow-800' : darkMode ? 'text-white' : 'text-gray-800'}`}>
+                                                                {validation.summary.warning}
+                                                            </div>
+                                                            <div className={`text-xs ${validation.summary.warning > 0 ? 'text-yellow-700' : darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                                                                Warnings
+                                                            </div>
+                                                        </div>
+                                                        <div className={`p-3 rounded-lg text-center ${validation.summary.info > 0 ? 'bg-blue-100' : darkMode ? 'bg-gray-700' : 'bg-gray-100'}`}>
+                                                            <div className={`text-2xl font-bold ${validation.summary.info > 0 ? 'text-blue-800' : darkMode ? 'text-white' : 'text-gray-800'}`}>
+                                                                {validation.summary.info}
+                                                            </div>
+                                                            <div className={`text-xs ${validation.summary.info > 0 ? 'text-blue-700' : darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                                                                Info
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                {/* Duplicate Warning */}
+                                                {duplicateInfo.hasDuplicates && (
+                                                    <div className="mb-6 p-4 rounded-lg bg-orange-100 border-l-4 border-orange-600">
+                                                        <div className="flex items-start gap-3">
+                                                            <div className="text-2xl">🔄</div>
+                                                            <div>
+                                                                <div className="font-bold text-orange-800 mb-1">
+                                                                    Potential Duplicate Detected
+                                                                </div>
+                                                                <div className="text-sm text-orange-700">
+                                                                    This report appears to be similar to {duplicateInfo.count} other report{duplicateInfo.count !== 1 ? 's' : ''} based on client, job name, date, and driller.
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                )}
+
+                                                {/* Issues List */}
+                                                {validation.issues.length > 0 ? (
+                                                    <div>
+                                                        <h3 className={`font-bold mb-3 ${darkMode ? 'text-white' : 'text-gray-800'}`}>
+                                                            Issues Found ({validation.issues.length})
+                                                        </h3>
+                                                        <div className="space-y-2">
+                                                            {validation.issues.map((issue, index) => (
+                                                                <div
+                                                                    key={index}
+                                                                    className={`p-3 rounded-lg border-l-4 ${
+                                                                        issue.severity === 'critical' ? 'bg-red-50 border-red-500' :
+                                                                        issue.severity === 'warning' ? 'bg-yellow-50 border-yellow-500' :
+                                                                        'bg-blue-50 border-blue-500'
+                                                                    } ${darkMode ? 'bg-opacity-20' : ''}`}
+                                                                >
+                                                                    <div className="flex items-start gap-2">
+                                                                        <div className="text-lg">
+                                                                            {issue.severity === 'critical' ? '⚠' :
+                                                                             issue.severity === 'warning' ? '⚡' : 'ℹ'}
+                                                                        </div>
+                                                                        <div className="flex-1">
+                                                                            <div className={`font-medium ${
+                                                                                issue.severity === 'critical' ? 'text-red-800' :
+                                                                                issue.severity === 'warning' ? 'text-yellow-800' :
+                                                                                'text-blue-800'
+                                                                            }`}>
+                                                                                {issue.message}
+                                                                            </div>
+                                                                            <div className={`text-xs mt-1 ${
+                                                                                issue.severity === 'critical' ? 'text-red-600' :
+                                                                                issue.severity === 'warning' ? 'text-yellow-600' :
+                                                                                'text-blue-600'
+                                                                            }`}>
+                                                                                Field: {issue.field} • Category: {issue.category}
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                ) : (
+                                                    <div className="text-center py-8">
+                                                        <div className="text-5xl mb-3">✅</div>
+                                                        <div className={`text-lg font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>
+                                                            No Issues Found
+                                                        </div>
+                                                        <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                                                            This report has passed all data quality checks.
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </>
+                                        );
+                                    })()}
                                 </div>
                             </div>
                         </div>
