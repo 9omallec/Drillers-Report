@@ -983,14 +983,15 @@
                                 📋 Quick Guide
                             </h3>
                             <ol className={`list-decimal list-inside space-y-2 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                                <li><strong>Sign in to Google Drive</strong> (top right) - reports automatically sync!</li>
-                                <li>Click the 👁 eye icon to view any report</li>
-                                <li>Click "✓" to approve or "✎" to request changes</li>
-                                <li>Select reports and use <strong>💰 Export to QuickBooks</strong> for billing</li>
-                                <li>Use <strong>📊 Download CSV Backup</strong> to export comprehensive data with filters (date range, client, status, quality)</li>
+                                <li>Click <strong>🔐 Sign in to Drive</strong> to automatically sync reports from Google Drive</li>
+                                <li>Use the <strong>✏️</strong> button to edit a report (opens in Report app)</li>
+                                <li>Click <strong>✓</strong> to approve pending reports, or <strong>↺</strong> to reset approved reports back to pending</li>
+                                <li>Click <strong>🖼️</strong> to view photos (if report has images)</li>
+                                <li>Check the boxes to select multiple reports, then click <strong>💰 Export to QuickBooks</strong> for billing</li>
+                                <li>Use <strong>📊 Download CSV Backup</strong> to export data with custom filters (date range, client, status, quality)</li>
                             </ol>
                             <p className={`mt-3 text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                                💡 Backup: Use "Import Report" to manually upload JSON files or use "Download CSV Backup" for comprehensive data exports
+                                💡 Tip: Use filters and search at the top to quickly find specific reports. Click column headers to sort.
                             </p>
                         </div>
                         </>
