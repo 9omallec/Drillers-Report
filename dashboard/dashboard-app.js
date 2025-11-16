@@ -19,6 +19,14 @@
             const [sortColumn, setSortColumn] = useState('date');
             const [sortDirection, setSortDirection] = useState('desc'); // 'asc' or 'desc'
             const [viewingValidation, setViewingValidation] = useState(null);
+            const [showCSVExportModal, setShowCSVExportModal] = useState(false);
+            const [csvExportOptions, setCSVExportOptions] = useState({
+                dateFrom: '',
+                dateTo: '',
+                client: '',
+                status: 'all',
+                quality: 'all'
+            });
 
             // Use shared dark mode hook
             const [darkMode, setDarkMode] = window.useDarkMode();
@@ -207,6 +215,190 @@
                     title: 'QuickBooks Export Ready',
                     duration: 6000
                 });
+            };
+
+            // Export comprehensive CSV backup with filters
+            const exportCSVBackup = () => {
+                // Apply filters
+                let filteredData = reports;
+
+                // Date range filter
+                if (csvExportOptions.dateFrom) {
+                    filteredData = filteredData.filter(r => {
+                        const reportDate = new Date(r.date || r.importedAt);
+                        const fromDate = new Date(csvExportOptions.dateFrom);
+                        return reportDate >= fromDate;
+                    });
+                }
+                if (csvExportOptions.dateTo) {
+                    filteredData = filteredData.filter(r => {
+                        const reportDate = new Date(r.date || r.importedAt);
+                        const toDate = new Date(csvExportOptions.dateTo);
+                        toDate.setHours(23, 59, 59, 999); // Include entire day
+                        return reportDate <= toDate;
+                    });
+                }
+
+                // Client filter
+                if (csvExportOptions.client && csvExportOptions.client.trim() !== '') {
+                    const clientSearch = csvExportOptions.client.toLowerCase();
+                    filteredData = filteredData.filter(r =>
+                        (r.client || r.customer || '').toLowerCase().includes(clientSearch)
+                    );
+                }
+
+                // Status filter
+                if (csvExportOptions.status !== 'all') {
+                    filteredData = filteredData.filter(r => r.status === csvExportOptions.status);
+                }
+
+                // Quality filter
+                if (csvExportOptions.quality !== 'all' && window.ReportValidation) {
+                    filteredData = filteredData.filter(r => {
+                        const badge = window.ReportValidation.getValidationBadge(r);
+                        if (csvExportOptions.quality === 'complete') return badge.severity === 'ok';
+                        if (csvExportOptions.quality === 'incomplete') return badge.severity === 'critical';
+                        if (csvExportOptions.quality === 'warnings') return badge.severity === 'warning';
+                        return true;
+                    });
+                }
+
+                if (filteredData.length === 0) {
+                    toast.warning('No reports match the selected filters');
+                    return;
+                }
+
+                // Generate comprehensive CSV
+                const csv = generateComprehensiveCSV(filteredData);
+
+                // Download file
+                const blob = new Blob([csv], { type: 'text/csv' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `Reports-Backup-${new Date().toISOString().split('T')[0]}.csv`;
+                a.click();
+                URL.revokeObjectURL(url);
+
+                toast.success(`Exported ${filteredData.length} report(s) to CSV`, {
+                    title: 'CSV Backup Complete',
+                    duration: 4000
+                });
+
+                setShowCSVExportModal(false);
+            };
+
+            // Generate comprehensive CSV from reports
+            const generateComprehensiveCSV = (reportsToExport) => {
+                // Multi-section CSV format
+                let csv = '';
+
+                // Section 1: Summary Information
+                csv += '=== REPORT SUMMARY ===\n';
+                csv += 'Date,Client,Job Name,Location,Driller,Status,Total Hours,Standby Hours,Total Footage,Borings Count\n';
+
+                reportsToExport.forEach(report => {
+                    const date = (report.date || report.importedAt || '').split('T')[0];
+                    const client = (report.client || report.customer || '').replace(/,/g, ';');
+                    const jobName = (report.jobName || '').replace(/,/g, ';');
+                    const location = (report.location || '').replace(/,/g, ';');
+                    const driller = (report.driller || '').replace(/,/g, ';');
+                    const status = report.status || 'pending';
+
+                    const totalHours = report.workDays?.reduce((sum, day) => {
+                        const drive = parseFloat(day.hoursDriving) || 0;
+                        const onSite = parseFloat(day.hoursOnSite) || 0;
+                        return sum + drive + onSite;
+                    }, 0) || 0;
+
+                    const totalStandby = report.workDays?.reduce((sum, day) => {
+                        const hours = parseFloat(day.standbyHours) || 0;
+                        const minutes = parseFloat(day.standbyMinutes) || 0;
+                        return sum + hours + (minutes / 60);
+                    }, 0) || 0;
+
+                    const totalFootage = report.borings?.reduce((sum, b) => sum + (parseFloat(b.footage) || 0), 0) || 0;
+                    const boringsCount = report.borings?.filter(b => parseFloat(b.footage) > 0).length || 0;
+
+                    csv += `"${date}","${client}","${jobName}","${location}","${driller}","${status}",${totalHours.toFixed(2)},${totalStandby.toFixed(2)},${totalFootage.toFixed(1)},${boringsCount}\n`;
+                });
+
+                csv += '\n';
+
+                // Section 2: Work Days Detail
+                csv += '=== WORK DAYS DETAIL ===\n';
+                csv += 'Report Date,Client,Job Name,Work Date,Time Left Shop,Arrived On Site,Time Left Site,Arrived At Shop,Hours Driving,Hours On Site,Standby Hours,Standby Minutes,Work Notes\n';
+
+                reportsToExport.forEach(report => {
+                    const reportDate = (report.date || report.importedAt || '').split('T')[0];
+                    const client = (report.client || report.customer || '').replace(/,/g, ';');
+                    const jobName = (report.jobName || '').replace(/,/g, ';');
+
+                    (report.workDays || []).forEach(day => {
+                        const workDate = (day.date || '').replace(/,/g, ';');
+                        const leftShop = (day.timeLeftShop || '').replace(/,/g, ';');
+                        const arrivedSite = (day.arrivedOnSite || '').replace(/,/g, ';');
+                        const leftSite = (day.timeLeftSite || '').replace(/,/g, ';');
+                        const arrivedShop = (day.arrivedAtShop || '').replace(/,/g, ';');
+                        const hoursDriving = parseFloat(day.hoursDriving) || 0;
+                        const hoursOnSite = parseFloat(day.hoursOnSite) || 0;
+                        const standbyHours = parseFloat(day.standbyHours) || 0;
+                        const standbyMinutes = parseFloat(day.standbyMinutes) || 0;
+                        const notes = (day.workNotes || '').replace(/,/g, ';').replace(/\n/g, ' ');
+
+                        csv += `"${reportDate}","${client}","${jobName}","${workDate}","${leftShop}","${arrivedSite}","${leftSite}","${arrivedShop}",${hoursDriving},${hoursOnSite},${standbyHours},${standbyMinutes},"${notes}"\n`;
+                    });
+                });
+
+                csv += '\n';
+
+                // Section 3: Borings Detail
+                csv += '=== BORINGS DETAIL ===\n';
+                csv += 'Report Date,Client,Job Name,Boring Number,Boring Name,Footage,Depth From,Depth To,Method,Completion,Casing,Additional Notes\n';
+
+                reportsToExport.forEach(report => {
+                    const reportDate = (report.date || report.importedAt || '').split('T')[0];
+                    const client = (report.client || report.customer || '').replace(/,/g, ';');
+                    const jobName = (report.jobName || '').replace(/,/g, ';');
+
+                    (report.borings || []).forEach((boring, index) => {
+                        const boringNum = index + 1;
+                        const boringName = (boring.boringNumber || boring.name || '').replace(/,/g, ';');
+                        const footage = parseFloat(boring.footage) || 0;
+                        const depthFrom = (boring.depthFrom || '').replace(/,/g, ';');
+                        const depthTo = (boring.depthTo || '').replace(/,/g, ';');
+                        const method = (boring.method || '').replace(/,/g, ';');
+                        const completion = (boring.completion || '').replace(/,/g, ';');
+                        const casing = (boring.casing || '').replace(/,/g, ';');
+                        const notes = (boring.additionalNotes || '').replace(/,/g, ';').replace(/\n/g, ' ');
+
+                        csv += `"${reportDate}","${client}","${jobName}",${boringNum},"${boringName}",${footage},"${depthFrom}","${depthTo}","${method}","${completion}","${casing}","${notes}"\n`;
+                    });
+                });
+
+                csv += '\n';
+
+                // Section 4: Equipment & Labor
+                csv += '=== EQUIPMENT & LABOR ===\n';
+                csv += 'Report Date,Client,Job Name,Drill Rig,Truck,Core Machine,Grout Machine,Driller,Helper 1,Helper 2,Helper 3\n';
+
+                reportsToExport.forEach(report => {
+                    const reportDate = (report.date || report.importedAt || '').split('T')[0];
+                    const client = (report.client || report.customer || '').replace(/,/g, ';');
+                    const jobName = (report.jobName || '').replace(/,/g, ';');
+                    const drillRig = (report.equipment?.drillRig || '').replace(/,/g, ';');
+                    const truck = (report.equipment?.truck || '').replace(/,/g, ';');
+                    const coreMachine = (report.equipment?.coreMachine || '').replace(/,/g, ';');
+                    const groutMachine = (report.equipment?.groutMachine || '').replace(/,/g, ';');
+                    const driller = (report.driller || '').replace(/,/g, ';');
+                    const helper1 = (report.labor?.helper1 || '').replace(/,/g, ';');
+                    const helper2 = (report.labor?.helper2 || '').replace(/,/g, ';');
+                    const helper3 = (report.labor?.helper3 || '').replace(/,/g, ';');
+
+                    csv += `"${reportDate}","${client}","${jobName}","${drillRig}","${truck}","${coreMachine}","${groutMachine}","${driller}","${helper1}","${helper2}","${helper3}"\n`;
+                });
+
+                return csv;
             };
 
             // Filter and search reports
@@ -417,6 +609,13 @@
                                     disabled={selectedReports.length === 0}
                                 >
                                     💰 Export to QuickBooks ({selectedReports.length})
+                                </button>
+                                <button
+                                    onClick={() => setShowCSVExportModal(true)}
+                                    className="px-5 py-2.5 rounded-lg font-semibold transition-all bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white hover:shadow-lg"
+                                    title="Export reports to CSV with filtering options"
+                                >
+                                    📊 Download CSV Backup
                                 </button>
                                 {/* Manual Import - Backup Option (Less Prominent) */}
                                 <label className={`px-4 py-2 rounded-lg cursor-pointer text-sm font-medium transition-all ${darkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`} title="Manual import (backup option if Drive sync fails)">
@@ -1339,6 +1538,146 @@
                                             </>
                                         );
                                     })()}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* CSV Export Options Modal */}
+                    {showCSVExportModal && (
+                        <div
+                            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4"
+                            onClick={() => setShowCSVExportModal(false)}
+                        >
+                            <div
+                                className={`w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-lg shadow-2xl ${darkMode ? 'bg-gray-800' : 'bg-white'}`}
+                                onClick={(e) => e.stopPropagation()}
+                            >
+                                {/* Modal Header */}
+                                <div className={`sticky top-0 z-10 flex items-center justify-between p-4 sm:p-6 border-b ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
+                                    <h2 className={`text-lg sm:text-xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                                        📊 Export CSV Backup
+                                    </h2>
+                                    <button
+                                        onClick={() => setShowCSVExportModal(false)}
+                                        className="text-2xl font-bold text-gray-500 hover:text-gray-700"
+                                    >
+                                        ×
+                                    </button>
+                                </div>
+
+                                {/* Export Options Content */}
+                                <div className="p-4 sm:p-6">
+                                    <p className={`mb-6 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                                        Export a comprehensive CSV backup of your reports with filtering options. The CSV includes multiple sections: summary, work days detail, borings detail, and equipment & labor.
+                                    </p>
+
+                                    {/* Filter Options */}
+                                    <div className="space-y-4">
+                                        {/* Date Range */}
+                                        <div>
+                                            <label className={`block text-sm font-medium mb-2 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                                Date Range (optional)
+                                            </label>
+                                            <div className="grid grid-cols-2 gap-3">
+                                                <div>
+                                                    <label className={`block text-xs mb-1 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>From</label>
+                                                    <input
+                                                        type="date"
+                                                        value={csvExportOptions.dateFrom}
+                                                        onChange={(e) => setCSVExportOptions({...csvExportOptions, dateFrom: e.target.value})}
+                                                        className={`w-full p-2 border rounded ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className={`block text-xs mb-1 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>To</label>
+                                                    <input
+                                                        type="date"
+                                                        value={csvExportOptions.dateTo}
+                                                        onChange={(e) => setCSVExportOptions({...csvExportOptions, dateTo: e.target.value})}
+                                                        className={`w-full p-2 border rounded ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Client Filter */}
+                                        <div>
+                                            <label className={`block text-sm font-medium mb-2 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                                Client (optional)
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={csvExportOptions.client}
+                                                onChange={(e) => setCSVExportOptions({...csvExportOptions, client: e.target.value})}
+                                                placeholder="Search by client name"
+                                                className={`w-full p-2 border rounded ${darkMode ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400'}`}
+                                            />
+                                        </div>
+
+                                        {/* Status Filter */}
+                                        <div>
+                                            <label className={`block text-sm font-medium mb-2 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                                Status
+                                            </label>
+                                            <select
+                                                value={csvExportOptions.status}
+                                                onChange={(e) => setCSVExportOptions({...csvExportOptions, status: e.target.value})}
+                                                className={`w-full p-2 border rounded ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
+                                            >
+                                                <option value="all">All Statuses</option>
+                                                <option value="pending">Pending</option>
+                                                <option value="approved">Approved</option>
+                                                <option value="billed">Billed</option>
+                                            </select>
+                                        </div>
+
+                                        {/* Quality Filter */}
+                                        <div>
+                                            <label className={`block text-sm font-medium mb-2 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                                Data Quality
+                                            </label>
+                                            <select
+                                                value={csvExportOptions.quality}
+                                                onChange={(e) => setCSVExportOptions({...csvExportOptions, quality: e.target.value})}
+                                                className={`w-full p-2 border rounded ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'}`}
+                                            >
+                                                <option value="all">All Reports</option>
+                                                <option value="complete">Complete Only</option>
+                                                <option value="incomplete">Incomplete Only</option>
+                                                <option value="warnings">With Warnings</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    {/* Preview Info */}
+                                    <div className={`mt-6 p-4 rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-blue-50'}`}>
+                                        <div className={`text-sm font-medium mb-2 ${darkMode ? 'text-blue-300' : 'text-blue-800'}`}>
+                                            📋 What's Included in the Export:
+                                        </div>
+                                        <ul className={`text-xs space-y-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                            <li>• Section 1: Report summary (dates, client, job, totals)</li>
+                                            <li>• Section 2: Work days detail (times, hours, notes)</li>
+                                            <li>• Section 3: Borings detail (footage, depth, methods)</li>
+                                            <li>• Section 4: Equipment & labor information</li>
+                                        </ul>
+                                    </div>
+
+                                    {/* Action Buttons */}
+                                    <div className="flex gap-3 mt-6">
+                                        <button
+                                            onClick={exportCSVBackup}
+                                            className="flex-1 px-5 py-2.5 rounded-lg font-semibold transition-all bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white hover:shadow-lg"
+                                        >
+                                            📊 Export CSV
+                                        </button>
+                                        <button
+                                            onClick={() => setShowCSVExportModal(false)}
+                                            className={`px-5 py-2.5 rounded-lg font-medium transition-all ${darkMode ? 'bg-gray-700 hover:bg-gray-600 text-gray-300' : 'bg-gray-200 hover:bg-gray-300 text-gray-700'}`}
+                                        >
+                                            Cancel
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
