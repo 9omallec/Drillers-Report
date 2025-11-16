@@ -986,10 +986,11 @@
                                 <li><strong>Sign in to Google Drive</strong> (top right) - reports automatically sync!</li>
                                 <li>Click the 👁 eye icon to view any report</li>
                                 <li>Click "✓" to approve or "✎" to request changes</li>
-                                <li>Export approved reports to QuickBooks for billing</li>
+                                <li>Select reports and use <strong>💰 Export to QuickBooks</strong> for billing</li>
+                                <li>Use <strong>📊 Download CSV Backup</strong> to export comprehensive data with filters (date range, client, status, quality)</li>
                             </ol>
                             <p className={`mt-3 text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                                💡 Backup: Use "Import Report" if you need to manually upload a JSON file
+                                💡 Backup: Use "Import Report" to manually upload JSON files or use "Download CSV Backup" for comprehensive data exports
                             </p>
                         </div>
                         </>
