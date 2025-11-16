@@ -399,11 +399,19 @@
                                                 React.createElement('div', {}, `Date: ${new Date(report.date || report.importedAt).toLocaleDateString()}`),
                                                 React.createElement('div', {}, `Driller: ${report.driller || 'Unknown'}`),
                                                 React.createElement('div', {}, `Footage: ${report.borings?.reduce((sum, b) => sum + (parseFloat(b.footage) || 0), 0).toFixed(1) || 0} ft`),
-                                                React.createElement('div', {}, `Hours: ${report.workDays?.reduce((sum, day) => {
-                                                    const drive = parseFloat(day.hoursDriving) || 0;
-                                                    const onSite = parseFloat(day.hoursOnSite) || 0;
-                                                    return sum + drive + onSite;
-                                                }, 0).toFixed(1) || 0} hrs`)
+                                                React.createElement('div', {}, (() => {
+                                                    const totalHours = report.workDays?.reduce((sum, day) => {
+                                                        const drive = parseFloat(day.hoursDriving) || 0;
+                                                        const onSite = parseFloat(day.hoursOnSite) || 0;
+                                                        return sum + drive + onSite;
+                                                    }, 0).toFixed(1) || 0;
+                                                    const totalStandby = report.workDays?.reduce((sum, day) => {
+                                                        const hours = parseFloat(day.standbyHours) || 0;
+                                                        const minutes = parseFloat(day.standbyMinutes) || 0;
+                                                        return sum + hours + (minutes / 60);
+                                                    }, 0) || 0;
+                                                    return `Hours: ${totalHours}${totalStandby > 0 ? ` (+${totalStandby.toFixed(1)} SB)` : ''} hrs`;
+                                                })())
                                             )
                                         ),
                                         onViewReport && React.createElement('button', {

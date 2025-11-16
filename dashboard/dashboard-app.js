@@ -311,6 +311,13 @@
                     const onSite = r.workDays?.reduce((s, d) => s + (parseFloat(d.hoursOnSite) || 0), 0) || 0;
                     return sum + drive + onSite;
                 }, 0).toFixed(1),
+                totalStandby: reports.reduce((sum, r) => {
+                    return sum + (r.workDays?.reduce((s, d) => {
+                        const hours = parseFloat(d.standbyHours) || 0;
+                        const minutes = parseFloat(d.standbyMinutes) || 0;
+                        return s + hours + (minutes / 60);
+                    }, 0) || 0);
+                }, 0),
                 totalFootage: reports.reduce((sum, r) => {
                     return sum + (r.borings?.reduce((s, b) => s + (parseFloat(b.footage) || 0), 0) || 0);
                 }, 0).toFixed(1)
@@ -358,7 +365,7 @@
                                 <div className={`text-sm font-medium ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Approved</div>
                             </div>
                             <div className={`rounded-xl p-5 ${darkMode ? 'bg-gray-800' : 'bg-white'} shadow-lg hover:shadow-xl transition-shadow`}>
-                                <div className="text-3xl font-bold text-blue-500">{stats.totalHours}</div>
+                                <div className="text-3xl font-bold text-blue-500">{stats.totalHours}{stats.totalStandby > 0 ? ` (+${stats.totalStandby.toFixed(1)} SB)` : ''}</div>
                                 <div className={`text-sm font-medium ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Total Hours</div>
                             </div>
                             <div className={`rounded-xl p-5 ${darkMode ? 'bg-gray-800' : 'bg-white'} shadow-lg hover:shadow-xl transition-shadow`}>
@@ -604,6 +611,11 @@
                                                     const onSite = parseFloat(day.hoursOnSite) || 0;
                                                     return sum + drive + onSite;
                                                 }, 0) || 0).toFixed(1);
+                                                const totalStandby = (report.workDays?.reduce((sum, day) => {
+                                                    const hours = parseFloat(day.standbyHours) || 0;
+                                                    const minutes = parseFloat(day.standbyMinutes) || 0;
+                                                    return sum + hours + (minutes / 60);
+                                                }, 0) || 0);
                                                 const totalFootage = (report.borings?.reduce((sum, b) => sum + (parseFloat(b.footage) || 0), 0) || 0).toFixed(1);
 
                                                 // Get validation badge
@@ -665,7 +677,7 @@
                                                             {report.driller || 'N/A'}
                                                         </td>
                                                         <td className={`px-4 py-3 text-sm font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                                                            {totalHours}
+                                                            {totalHours}{totalStandby > 0 ? ` (+${totalStandby.toFixed(1)} SB)` : ''}
                                                         </td>
                                                         <td className={`px-4 py-3 text-sm font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
                                                             {totalFootage} ft
