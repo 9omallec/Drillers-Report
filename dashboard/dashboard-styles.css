@@ -4,20 +4,27 @@
             touch-action: manipulation;
         }
 
-        button, a, label, input[type="checkbox"], input[type="radio"], select {
-            min-height: 44px;
-            min-width: 44px;
-        }
-
-        input, select, textarea {
-            font-size: 16px !important;
-            -webkit-appearance: none;
-            appearance: none;
-        }
-
         html {
             scroll-behavior: smooth;
             -webkit-overflow-scrolling: touch;
+        }
+
+        /* Mobile-only: Larger touch targets and font sizes */
+        @media (max-width: 768px) {
+            button, a, label, input[type="checkbox"], input[type="radio"], select {
+                min-height: 44px;
+                min-width: 44px;
+            }
+
+            input, select, textarea {
+                font-size: 16px !important;
+            }
+        }
+
+        /* All devices: Remove default appearance */
+        input, select, textarea {
+            -webkit-appearance: none;
+            appearance: none;
         }
 
         body {
