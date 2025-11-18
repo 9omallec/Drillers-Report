@@ -1,5 +1,5 @@
 // Version: 1763066342.9972708
-        const { useState, useEffect } = React;
+        const { useState, useEffect, useMemo, useCallback } = React;
 
         function BossDashboard() {
             // Initialize shared storage service
@@ -402,87 +402,91 @@
                 return csv;
             };
 
-            // Filter and search reports
-            const filteredReports = reports.filter(report => {
-                const matchesStatus = filterStatus === 'all' || report.status === filterStatus;
+            // Filter and search reports (memoized for performance)
+            const filteredReports = useMemo(() => {
+                return reports.filter(report => {
+                    const matchesStatus = filterStatus === 'all' || report.status === filterStatus;
 
-                // Data quality filter
-                let matchesQuality = true;
-                if (filterQuality !== 'all' && window.ReportValidation) {
-                    if (filterQuality === 'duplicates') {
-                        const dupInfo = window.ReportValidation.checkForDuplicates(report, reports);
-                        matchesQuality = dupInfo.hasDuplicates;
-                    } else {
-                        const badge = window.ReportValidation.getValidationBadge(report);
-                        if (filterQuality === 'incomplete') {
-                            matchesQuality = badge.severity === 'critical';
-                        } else if (filterQuality === 'warnings') {
-                            matchesQuality = badge.severity === 'warning';
-                        } else if (filterQuality === 'complete') {
-                            matchesQuality = badge.severity === 'ok';
+                    // Data quality filter
+                    let matchesQuality = true;
+                    if (filterQuality !== 'all' && window.ReportValidation) {
+                        if (filterQuality === 'duplicates') {
+                            const dupInfo = window.ReportValidation.checkForDuplicates(report, reports);
+                            matchesQuality = dupInfo.hasDuplicates;
+                        } else {
+                            const badge = window.ReportValidation.getValidationBadge(report);
+                            if (filterQuality === 'incomplete') {
+                                matchesQuality = badge.severity === 'critical';
+                            } else if (filterQuality === 'warnings') {
+                                matchesQuality = badge.severity === 'warning';
+                            } else if (filterQuality === 'complete') {
+                                matchesQuality = badge.severity === 'ok';
+                            }
                         }
                     }
-                }
 
-                const matchesSearch = searchTerm === '' ||
-                    (report.client || report.customer)?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                    report.jobName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                    report.driller?.toLowerCase().includes(searchTerm.toLowerCase());
-                return matchesStatus && matchesQuality && matchesSearch;
-            });
+                    const matchesSearch = searchTerm === '' ||
+                        (report.client || report.customer)?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                        report.jobName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                        report.driller?.toLowerCase().includes(searchTerm.toLowerCase());
+                    return matchesStatus && matchesQuality && matchesSearch;
+                });
+            }, [reports, filterStatus, filterQuality, searchTerm]);
 
-            // Sort reports
-            const sortedReports = [...filteredReports].sort((a, b) => {
-                let aVal, bVal;
+            // Sort reports (memoized for performance)
+            const sortedReports = useMemo(() => {
+                return [...filteredReports].sort((a, b) => {
+                    let aVal, bVal;
 
-                switch (sortColumn) {
-                    case 'date':
-                        aVal = new Date(a.date || a.importedAt || 0).getTime();
-                        bVal = new Date(b.date || b.importedAt || 0).getTime();
-                        break;
-                    case 'customer':
-                        aVal = (a.client || a.customer || '').toLowerCase();
-                        bVal = (b.client || b.customer || '').toLowerCase();
-                        break;
-                    case 'job':
-                        aVal = (a.jobName || '').toLowerCase();
-                        bVal = (b.jobName || '').toLowerCase();
-                        break;
-                    case 'driller':
-                        aVal = (a.driller || '').toLowerCase();
-                        bVal = (b.driller || '').toLowerCase();
-                        break;
-                    case 'hours':
-                        aVal = a.workDays?.reduce((sum, day) => {
-                            const drive = parseFloat(day.hoursDriving) || 0;
-                            const onSite = parseFloat(day.hoursOnSite) || 0;
-                            return sum + drive + onSite;
-                        }, 0) || 0;
-                        bVal = b.workDays?.reduce((sum, day) => {
-                            const drive = parseFloat(day.hoursDriving) || 0;
-                            const onSite = parseFloat(day.hoursOnSite) || 0;
-                            return sum + drive + onSite;
-                        }, 0) || 0;
-                        break;
-                    case 'footage':
-                        aVal = a.borings?.reduce((sum, boring) => sum + (parseFloat(boring.footage) || 0), 0) || 0;
-                        bVal = b.borings?.reduce((sum, boring) => sum + (parseFloat(boring.footage) || 0), 0) || 0;
-                        break;
-                    case 'status':
-                        aVal = (a.status || '').toLowerCase();
-                        bVal = (b.status || '').toLowerCase();
-                        break;
-                    default:
-                        return 0;
-                }
+                    switch (sortColumn) {
+                        case 'date':
+                            aVal = new Date(a.date || a.importedAt || 0).getTime();
+                            bVal = new Date(b.date || b.importedAt || 0).getTime();
+                            break;
+                        case 'customer':
+                            aVal = (a.client || a.customer || '').toLowerCase();
+                            bVal = (b.client || b.customer || '').toLowerCase();
+                            break;
+                        case 'job':
+                            aVal = (a.jobName || '').toLowerCase();
+                            bVal = (b.jobName || '').toLowerCase();
+                            break;
+                        case 'driller':
+                            aVal = (a.driller || '').toLowerCase();
+                            bVal = (b.driller || '').toLowerCase();
+                            break;
+                        case 'hours':
+                            aVal = a.workDays?.reduce((sum, day) => {
+                                const drive = parseFloat(day.hoursDriving) || 0;
+                                const onSite = parseFloat(day.hoursOnSite) || 0;
+                                return sum + drive + onSite;
+                            }, 0) || 0;
+                            bVal = b.workDays?.reduce((sum, day) => {
+                                const drive = parseFloat(day.hoursDriving) || 0;
+                                const onSite = parseFloat(day.hoursOnSite) || 0;
+                                return sum + drive + onSite;
+                            }, 0) || 0;
+                            break;
+                        case 'footage':
+                            aVal = a.borings?.reduce((sum, boring) => sum + (parseFloat(boring.footage) || 0), 0) || 0;
+                            bVal = b.borings?.reduce((sum, boring) => sum + (parseFloat(boring.footage) || 0), 0) || 0;
+                            break;
+                        case 'status':
+                            aVal = (a.status || '').toLowerCase();
+                            bVal = (b.status || '').toLowerCase();
+                            break;
+                        default:
+                            return 0;
+                    }
 
-                if (aVal < bVal) return sortDirection === 'asc' ? -1 : 1;
-                if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1;
-                return 0;
-            });
+                    if (aVal < bVal) return sortDirection === 'asc' ? -1 : 1;
+                    if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1;
+                    return 0;
+                });
+            }, [filteredReports, sortColumn, sortDirection]);
 
-            // Handle sort column click
-            const handleSort = (column) => {
+            // Handle sort column click (memoized to prevent unnecessary re-renders)
+            const handleSort = useCallback((column) => {
                 if (sortColumn === column) {
                     // Toggle direction if clicking the same column
                     setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
@@ -491,30 +495,32 @@
                     setSortColumn(column);
                     setSortDirection(column === 'customer' || column === 'job' || column === 'driller' ? 'asc' : 'desc');
                 }
-            };
+            }, [sortColumn, sortDirection]);
 
-            // Calculate summary statistics
-            const stats = {
-                total: reports.length,
-                pending: reports.filter(r => r.status === 'pending').length,
-                approved: reports.filter(r => r.status === 'approved').length,
-                changesRequested: reports.filter(r => r.status === 'changes_requested').length,
-                totalHours: reports.reduce((sum, r) => {
-                    const drive = r.workDays?.reduce((s, d) => s + (parseFloat(d.hoursDriving) || 0), 0) || 0;
-                    const onSite = r.workDays?.reduce((s, d) => s + (parseFloat(d.hoursOnSite) || 0), 0) || 0;
-                    return sum + drive + onSite;
-                }, 0).toFixed(1),
-                totalStandby: reports.reduce((sum, r) => {
-                    return sum + (r.workDays?.reduce((s, d) => {
-                        const hours = parseFloat(d.standbyHours) || 0;
-                        const minutes = parseFloat(d.standbyMinutes) || 0;
-                        return s + hours + (minutes / 60);
-                    }, 0) || 0);
-                }, 0),
-                totalFootage: reports.reduce((sum, r) => {
-                    return sum + (r.borings?.reduce((s, b) => s + (parseFloat(b.footage) || 0), 0) || 0);
-                }, 0).toFixed(1)
-            };
+            // Calculate summary statistics (memoized for performance)
+            const stats = useMemo(() => {
+                return {
+                    total: reports.length,
+                    pending: reports.filter(r => r.status === 'pending').length,
+                    approved: reports.filter(r => r.status === 'approved').length,
+                    changesRequested: reports.filter(r => r.status === 'changes_requested').length,
+                    totalHours: reports.reduce((sum, r) => {
+                        const drive = r.workDays?.reduce((s, d) => s + (parseFloat(d.hoursDriving) || 0), 0) || 0;
+                        const onSite = r.workDays?.reduce((s, d) => s + (parseFloat(d.hoursOnSite) || 0), 0) || 0;
+                        return sum + drive + onSite;
+                    }, 0).toFixed(1),
+                    totalStandby: reports.reduce((sum, r) => {
+                        return sum + (r.workDays?.reduce((s, d) => {
+                            const hours = parseFloat(d.standbyHours) || 0;
+                            const minutes = parseFloat(d.standbyMinutes) || 0;
+                            return s + hours + (minutes / 60);
+                        }, 0) || 0);
+                    }, 0),
+                    totalFootage: reports.reduce((sum, r) => {
+                        return sum + (r.borings?.reduce((s, b) => s + (parseFloat(b.footage) || 0), 0) || 0);
+                    }, 0).toFixed(1)
+                };
+            }, [reports]);
 
             return (
                 <div className={`min-h-screen ${darkMode ? 'bg-gray-900' : 'bg-gradient-to-br from-gray-50 to-gray-100'}`}>

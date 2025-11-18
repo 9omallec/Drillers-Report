@@ -1,4 +1,4 @@
-const { useState, useEffect } = React;
+const { useState, useEffect, useMemo, useCallback } = React;
 
         function DailyDrillReport() {
             // Initialize shared services
@@ -1577,8 +1577,9 @@ const { useState, useEffect } = React;
                 return csv;
             };
 
-            const totals = getTotalHours();
-            const boringStats = getBoringStats();
+            // Memoize expensive calculations for performance
+            const totals = useMemo(() => getTotalHours(), [workDays]);
+            const boringStats = useMemo(() => getBoringStats(), [borings]);
 
             return (
                 <div className={`min-h-screen transition-colors ${darkMode ? 'bg-gray-900' : 'bg-white'}`}><div className="max-w-7xl mx-auto p-3">
