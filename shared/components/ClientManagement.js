@@ -1,6 +1,6 @@
 /**
- * Client Management Component
- * Manages client database with contact info, billing rates, and preferences
+ * Client Management Component - WITH MULTIPLE CONTACTS SUPPORT
+ * Manages client database with multiple contact persons per company
  */
 
 (function() {
@@ -12,15 +12,16 @@
     function ClientForm({ client, onSave, onCancel, darkMode }) {
         const [formData, setFormData] = useState(client || {
             name: '',
-            contactName: '',
-            email: '',
-            phone: '',
             address: '',
             billingRate: '',
             rateType: 'per_foot',
-            notes: ''
+            notes: '',
+            contacts: []
         });
 
+        const [contacts, setContacts] = useState(client?.contacts || []);
+        const [newContact, setNewContact] = useState({ name: '', email: '', phone: '', title: '', isPrimary: false });
+        const [editingContactId, setEditingContactId] = useState(null);
         const [errors, setErrors] = useState({});
 
         const handleChange = (field, value) => {
@@ -42,10 +43,6 @@
                 newErrors.billingRate = 'Billing rate must be a number';
             }
 
-            if (formData.email && !formData.email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
-                newErrors.email = 'Invalid email format';
-            }
-
             setErrors(newErrors);
             return Object.keys(newErrors).length === 0;
         };
@@ -53,8 +50,74 @@
         const handleSubmit = (e) => {
             e.preventDefault();
             if (validate()) {
-                onSave(formData);
+                onSave({ ...formData, contacts });
             }
+        };
+
+        const handleAddContact = () => {
+            if (!newContact.name && !newContact.email && !newContact.phone) {
+                alert('Please enter at least a name, email, or phone for the contact');
+                return;
+            }
+
+            if (newContact.email && !newContact.email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+                alert('Invalid email format');
+                return;
+            }
+
+            const contactToAdd = {
+                id: 'temp_' + Date.now(),
+                ...newContact,
+                isPrimary: contacts.length === 0 ? true : newContact.isPrimary
+            };
+
+            // If marking as primary, unmark all others
+            if (contactToAdd.isPrimary) {
+                setContacts(prev => prev.map(c => ({ ...c, isPrimary: false })));
+            }
+
+            setContacts(prev => [...prev, contactToAdd]);
+            setNewContact({ name: '', email: '', phone: '', title: '', isPrimary: false });
+        };
+
+        const handleEditContact = (contact) => {
+            setEditingContactId(contact.id);
+            setNewContact(contact);
+        };
+
+        const handleUpdateContact = () => {
+            if (!newContact.name && !newContact.email && !newContact.phone) {
+                alert('Please enter at least a name, email, or phone for the contact');
+                return;
+            }
+
+            if (newContact.email && !newContact.email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+                alert('Invalid email format');
+                return;
+            }
+
+            // If marking as primary, unmark all others
+            if (newContact.isPrimary) {
+                setContacts(prev => prev.map(c => ({ ...c, isPrimary: false })));
+            }
+
+            setContacts(prev => prev.map(c =>
+                c.id === editingContactId ? { ...newContact, id: editingContactId } : c
+            ));
+
+            setNewContact({ name: '', email: '', phone: '', title: '', isPrimary: false });
+            setEditingContactId(null);
+        };
+
+        const handleDeleteContact = (contactId) => {
+            if (confirm('Delete this contact?')) {
+                setContacts(prev => prev.filter(c => c.id !== contactId));
+            }
+        };
+
+        const handleCancelEdit = () => {
+            setEditingContactId(null);
+            setNewContact({ name: '', email: '', phone: '', title: '', isPrimary: false });
         };
 
         return React.createElement(
@@ -77,49 +140,6 @@
                     placeholder: 'ABC Construction Company'
                 }),
                 errors.name && React.createElement('p', { className: 'text-red-500 text-sm mt-1' }, errors.name)
-            ),
-
-            // Contact Name
-            React.createElement('div', { className: 'mb-4' },
-                React.createElement('label', {
-                    className: `block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`
-                }, 'Contact Person'),
-                React.createElement('input', {
-                    type: 'text',
-                    value: formData.contactName,
-                    onChange: (e) => handleChange('contactName', e.target.value),
-                    className: `w-full px-3 py-2 border rounded-lg ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300'}`,
-                    placeholder: 'John Smith'
-                })
-            ),
-
-            // Email and Phone (side by side)
-            React.createElement('div', { className: 'grid grid-cols-1 md:grid-cols-2 gap-4 mb-4' },
-                React.createElement('div', {},
-                    React.createElement('label', {
-                        className: `block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`
-                    }, 'Email'),
-                    React.createElement('input', {
-                        type: 'email',
-                        value: formData.email,
-                        onChange: (e) => handleChange('email', e.target.value),
-                        className: `w-full px-3 py-2 border rounded-lg ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300'} ${errors.email ? 'border-red-500' : ''}`,
-                        placeholder: 'john@example.com'
-                    }),
-                    errors.email && React.createElement('p', { className: 'text-red-500 text-sm mt-1' }, errors.email)
-                ),
-                React.createElement('div', {},
-                    React.createElement('label', {
-                        className: `block text-sm font-medium mb-1 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`
-                    }, 'Phone'),
-                    React.createElement('input', {
-                        type: 'tel',
-                        value: formData.phone,
-                        onChange: (e) => handleChange('phone', e.target.value),
-                        className: `w-full px-3 py-2 border rounded-lg ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300'}`,
-                        placeholder: '(555) 123-4567'
-                    })
-                )
             ),
 
             // Address
@@ -181,6 +201,142 @@
                 })
             ),
 
+            // Contacts Section
+            React.createElement('div', { className: 'mb-4' },
+                React.createElement('h4', {
+                    className: `text-base font-bold mb-2 ${darkMode ? 'text-white' : 'text-gray-800'}`
+                }, '👥 Contacts'),
+
+                // Existing contacts list
+                contacts.length > 0 && React.createElement('div', { className: 'mb-3 space-y-2' },
+                    contacts.map(contact =>
+                        React.createElement('div', {
+                            key: contact.id,
+                            className: `p-3 rounded border ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'}`
+                        },
+                            React.createElement('div', { className: 'flex justify-between items-start' },
+                                React.createElement('div', { className: 'flex-1' },
+                                    React.createElement('div', { className: 'flex items-center gap-2' },
+                                        React.createElement('span', {
+                                            className: `font-semibold ${darkMode ? 'text-white' : 'text-gray-800'}`
+                                        }, contact.name || 'Unnamed Contact'),
+                                        contact.isPrimary && React.createElement('span', {
+                                            className: 'px-2 py-0.5 text-xs bg-green-600 text-white rounded'
+                                        }, 'Primary')
+                                    ),
+                                    contact.title && React.createElement('p', {
+                                        className: `text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`
+                                    }, contact.title),
+                                    React.createElement('p', {
+                                        className: `text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`
+                                    }, [contact.email, contact.phone].filter(Boolean).join(' • '))
+                                ),
+                                React.createElement('div', { className: 'flex gap-1' },
+                                    React.createElement('button', {
+                                        type: 'button',
+                                        onClick: () => handleEditContact(contact),
+                                        className: 'px-2 py-1 text-sm bg-yellow-600 hover:bg-yellow-700 text-white rounded'
+                                    }, '✏️'),
+                                    React.createElement('button', {
+                                        type: 'button',
+                                        onClick: () => handleDeleteContact(contact.id),
+                                        className: 'px-2 py-1 text-sm bg-red-600 hover:bg-red-700 text-white rounded'
+                                    }, '🗑️')
+                                )
+                            )
+                        )
+                    )
+                ),
+
+                // Add/Edit contact form
+                React.createElement('div', {
+                    className: `p-3 rounded border ${darkMode ? 'bg-gray-900 border-gray-600' : 'bg-gray-100 border-gray-300'}`
+                },
+                    React.createElement('h5', {
+                        className: `text-sm font-semibold mb-2 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`
+                    }, editingContactId ? 'Edit Contact' : 'Add Contact'),
+
+                    React.createElement('div', { className: 'grid grid-cols-1 md:grid-cols-2 gap-3 mb-3' },
+                        React.createElement('div', {},
+                            React.createElement('label', {
+                                className: `block text-xs font-medium mb-1 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`
+                            }, 'Contact Name'),
+                            React.createElement('input', {
+                                type: 'text',
+                                value: newContact.name,
+                                onChange: (e) => setNewContact(prev => ({ ...prev, name: e.target.value })),
+                                className: `w-full px-2 py-1.5 text-sm border rounded ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300'}`,
+                                placeholder: 'John Smith'
+                            })
+                        ),
+                        React.createElement('div', {},
+                            React.createElement('label', {
+                                className: `block text-xs font-medium mb-1 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`
+                            }, 'Title'),
+                            React.createElement('input', {
+                                type: 'text',
+                                value: newContact.title,
+                                onChange: (e) => setNewContact(prev => ({ ...prev, title: e.target.value })),
+                                className: `w-full px-2 py-1.5 text-sm border rounded ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300'}`,
+                                placeholder: 'Project Manager'
+                            })
+                        )
+                    ),
+
+                    React.createElement('div', { className: 'grid grid-cols-1 md:grid-cols-2 gap-3 mb-3' },
+                        React.createElement('div', {},
+                            React.createElement('label', {
+                                className: `block text-xs font-medium mb-1 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`
+                            }, 'Email'),
+                            React.createElement('input', {
+                                type: 'email',
+                                value: newContact.email,
+                                onChange: (e) => setNewContact(prev => ({ ...prev, email: e.target.value })),
+                                className: `w-full px-2 py-1.5 text-sm border rounded ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300'}`,
+                                placeholder: 'john@example.com'
+                            })
+                        ),
+                        React.createElement('div', {},
+                            React.createElement('label', {
+                                className: `block text-xs font-medium mb-1 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`
+                            }, 'Phone'),
+                            React.createElement('input', {
+                                type: 'tel',
+                                value: newContact.phone,
+                                onChange: (e) => setNewContact(prev => ({ ...prev, phone: e.target.value })),
+                                className: `w-full px-2 py-1.5 text-sm border rounded ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300'}`,
+                                placeholder: '(555) 123-4567'
+                            })
+                        )
+                    ),
+
+                    React.createElement('div', { className: 'flex items-center gap-3' },
+                        React.createElement('label', { className: 'flex items-center gap-2 cursor-pointer' },
+                            React.createElement('input', {
+                                type: 'checkbox',
+                                checked: newContact.isPrimary,
+                                onChange: (e) => setNewContact(prev => ({ ...prev, isPrimary: e.target.checked })),
+                                className: 'cursor-pointer'
+                            }),
+                            React.createElement('span', {
+                                className: `text-sm ${darkMode ? 'text-gray-300' : 'text-gray-700'}`
+                            }, 'Primary Contact')
+                        ),
+                        React.createElement('div', { className: 'flex-1' }),
+                        editingContactId && React.createElement('button', {
+                            type: 'button',
+                            onClick: handleCancelEdit,
+                            className: `px-3 py-1.5 text-sm rounded ${darkMode ? 'bg-gray-700 text-gray-300' : 'bg-gray-300 text-gray-700'}`
+                        }, 'Cancel'),
+                        React.createElement('button', {
+                            type: 'button',
+                            onClick: editingContactId ? handleUpdateContact : handleAddContact,
+                            className: 'px-3 py-1.5 text-sm bg-green-600 hover:bg-green-700 text-white rounded'
+                        }, editingContactId ? 'Update Contact' : '+ Add Contact')
+                    )
+                )
+            ),
+
             // Buttons
             React.createElement('div', { className: 'flex gap-3 justify-end' },
                 React.createElement('button', {
@@ -199,12 +355,26 @@
     // Client List Item Component
     function ClientListItem({ client, onEdit, onDelete, onViewHistory, darkMode, reports }) {
         const [showDetails, setShowDetails] = useState(false);
+        const [selectedContactId, setSelectedContactId] = useState(null);
+
+        const clientService = useMemo(() => new window.ClientService(new window.StorageService()), []);
+
+        // Get primary contact for display
+        const primaryContact = useMemo(() => {
+            return clientService.getPrimaryContact(client);
+        }, [client]);
+
+        // Get selected contact or primary
+        const displayContact = useMemo(() => {
+            if (selectedContactId && client.contacts) {
+                return client.contacts.find(c => c.id === selectedContactId) || primaryContact;
+            }
+            return primaryContact;
+        }, [client, selectedContactId, primaryContact]);
 
         // Calculate client stats if reports are provided
         const stats = useMemo(() => {
             if (!reports) return null;
-
-            const clientService = new window.ClientService(new window.StorageService());
             return clientService.getClientStats(client.name, reports);
         }, [client.name, reports]);
 
@@ -217,12 +387,37 @@
                     React.createElement('h4', {
                         className: `text-lg font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`
                     }, client.name),
-                    client.contactName && React.createElement('p', {
-                        className: `text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`
-                    }, `Contact: ${client.contactName}`),
-                    (client.email || client.phone) && React.createElement('p', {
-                        className: `text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`
-                    }, [client.email, client.phone].filter(Boolean).join(' • ')),
+
+                    // Contact selector dropdown (if multiple contacts)
+                    client.contacts && client.contacts.length > 1 ?
+                        React.createElement('div', { className: 'mt-2 mb-1' },
+                            React.createElement('select', {
+                                value: selectedContactId || (primaryContact?.id || ''),
+                                onChange: (e) => setSelectedContactId(e.target.value),
+                                className: `text-sm px-2 py-1 border rounded ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300'}`
+                            },
+                                client.contacts.map(contact =>
+                                    React.createElement('option', { key: contact.id, value: contact.id },
+                                        `${contact.name}${contact.isPrimary ? ' (Primary)' : ''}${contact.title ? ' - ' + contact.title : ''}`
+                                    )
+                                )
+                            )
+                        ) : null,
+
+                    // Display selected/primary contact info
+                    displayContact && React.createElement('div', { className: 'mt-1' },
+                        displayContact.name && React.createElement('p', {
+                            className: `text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`
+                        }, `Contact: ${displayContact.name}${displayContact.title ? ' - ' + displayContact.title : ''}`),
+                        (displayContact.email || displayContact.phone) && React.createElement('p', {
+                            className: `text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`
+                        }, [displayContact.email, displayContact.phone].filter(Boolean).join(' • '))
+                    ),
+
+                    client.contacts && client.contacts.length > 0 && React.createElement('p', {
+                        className: `text-xs ${darkMode ? 'text-gray-500' : 'text-gray-500'} mt-1`
+                    }, `${client.contacts.length} contact${client.contacts.length !== 1 ? 's' : ''}`),
+
                     client.billingRate > 0 && React.createElement('p', {
                         className: `text-sm font-semibold text-green-600 mt-1`
                     }, `$${client.billingRate} ${client.rateType === 'per_foot' ? 'per foot' : 'per hour'}`)
@@ -263,6 +458,22 @@
                 client.address && React.createElement('p', {
                     className: `text-sm ${darkMode ? 'text-gray-300' : 'text-gray-700'} mb-2`
                 }, `📍 ${client.address}`),
+
+                // Show all contacts if multiple
+                client.contacts && client.contacts.length > 0 && React.createElement('div', { className: 'mb-2' },
+                    React.createElement('p', {
+                        className: `text-sm font-semibold ${darkMode ? 'text-gray-300' : 'text-gray-700'} mb-1`
+                    }, 'All Contacts:'),
+                    React.createElement('div', { className: 'space-y-1' },
+                        client.contacts.map(contact =>
+                            React.createElement('div', {
+                                key: contact.id,
+                                className: `text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'} pl-2`
+                            }, `• ${contact.name}${contact.title ? ' (' + contact.title + ')' : ''}${contact.isPrimary ? ' [Primary]' : ''} - ${[contact.email, contact.phone].filter(Boolean).join(', ')}`)
+                        )
+                    )
+                ),
+
                 client.notes && React.createElement('p', {
                     className: `text-sm ${darkMode ? 'text-gray-300' : 'text-gray-700'} italic`
                 }, `"${client.notes}"`),
@@ -284,7 +495,7 @@
                         React.createElement('div', { className: `text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'}` }, 'Total Hours')
                     ),
                     React.createElement('div', { className: `text-center p-2 rounded ${darkMode ? 'bg-gray-700' : 'bg-gray-100'}` },
-                        React.createElement('div', { className: `font-bold text-green-600` }, `$${stats.estimatedRevenue}`),
+                        React.createElement('div', { className: 'font-bold text-green-600' }, `$${stats.estimatedRevenue}`),
                         React.createElement('div', { className: `text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'}` }, 'Est. Revenue')
                     )
                 )
@@ -292,7 +503,7 @@
         );
     }
 
-    // Client History Modal Component
+    // Client History Modal Component (unchanged from original - showing reports for this client)
     function ClientHistory({ client, reports, onClose, onViewReport, darkMode }) {
         const clientService = useMemo(() => {
             return new window.ClientService(new window.StorageService());
@@ -314,6 +525,8 @@
             return clientService.getClientStats(client.name, reports);
         }, [client.name, reports]);
 
+        const primaryContact = clientService.getPrimaryContact(client);
+
         return React.createElement(
             'div',
             {
@@ -331,9 +544,9 @@
                         React.createElement('h2', {
                             className: `text-lg sm:text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`
                         }, `${client.name} - History`),
-                        client.contactName && React.createElement('p', {
+                        primaryContact && primaryContact.name && React.createElement('p', {
                             className: `text-xs sm:text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`
-                        }, `Contact: ${client.contactName}`)
+                        }, `Primary Contact: ${primaryContact.name}`)
                     ),
                     React.createElement('button', {
                         onClick: onClose,

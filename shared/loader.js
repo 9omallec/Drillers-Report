@@ -22,11 +22,13 @@
         'components/AdvancedAnalytics.js',
         'components/ClientManagement.js',
         'components/Toast.js',
+        'components/RateSheetManager.js',
 
         // Services
         'services/storage.js',
         'services/clientService.js',
         'services/googleDrive.js',
+        'services/rateSheets.js',
 
         // Utilities
         'utils/calculations.js',

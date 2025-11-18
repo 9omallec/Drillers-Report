@@ -34,19 +34,33 @@ class ClientService {
         );
     }
 
-    // Search clients by name
+    // Search clients by name or contact info
     searchClients(searchTerm) {
         if (!searchTerm) return this.getAllClients();
 
         const clients = this.getAllClients();
         const term = searchTerm.toLowerCase();
 
-        return clients.filter(client =>
-            client.name.toLowerCase().includes(term) ||
-            client.contactName?.toLowerCase().includes(term) ||
-            client.email?.toLowerCase().includes(term) ||
-            client.phone?.includes(term)
-        );
+        return clients.filter(client => {
+            // Search in client name
+            if (client.name.toLowerCase().includes(term)) return true;
+
+            // Search in old single contact fields (backward compatibility)
+            if (client.contactName?.toLowerCase().includes(term)) return true;
+            if (client.email?.toLowerCase().includes(term)) return true;
+            if (client.phone?.includes(term)) return true;
+
+            // Search in new contacts array
+            if (client.contacts && Array.isArray(client.contacts)) {
+                return client.contacts.some(contact =>
+                    contact.name?.toLowerCase().includes(term) ||
+                    contact.email?.toLowerCase().includes(term) ||
+                    contact.phone?.includes(term)
+                );
+            }
+
+            return false;
+        });
     }
 
     // Create new client
@@ -62,16 +76,25 @@ class ClientService {
         const newClient = {
             id: this.generateId(),
             name: clientData.name || '',
-            contactName: clientData.contactName || '',
-            email: clientData.email || '',
-            phone: clientData.phone || '',
             address: clientData.address || '',
             billingRate: parseFloat(clientData.billingRate) || 0,
             rateType: clientData.rateType || 'per_foot', // 'per_foot' or 'per_hour'
             notes: clientData.notes || '',
+            contacts: clientData.contacts || [], // Array of contacts
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString()
         };
+
+        // Backward compatibility: if old fields provided, create first contact
+        if (clientData.contactName || clientData.email || clientData.phone) {
+            newClient.contacts.push({
+                id: this.generateId(),
+                name: clientData.contactName || '',
+                email: clientData.email || '',
+                phone: clientData.phone || '',
+                isPrimary: true
+            });
+        }
 
         clients.push(newClient);
         this.storage.saveGlobal(this.STORAGE_KEY, clients);
@@ -121,6 +144,170 @@ class ClientService {
         this.storage.saveGlobal(this.STORAGE_KEY, filteredClients);
 
         return true;
+    }
+
+    // Add contact to client
+    addContact(clientId, contactData) {
+        const clients = this.getAllClients();
+        const clientIndex = clients.findIndex(c => c.id === clientId);
+
+        if (clientIndex === -1) {
+            throw new Error(`Client with ID "${clientId}" not found`);
+        }
+
+        // Ensure contacts array exists
+        if (!clients[clientIndex].contacts) {
+            clients[clientIndex].contacts = [];
+        }
+
+        const newContact = {
+            id: this.generateId(),
+            name: contactData.name || '',
+            email: contactData.email || '',
+            phone: contactData.phone || '',
+            title: contactData.title || '',
+            isPrimary: contactData.isPrimary || false
+        };
+
+        // If this is marked as primary, unmark all others
+        if (newContact.isPrimary) {
+            clients[clientIndex].contacts.forEach(c => c.isPrimary = false);
+        }
+
+        clients[clientIndex].contacts.push(newContact);
+        clients[clientIndex].updatedAt = new Date().toISOString();
+
+        this.storage.saveGlobal(this.STORAGE_KEY, clients);
+
+        return newContact;
+    }
+
+    // Update contact for client
+    updateContact(clientId, contactId, updates) {
+        const clients = this.getAllClients();
+        const clientIndex = clients.findIndex(c => c.id === clientId);
+
+        if (clientIndex === -1) {
+            throw new Error(`Client with ID "${clientId}" not found`);
+        }
+
+        if (!clients[clientIndex].contacts) {
+            clients[clientIndex].contacts = [];
+        }
+
+        const contactIndex = clients[clientIndex].contacts.findIndex(c => c.id === contactId);
+
+        if (contactIndex === -1) {
+            throw new Error(`Contact with ID "${contactId}" not found`);
+        }
+
+        // If marking as primary, unmark all others
+        if (updates.isPrimary) {
+            clients[clientIndex].contacts.forEach(c => c.isPrimary = false);
+        }
+
+        clients[clientIndex].contacts[contactIndex] = {
+            ...clients[clientIndex].contacts[contactIndex],
+            ...updates,
+            id: contactId // Preserve ID
+        };
+
+        clients[clientIndex].updatedAt = new Date().toISOString();
+
+        this.storage.saveGlobal(this.STORAGE_KEY, clients);
+
+        return clients[clientIndex].contacts[contactIndex];
+    }
+
+    // Delete contact from client
+    deleteContact(clientId, contactId) {
+        const clients = this.getAllClients();
+        const clientIndex = clients.findIndex(c => c.id === clientId);
+
+        if (clientIndex === -1) {
+            throw new Error(`Client with ID "${clientId}" not found`);
+        }
+
+        if (!clients[clientIndex].contacts) {
+            return true;
+        }
+
+        const originalLength = clients[clientIndex].contacts.length;
+        clients[clientIndex].contacts = clients[clientIndex].contacts.filter(c => c.id !== contactId);
+
+        if (clients[clientIndex].contacts.length === originalLength) {
+            throw new Error(`Contact with ID "${contactId}" not found`);
+        }
+
+        clients[clientIndex].updatedAt = new Date().toISOString();
+
+        this.storage.saveGlobal(this.STORAGE_KEY, clients);
+
+        return true;
+    }
+
+    // Get primary contact for a client
+    getPrimaryContact(client) {
+        // Backward compatibility: check old single contact fields first
+        if (client.contactName || client.email || client.phone) {
+            return {
+                name: client.contactName || '',
+                email: client.email || '',
+                phone: client.phone || ''
+            };
+        }
+
+        // New contacts array
+        if (client.contacts && client.contacts.length > 0) {
+            const primary = client.contacts.find(c => c.isPrimary);
+            return primary || client.contacts[0];
+        }
+
+        return null;
+    }
+
+    // Migrate old client format to new contacts array
+    migrateClientToNewFormat(clientId) {
+        const clients = this.getAllClients();
+        const clientIndex = clients.findIndex(c => c.id === clientId);
+
+        if (clientIndex === -1) {
+            throw new Error(`Client with ID "${clientId}" not found`);
+        }
+
+        const client = clients[clientIndex];
+
+        // Skip if already migrated or nothing to migrate
+        if (!client.contactName && !client.email && !client.phone) {
+            return client;
+        }
+
+        // Create contacts array if doesn't exist
+        if (!client.contacts) {
+            client.contacts = [];
+        }
+
+        // Add old contact info as first contact if not already there
+        if (client.contactName || client.email || client.phone) {
+            client.contacts.push({
+                id: this.generateId(),
+                name: client.contactName || '',
+                email: client.email || '',
+                phone: client.phone || '',
+                isPrimary: true
+            });
+
+            // Remove old fields
+            delete client.contactName;
+            delete client.email;
+            delete client.phone;
+
+            client.updatedAt = new Date().toISOString();
+
+            this.storage.saveGlobal(this.STORAGE_KEY, clients);
+        }
+
+        return client;
     }
 
     // Get client statistics (number of reports, total revenue, etc.)

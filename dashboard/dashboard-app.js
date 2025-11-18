@@ -27,6 +27,7 @@
                 status: 'all',
                 quality: 'all'
             });
+            const [showRateSheetManager, setShowRateSheetManager] = useState(false);
 
             // Use shared dark mode hook
             const [darkMode, setDarkMode] = window.useDarkMode();
@@ -616,6 +617,13 @@
                                     title="Export reports to CSV with filtering options"
                                 >
                                     📊 Download CSV Backup
+                                </button>
+                                <button
+                                    onClick={() => setShowRateSheetManager(true)}
+                                    className="px-5 py-2.5 rounded-lg font-semibold transition-all bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white hover:shadow-lg"
+                                    title="Manage equipment and labor hourly rates"
+                                >
+                                    ⚙️ Rate Sheets
                                 </button>
                                 {/* Manual Import - Backup Option (Less Prominent) */}
                                 <label className={`px-4 py-2 rounded-lg cursor-pointer text-sm font-medium transition-all ${darkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`} title="Manual import (backup option if Drive sync fails)">
@@ -1683,6 +1691,14 @@
                                 </div>
                             </div>
                         </div>
+                    )}
+
+                    {/* Rate Sheet Manager Modal */}
+                    {showRateSheetManager && (
+                        <RateSheetManager
+                            darkMode={darkMode}
+                            onClose={() => setShowRateSheetManager(false)}
+                        />
                     )}
                 </div>
             </div>
