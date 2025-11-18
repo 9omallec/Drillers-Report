@@ -29,6 +29,8 @@
         'services/clientService.js',
         'services/googleDrive.js',
         'services/rateSheets.js',
+        'services/invoiceService.js',
+        'services/expenseService.js',
 
         // Utilities
         'utils/calculations.js',
@@ -41,7 +43,8 @@
         'hooks/useDarkMode.js',
         'hooks/useLocalStorage.js',
         'hooks/useGoogleDrive.js',
-        'hooks/useToast.js'
+        'hooks/useToast.js',
+        'hooks/useKeyboardShortcuts.js'
     ];
 
     // Function to load a single script
