@@ -645,11 +645,11 @@
 
                             {/* View Toggle and Filters Row */}
                             <div className="flex flex-wrap gap-3 items-center">
-                                {/* View Toggle */}
-                                <div className="flex gap-2">
+                                {/* View Toggle - Responsive with horizontal scroll on mobile */}
+                                <div className="flex gap-2 overflow-x-auto max-w-full">
                                     <button
                                         onClick={() => setCurrentView('reports')}
-                                        className={`px-4 py-2.5 rounded-lg font-medium transition-all ${
+                                        className={`px-3 md:px-4 py-2.5 rounded-lg font-medium transition-all whitespace-nowrap ${
                                             currentView === 'reports'
                                                 ? 'bg-green-600 text-white shadow-md'
                                                 : darkMode
@@ -660,20 +660,20 @@
                                         📋 Reports
                                     </button>
                                     <button
-                                        onClick={() => setCurrentView('analytics')}
-                                        className={`px-4 py-2.5 rounded-lg font-medium transition-all ${
-                                            currentView === 'analytics'
+                                        onClick={() => setCurrentView('calendar')}
+                                        className={`px-3 md:px-4 py-2.5 rounded-lg font-medium transition-all whitespace-nowrap ${
+                                            currentView === 'calendar'
                                                 ? 'bg-green-600 text-white shadow-md'
                                                 : darkMode
                                                 ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
                                                 : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                                         }`}
                                     >
-                                        📊 Analytics
+                                        📅 Calendar
                                     </button>
                                     <button
                                         onClick={() => setCurrentView('clients')}
-                                        className={`px-4 py-2.5 rounded-lg font-medium transition-all ${
+                                        className={`px-3 md:px-4 py-2.5 rounded-lg font-medium transition-all whitespace-nowrap ${
                                             currentView === 'clients'
                                                 ? 'bg-green-600 text-white shadow-md'
                                                 : darkMode
@@ -684,8 +684,20 @@
                                         👥 Clients
                                     </button>
                                     <button
+                                        onClick={() => setCurrentView('analytics')}
+                                        className={`px-3 md:px-4 py-2.5 rounded-lg font-medium transition-all whitespace-nowrap ${
+                                            currentView === 'analytics'
+                                                ? 'bg-green-600 text-white shadow-md'
+                                                : darkMode
+                                                ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                                                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                        }`}
+                                    >
+                                        📊 Analytics
+                                    </button>
+                                    <button
                                         onClick={() => setCurrentView('profitability')}
-                                        className={`px-4 py-2.5 rounded-lg font-medium transition-all ${
+                                        className={`px-3 md:px-4 py-2.5 rounded-lg font-medium transition-all whitespace-nowrap ${
                                             currentView === 'profitability'
                                                 ? 'bg-green-600 text-white shadow-md'
                                                 : darkMode
@@ -694,18 +706,6 @@
                                         }`}
                                     >
                                         💰 Profitability
-                                    </button>
-                                    <button
-                                        onClick={() => setCurrentView('calendar')}
-                                        className={`px-4 py-2.5 rounded-lg font-medium transition-all ${
-                                            currentView === 'calendar'
-                                                ? 'bg-green-600 text-white shadow-md'
-                                                : darkMode
-                                                ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                                                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                                        }`}
-                                    >
-                                        📅 Calendar
                                     </button>
                                 </div>
                                 <select

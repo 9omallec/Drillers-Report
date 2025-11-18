@@ -18,15 +18,29 @@
 
         // Calculate profitability metrics
         const metrics = useMemo(() => {
-            const invoiceStats = invoiceService.getInvoiceStats();
-            const expenseStats = expenseService.getExpenseStats();
+            // Filter reports by selected client
+            const filteredReports = selectedClient === 'all'
+                ? reports
+                : reports.filter(report => {
+                    const clientName = report.customer || report.client;
+                    return clientName === selectedClient;
+                });
 
-            // Calculate estimated revenue from reports
+            // Get invoice and expense stats filtered by client
+            const invoiceStats = selectedClient === 'all'
+                ? invoiceService.getInvoiceStats()
+                : invoiceService.getInvoiceStats({ clientName: selectedClient });
+
+            const expenseStats = selectedClient === 'all'
+                ? expenseService.getExpenseStats()
+                : expenseService.getExpenseStats({ clientName: selectedClient });
+
+            // Calculate estimated revenue from filtered reports
             let estimatedRevenue = 0;
             let totalHours = 0;
             let totalFootage = 0;
 
-            reports.forEach(report => {
+            filteredReports.forEach(report => {
                 // Get client
                 const clientName = report.customer || report.client;
                 const client = clientService.getClientByName(clientName);
@@ -70,7 +84,7 @@
                 overdueAmount: invoiceStats.overdueAmount,
                 expensesByCategory: expenseStats.byCategory
             };
-        }, [reports, invoiceService, expenseService, clientService]);
+        }, [reports, selectedClient, invoiceService, expenseService, clientService]);
 
         // Get unique clients from reports
         const clients = useMemo(() => {
