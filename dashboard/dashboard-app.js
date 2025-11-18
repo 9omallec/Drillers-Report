@@ -29,12 +29,19 @@
                 quality: 'all'
             });
             const [showRateSheetManager, setShowRateSheetManager] = useState(false);
+            const [showImportModal, setShowImportModal] = useState(false);
+            const [importFile, setImportFile] = useState(null);
+            const [importPreview, setImportPreview] = useState(null);
+            const [importMode, setImportMode] = useState('replace'); // 'replace' or 'merge'
 
             // Use shared dark mode hook
             const [darkMode, setDarkMode] = window.useDarkMode();
 
             // Use toast notifications
             const toast = window.useToast();
+
+            // Initialize export/import service
+            const exportImportService = useMemo(() => new window.DataExportImportService(storageService), []);
 
             // Save reports whenever they change
             useEffect(() => {
@@ -156,6 +163,65 @@
             const deleteReport = (id) => {
                 if (confirm('Are you sure you want to delete this report?')) {
                     setReports(reports.filter(r => r.id !== id));
+                }
+            };
+
+            // Export all app data
+            const handleExportAllData = () => {
+                try {
+                    const backup = exportImportService.exportAllData();
+                    exportImportService.downloadBackup(backup);
+                    const stats = exportImportService.getBackupStats(backup);
+                    toast.success(`Backup exported! ${stats.reports} reports, ${stats.clients} clients, ${stats.invoices} invoices`, {
+                        duration: 5000
+                    });
+                } catch (error) {
+                    console.error('Export error:', error);
+                    toast.error('Failed to export data: ' + error.message);
+                }
+            };
+
+            // Handle import file selection
+            const handleImportFileSelect = async (event) => {
+                const file = event.target.files?.[0];
+                if (!file) return;
+
+                try {
+                    const backup = await exportImportService.parseBackupFile(file);
+                    const stats = exportImportService.getBackupStats(backup);
+                    setImportFile(backup);
+                    setImportPreview(stats);
+                    setShowImportModal(true);
+                } catch (error) {
+                    console.error('Import error:', error);
+                    toast.error('Failed to read backup file: ' + error.message);
+                }
+            };
+
+            // Confirm import
+            const handleConfirmImport = () => {
+                if (!importFile) return;
+
+                try {
+                    const results = importMode === 'replace'
+                        ? exportImportService.importDataReplace(importFile)
+                        : exportImportService.importDataMerge(importFile);
+
+                    if (results.success) {
+                        toast.success(`Data imported successfully! ${results.keysImported + results.keysUpdated} items processed`, {
+                            duration: 5000
+                        });
+                        setShowImportModal(false);
+                        setImportFile(null);
+                        setImportPreview(null);
+                        // Reload page to reflect imported data
+                        setTimeout(() => window.location.reload(), 1000);
+                    } else {
+                        toast.error(`Import completed with errors: ${results.errors.join(', ')}`);
+                    }
+                } catch (error) {
+                    console.error('Import error:', error);
+                    toast.error('Failed to import data: ' + error.message);
                 }
             };
 
@@ -632,6 +698,22 @@
                                 >
                                     ⚙️ Rate Sheets
                                 </button>
+                                <button
+                                    onClick={handleExportAllData}
+                                    className="px-5 py-2.5 rounded-lg font-semibold transition-all bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white hover:shadow-lg"
+                                    title="Export all data (reports, clients, invoices, etc.) to a backup file"
+                                >
+                                    📦 Export All Data
+                                </button>
+                                <label className="px-5 py-2.5 rounded-lg cursor-pointer font-semibold transition-all bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white hover:shadow-lg" title="Import backup file to restore data">
+                                    📥 Import All Data
+                                    <input
+                                        type="file"
+                                        accept=".json"
+                                        onChange={handleImportFileSelect}
+                                        className="hidden"
+                                    />
+                                </label>
                                 {/* Manual Import - Backup Option (Less Prominent) */}
                                 <label className={`px-4 py-2 rounded-lg cursor-pointer text-sm font-medium transition-all ${darkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`} title="Manual import (backup option if Drive sync fails)">
                                     📥 Manual Import
@@ -1745,6 +1827,128 @@
                             darkMode={darkMode}
                             onClose={() => setShowRateSheetManager(false)}
                         />
+                    )}
+
+                    {/* Import Data Modal */}
+                    {showImportModal && importPreview && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                            <div className={`rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-auto ${darkMode ? 'bg-gray-800 text-gray-100' : 'bg-white text-gray-900'}`}>
+                                {/* Header */}
+                                <div className={`p-6 border-b ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+                                    <h2 className="text-2xl font-bold">📥 Import Backup Data</h2>
+                                    <p className={`mt-2 text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                                        Review what will be imported from backup file
+                                    </p>
+                                </div>
+
+                                {/* Preview Stats */}
+                                <div className="p-6">
+                                    <div className={`p-4 rounded-lg mb-4 ${darkMode ? 'bg-gray-700' : 'bg-blue-50'}`}>
+                                        <h3 className="font-semibold mb-3">Backup Contains:</h3>
+                                        <div className="grid grid-cols-2 gap-3 text-sm">
+                                            <div>
+                                                <span className={darkMode ? 'text-gray-400' : 'text-gray-600'}>Reports:</span>
+                                                <span className="ml-2 font-bold">{importPreview.reports}</span>
+                                            </div>
+                                            <div>
+                                                <span className={darkMode ? 'text-gray-400' : 'text-gray-600'}>Clients:</span>
+                                                <span className="ml-2 font-bold">{importPreview.clients}</span>
+                                            </div>
+                                            <div>
+                                                <span className={darkMode ? 'text-gray-400' : 'text-gray-600'}>Invoices:</span>
+                                                <span className="ml-2 font-bold">{importPreview.invoices}</span>
+                                            </div>
+                                            <div>
+                                                <span className={darkMode ? 'text-gray-400' : 'text-gray-600'}>Expenses:</span>
+                                                <span className="ml-2 font-bold">{importPreview.expenses}</span>
+                                            </div>
+                                            <div>
+                                                <span className={darkMode ? 'text-gray-400' : 'text-gray-600'}>Rate Sheets:</span>
+                                                <span className="ml-2 font-bold">{importPreview.rateSheets}</span>
+                                            </div>
+                                            <div>
+                                                <span className={darkMode ? 'text-gray-400' : 'text-gray-600'}>Projects:</span>
+                                                <span className="ml-2 font-bold">{importPreview.projects}</span>
+                                            </div>
+                                        </div>
+                                        <div className={`mt-3 pt-3 border-t text-xs ${darkMode ? 'border-gray-600 text-gray-400' : 'border-gray-300 text-gray-500'}`}>
+                                            Exported: {new Date(importPreview.exportDate).toLocaleString()}
+                                        </div>
+                                    </div>
+
+                                    {/* Import Mode Selection */}
+                                    <div className="mb-6">
+                                        <label className="block font-semibold mb-3">Import Mode:</label>
+                                        <div className="space-y-2">
+                                            <label className={`flex items-start p-3 rounded-lg cursor-pointer border-2 ${importMode === 'replace' ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20' : darkMode ? 'border-gray-600 bg-gray-700' : 'border-gray-300 bg-gray-50'}`}>
+                                                <input
+                                                    type="radio"
+                                                    name="importMode"
+                                                    value="replace"
+                                                    checked={importMode === 'replace'}
+                                                    onChange={(e) => setImportMode(e.target.value)}
+                                                    className="mt-1"
+                                                />
+                                                <div className="ml-3">
+                                                    <div className="font-semibold">Replace All Data</div>
+                                                    <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                                                        Delete all current data and replace with backup data
+                                                    </div>
+                                                </div>
+                                            </label>
+                                            <label className={`flex items-start p-3 rounded-lg cursor-pointer border-2 ${importMode === 'merge' ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20' : darkMode ? 'border-gray-600 bg-gray-700' : 'border-gray-300 bg-gray-50'}`}>
+                                                <input
+                                                    type="radio"
+                                                    name="importMode"
+                                                    value="merge"
+                                                    checked={importMode === 'merge'}
+                                                    onChange={(e) => setImportMode(e.target.value)}
+                                                    className="mt-1"
+                                                />
+                                                <div className="ml-3">
+                                                    <div className="font-semibold">Merge Data</div>
+                                                    <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                                                        Keep current data and add/update with backup data
+                                                    </div>
+                                                </div>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    {/* Warning */}
+                                    {importMode === 'replace' && (
+                                        <div className="p-4 rounded-lg bg-red-100 dark:bg-red-900/30 border border-red-300 dark:border-red-700 mb-4">
+                                            <div className="flex items-start">
+                                                <span className="text-red-500 text-xl mr-2">⚠️</span>
+                                                <div className="text-sm text-red-800 dark:text-red-200">
+                                                    <strong>Warning:</strong> This will delete ALL your current data and replace it with the backup. This cannot be undone!
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Actions */}
+                                <div className={`p-6 border-t flex gap-3 justify-end ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+                                    <button
+                                        onClick={() => {
+                                            setShowImportModal(false);
+                                            setImportFile(null);
+                                            setImportPreview(null);
+                                        }}
+                                        className={`px-5 py-2.5 rounded-lg font-semibold transition-all ${darkMode ? 'bg-gray-700 hover:bg-gray-600 text-gray-300' : 'bg-gray-200 hover:bg-gray-300 text-gray-700'}`}
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        onClick={handleConfirmImport}
+                                        className="px-5 py-2.5 rounded-lg font-semibold transition-all bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white"
+                                    >
+                                        {importMode === 'replace' ? 'Replace All Data' : 'Merge Data'}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     )}
                 </div>
             </div>

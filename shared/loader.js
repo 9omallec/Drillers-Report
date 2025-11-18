@@ -29,6 +29,7 @@
 
         // Services
         'services/storage.js',
+        'services/dataExportImport.js',
         'services/clientService.js',
         'services/googleDrive.js',
         'services/rateSheets.js',
