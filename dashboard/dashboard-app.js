@@ -13,7 +13,7 @@
             const [filterQuality, setFilterQuality] = useState('all');
             const [searchTerm, setSearchTerm] = useState('');
             const [viewingReport, setViewingReport] = useState(null);
-            const [currentView, setCurrentView] = useState('reports'); // 'reports', 'analytics', 'clients'
+            const [currentView, setCurrentView] = useState('reports'); // 'reports', 'analytics', 'clients', 'profitability', 'calendar'
             const [viewingImages, setViewingImages] = useState(null);
             const [currentImageIndex, setCurrentImageIndex] = useState(0);
             const [sortColumn, setSortColumn] = useState('date');
@@ -677,6 +677,30 @@
                                     >
                                         👥 Clients
                                     </button>
+                                    <button
+                                        onClick={() => setCurrentView('profitability')}
+                                        className={`px-4 py-2.5 rounded-lg font-medium transition-all ${
+                                            currentView === 'profitability'
+                                                ? 'bg-green-600 text-white shadow-md'
+                                                : darkMode
+                                                ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                                                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                        }`}
+                                    >
+                                        💰 Profitability
+                                    </button>
+                                    <button
+                                        onClick={() => setCurrentView('calendar')}
+                                        className={`px-4 py-2.5 rounded-lg font-medium transition-all ${
+                                            currentView === 'calendar'
+                                                ? 'bg-green-600 text-white shadow-md'
+                                                : darkMode
+                                                ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                                                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                        }`}
+                                    >
+                                        📅 Calendar
+                                    </button>
                                 </div>
                                 <select
                                     value={filterStatus}
@@ -722,7 +746,7 @@
                             )}
                         </div>
 
-                        {/* View Switcher: Reports, Analytics, or Clients */}
+                        {/* View Switcher: Reports, Analytics, Clients, Profitability, or Calendar */}
                         {currentView === 'analytics' ? (
                             <div className="mb-6 space-y-6">
                                 <AnalyticsComponents.AnalyticsDashboard reports={reports} darkMode={darkMode} />
@@ -731,6 +755,21 @@
                         ) : currentView === 'clients' ? (
                             <div className="mb-6">
                                 <ClientManagementComponents.ClientManagement reports={reports} darkMode={darkMode} onViewReport={(report) => setViewingReport(report)} />
+                            </div>
+                        ) : currentView === 'profitability' ? (
+                            <div className="mb-6">
+                                {React.createElement(window.ProfitabilityDashboard, {
+                                    reports: reports,
+                                    darkMode: darkMode
+                                })}
+                            </div>
+                        ) : currentView === 'calendar' ? (
+                            <div className="mb-6">
+                                {React.createElement(window.CalendarView, {
+                                    reports: reports,
+                                    onViewReport: (report) => setViewingReport(report),
+                                    darkMode: darkMode
+                                })}
                             </div>
                         ) : (
                             <>

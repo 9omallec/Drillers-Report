@@ -23,6 +23,8 @@
         'components/ClientManagement.js',
         'components/Toast.js',
         'components/RateSheetManager.js',
+        'components/ProfitabilityDashboard.js',
+        'components/CalendarView.js',
 
         // Services
         'services/storage.js',
