@@ -17,6 +17,7 @@
 
         // Components (before everything else so they're available)
         'components/Loading.js',
+        'components/LoadingSpinner.js',
         'components/PhotoGallery.js',
         'components/Analytics.js',
         'components/AdvancedAnalytics.js',
@@ -46,7 +47,8 @@
         'hooks/useLocalStorage.js',
         'hooks/useGoogleDrive.js',
         'hooks/useToast.js',
-        'hooks/useKeyboardShortcuts.js'
+        'hooks/useKeyboardShortcuts.js',
+        'hooks/useDebounce.js'
     ];
 
     // Function to load a single script

@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#16a34a">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiRHJpbGxlcnMgUmVwb3J0IERhc2hib2FyZCIsInNob3J0X25hbWUiOiJSZXBvcnRzIiwiZGVzY3JpcHRpb24iOiJNYW5hZ2UgYW5kIHJldmlldyBkcmlsbCByZXBvcnRzIiwic3RhcnRfdXJsIjoiLi8iLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsImJhY2tncm91bmRfY29sb3IiOiIjZmZmZmZmIiwidGhlbWVfY29sb3IiOiIjMTZhMzRhIiwiaWNvbnMiOlt7InNyYyI6ImRhdGE6aW1hZ2Uvc3ZnK3htbCwlM0NzdmcgeG1sbnM9J2h0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnJyB2aWV3Qm94PScwIDAgMTAwIDEwMCclM0UlM0NyZWN0IHdpZHRoPScxMDAnIGhlaWdodD0nMTAwJyBmaWxsPSclMjMxNmEzNGEnLyUzRSUzQ3JlY3QgeD0nMjAnIHk9JzIwJyB3aWR0aD0nNjAnIGhlaWdodD0nNjAnIGZpbGw9J3doaXRlJyByeD0nNScvJTNFJTNDcmVjdCB4PSczMCcgeT0nMzUnIHdpZHRoPSc0MCcgaGVpZ2h0PSc2JyBmaWxsPSclMjMxNmEzNGEnIHJ4PScyJy8lM0UlM0NyZWN0IHg9JzMwJyB5PSc0NScgd2lkdGg9JzQwJyBoZWlnaHQ9JzYnIGZpbGw9JyUyMzE2YTM0YScgcng9JzInLyUzRSUzQ3JlY3QgeD0nMzAnIHk9JzU1JyB3aWR0aD0nNDAnIGhlaWdodD0nNicgZmlsbD0nJTIzMTZhMzRhJyByeD0nMicvJTNFJTNDY2lyY2xlIGN4PSc3MCcgY3k9JzMwJyByPSc4JyBmaWxsPSclMjMyMmM1NWUnLyUzRSUzQ3BhdGggZD0nTTY3IDMwIEw2OSAzMiBMNzMgMjgnIHN0cm9rZT0nd2hpdGUnIHN0cm9rZS13aWR0aD0nMicgZmlsbD0nbm9uZScvJTNFJTNDL3N2ZyUzRSIsInNpemVzIjoiNTEyeDUxMiIsInR5cGUiOiJpbWFnZS9zdmcreG1sIn1dfQ==">
+    <link rel="manifest" href="../manifest.json">
     <title>Drillers Report Dashboard</title>
     
     <!-- External Dependencies -->
@@ -59,6 +59,22 @@
                 console.error('Failed to load dashboard-app.js:', error);
             }
         });
+    </script>
+
+    <!-- Service Worker Registration -->
+    <script>
+        // Register service worker for offline capability
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('../service-worker.js')
+                    .then((registration) => {
+                        console.log('Service Worker registered successfully:', registration.scope);
+                    })
+                    .catch((error) => {
+                        console.log('Service Worker registration failed:', error);
+                    });
+            });
+        }
     </script>
 </body>
 </html>

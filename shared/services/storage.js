@@ -48,8 +48,46 @@ class StorageService {
             return true;
         } catch (error) {
             console.error('Error saving to storage:', error);
+
+            // Check if quota exceeded
+            if (error.name === 'QuotaExceededError' || error.code === 22) {
+                console.warn('localStorage quota exceeded. Consider clearing old data.');
+                this.handleQuotaExceeded();
+            }
             return false;
         }
+    }
+
+    // Handle quota exceeded - try to free up space
+    handleQuotaExceeded() {
+        // Calculate current usage
+        const usage = this.getStorageUsage();
+        console.warn(`Storage usage: ${usage.usedMB.toFixed(2)}MB / ~5MB limit`);
+
+        // Alert user
+        if (window.useToast) {
+            const toast = window.useToast();
+            toast.error('Storage limit reached! Consider exporting and deleting old reports.');
+        }
+    }
+
+    // Get storage usage information
+    getStorageUsage() {
+        let totalBytes = 0;
+
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            const value = localStorage.getItem(key);
+            if (key && value) {
+                totalBytes += key.length + value.length;
+            }
+        }
+
+        return {
+            usedBytes: totalBytes,
+            usedKB: totalBytes / 1024,
+            usedMB: totalBytes / (1024 * 1024)
+        };
     }
 
     // Remove from localStorage
@@ -82,6 +120,12 @@ class StorageService {
             return true;
         } catch (error) {
             console.error('Error saving to global storage:', error);
+
+            // Check if quota exceeded
+            if (error.name === 'QuotaExceededError' || error.code === 22) {
+                console.warn('localStorage quota exceeded. Consider clearing old data.');
+                this.handleQuotaExceeded();
+            }
             return false;
         }
     }

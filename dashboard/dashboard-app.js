@@ -12,6 +12,7 @@
             const [filterStatus, setFilterStatus] = useState('all');
             const [filterQuality, setFilterQuality] = useState('all');
             const [searchTerm, setSearchTerm] = useState('');
+            const debouncedSearchTerm = window.useDebounce(searchTerm, 300);
             const [viewingReport, setViewingReport] = useState(null);
             const [currentView, setCurrentView] = useState('reports'); // 'reports', 'analytics', 'clients', 'profitability', 'calendar'
             const [viewingImages, setViewingImages] = useState(null);
@@ -425,13 +426,13 @@
                         }
                     }
 
-                    const matchesSearch = searchTerm === '' ||
-                        (report.client || report.customer)?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                        report.jobName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                        report.driller?.toLowerCase().includes(searchTerm.toLowerCase());
+                    const matchesSearch = debouncedSearchTerm === '' ||
+                        (report.client || report.customer)?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+                        report.jobName?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+                        report.driller?.toLowerCase().includes(debouncedSearchTerm.toLowerCase());
                     return matchesStatus && matchesQuality && matchesSearch;
                 });
-            }, [reports, filterStatus, filterQuality, searchTerm]);
+            }, [reports, filterStatus, filterQuality, debouncedSearchTerm]);
 
             // Sort reports (memoized for performance)
             const sortedReports = useMemo(() => {

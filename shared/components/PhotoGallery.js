@@ -32,7 +32,8 @@
                         src: photo.dataURL,
                         alt: photo.name,
                         className: 'w-16 h-16 md:w-20 md:h-20 object-cover rounded border border-gray-300',
-                        title: 'Click to preview'
+                        title: 'Click to preview',
+                        loading: 'lazy'
                     })
                 ),
                 // Details and controls
