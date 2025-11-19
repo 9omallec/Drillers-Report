@@ -13,8 +13,52 @@
         const [rateService] = useState(() => new window.RateSheetService());
         const [clientService] = useState(() => new window.ClientService(storageService));
 
+        // Initialize Firebase for real-time sync
+        const firebase = window.useFirebase(true);
+
         const [timeframe, setTimeframe] = useState('all'); // all, month, quarter, year
         const [selectedClient, setSelectedClient] = useState('all');
+
+        // Sync invoices and expenses to Firebase
+        useEffect(() => {
+            if (firebase.isReady && firebase.syncEnabled) {
+                const invoices = invoiceService.getAllInvoices();
+                const expenses = expenseService.getAllExpenses();
+
+                if (invoices.length > 0) {
+                    firebase.saveToFirebase('invoices', invoices);
+                }
+                if (expenses.length > 0) {
+                    firebase.saveToFirebase('expenses', expenses);
+                }
+            }
+        }, [firebase.isReady, firebase.syncEnabled, invoiceService, expenseService]);
+
+        // Listen for real-time updates from Firebase
+        useEffect(() => {
+            if (!firebase.isReady) return;
+
+            // Listen to invoices
+            firebase.listenToFirebase('invoices', (firebaseInvoices) => {
+                if (firebaseInvoices && Array.isArray(firebaseInvoices)) {
+                    console.log('📥 Received updated invoices from Firebase');
+                    storageService.saveGlobal('invoices', firebaseInvoices);
+                }
+            });
+
+            // Listen to expenses
+            firebase.listenToFirebase('expenses', (firebaseExpenses) => {
+                if (firebaseExpenses && Array.isArray(firebaseExpenses)) {
+                    console.log('📥 Received updated expenses from Firebase');
+                    storageService.saveGlobal('expenses', firebaseExpenses);
+                }
+            });
+
+            return () => {
+                firebase.unlistenFromFirebase('invoices');
+                firebase.unlistenFromFirebase('expenses');
+            };
+        }, [firebase.isReady]);
 
         // Calculate profitability metrics
         const metrics = useMemo(() => {

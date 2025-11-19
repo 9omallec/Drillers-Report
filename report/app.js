@@ -4,6 +4,9 @@ const { useState, useEffect, useMemo, useCallback } = React;
             // Initialize shared services
             const storageService = new window.StorageService();
 
+            // Initialize Firebase for real-time sync
+            const firebase = window.useFirebase(true);
+
             // Get current project ID first - this is critical for loading correct data
             const currentProjectId = storageService.getCurrentProjectId();
             
@@ -1079,15 +1082,51 @@ const { useState, useEffect, useMemo, useCallback } = React;
                 const uploaded = await uploadToDrive(reportData_json);
 
                 if (uploaded) {
+                    // Also upload JSON to Firebase for real-time sync
+                    if (firebase.isReady && firebase.syncEnabled) {
+                        try {
+                            // Get existing reports from Firebase
+                            const existingReports = await firebase.getFromFirebase('reports') || [];
+
+                            // Create report object with unique ID
+                            const reportForFirebase = {
+                                ...reportData_json,
+                                id: isEditMode && editingReportId ? editingReportId : Date.now(),
+                                uploadedAt: new Date().toISOString()
+                            };
+
+                            // Update or add report
+                            let updatedReports;
+                            if (isEditMode && editingReportId) {
+                                // Update existing report
+                                updatedReports = existingReports.map(r =>
+                                    r.id === editingReportId ? reportForFirebase : r
+                                );
+                            } else {
+                                // Add new report
+                                updatedReports = [reportForFirebase, ...existingReports];
+                            }
+
+                            // Save to Firebase
+                            await firebase.saveToFirebase('reports', updatedReports);
+                            console.log('✓ Report synced to Firebase');
+                        } catch (error) {
+                            console.error('Firebase sync error:', error);
+                            // Don't fail the whole submission if Firebase fails
+                        }
+                    }
+
                     // Success! - different message for edit mode
                     const successMessage = isEditMode
                         ? '✅ Report Updated Successfully!\n\n' +
                           '✓ Updated on Google Drive\n' +
-                          '✓ Changes are now visible in the dashboard\n\n' +
+                          '✓ Synced to real-time dashboard\n' +
+                          '✓ Changes are now visible everywhere\n\n' +
                           'You can close this page or continue editing.'
                         : '✅ Report Submitted Successfully!\n\n' +
-                          '✓ Uploaded to Google Drive\n' +
-                          '✓ Your boss will see it when they sync\n\n' +
+                          '✓ Uploaded to Google Drive (backup)\n' +
+                          '✓ Synced to real-time dashboard\n' +
+                          '✓ Everyone can see it now!\n\n' +
                           'You can now start a new report or close this page.';
 
                     alert(successMessage);

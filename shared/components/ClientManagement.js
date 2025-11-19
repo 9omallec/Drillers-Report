@@ -654,6 +654,9 @@
             return new window.ClientService(new window.StorageService());
         }, []);
 
+        // Initialize Firebase for real-time sync
+        const firebase = window.useFirebase(true);
+
         // Load clients on mount
         useEffect(() => {
             loadClients();
@@ -663,6 +666,39 @@
             const allClients = clientService.getSortedClients(sortBy, sortOrder);
             setClients(allClients);
         };
+
+        // Sync clients to Firebase whenever they change
+        useEffect(() => {
+            if (firebase.isReady && firebase.syncEnabled && clients.length > 0) {
+                firebase.saveToFirebase('clients', clients);
+            }
+        }, [clients, firebase.isReady, firebase.syncEnabled]);
+
+        // Listen for real-time updates from Firebase
+        useEffect(() => {
+            if (!firebase.isReady) return;
+
+            firebase.listenToFirebase('clients', (firebaseClients) => {
+                if (firebaseClients && Array.isArray(firebaseClients)) {
+                    const currentIds = new Set(clients.map(c => c.id));
+                    const firebaseIds = new Set(firebaseClients.map(c => c.id));
+                    const isDifferent = currentIds.size !== firebaseIds.size ||
+                        [...currentIds].some(id => !firebaseIds.has(id));
+
+                    if (isDifferent) {
+                        console.log('📥 Received updated clients from Firebase');
+                        // Update localStorage through service
+                        const storage = new window.StorageService();
+                        storage.saveGlobal('clientsList', firebaseClients);
+                        loadClients();
+                    }
+                }
+            });
+
+            return () => {
+                firebase.unlistenFromFirebase('clients');
+            };
+        }, [firebase.isReady]);
 
         const handleSave = (clientData) => {
             try {

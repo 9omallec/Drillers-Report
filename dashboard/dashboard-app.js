@@ -40,13 +40,47 @@
             // Use toast notifications
             const toast = window.useToast();
 
+            // Initialize Firebase for real-time sync
+            const firebase = window.useFirebase(true);
+
             // Initialize export/import service
             const exportImportService = useMemo(() => new window.DataExportImportService(storageService), []);
 
-            // Save reports whenever they change
+            // Save reports to localStorage whenever they change
             useEffect(() => {
                 storageService.saveGlobal('bossReports', reports);
             }, [reports]);
+
+            // Sync reports to Firebase whenever they change
+            useEffect(() => {
+                if (firebase.isReady && firebase.syncEnabled && reports.length > 0) {
+                    firebase.saveToFirebase('reports', reports);
+                }
+            }, [reports, firebase.isReady, firebase.syncEnabled]);
+
+            // Listen for real-time updates from Firebase
+            useEffect(() => {
+                if (!firebase.isReady) return;
+
+                firebase.listenToFirebase('reports', (firebaseReports) => {
+                    if (firebaseReports && Array.isArray(firebaseReports)) {
+                        // Only update if data is different
+                        const currentIds = new Set(reports.map(r => r.id));
+                        const firebaseIds = new Set(firebaseReports.map(r => r.id));
+                        const isDifferent = currentIds.size !== firebaseIds.size ||
+                            [...currentIds].some(id => !firebaseIds.has(id));
+
+                        if (isDifferent) {
+                            console.log('📥 Received updated reports from Firebase');
+                            setReports(firebaseReports);
+                        }
+                    }
+                });
+
+                return () => {
+                    firebase.unlistenFromFirebase('reports');
+                };
+            }, [firebase.isReady]);
 
             // ====== GOOGLE DRIVE API INTEGRATION (Shared Hook) ======
             const {

@@ -11,6 +11,9 @@
         const [activeTab, setActiveTab] = useState('equipment'); // equipment, labor, standby
         const [rateSheets, setRateSheets] = useState(rateService.rateSheets);
 
+        // Initialize Firebase for real-time sync
+        const firebase = window.useFirebase(true);
+
         // Form state for adding new rates
         const [newRate, setNewRate] = useState({
             name: '',
@@ -24,6 +27,32 @@
             rateService.loadRateSheets();
             setRateSheets({ ...rateService.rateSheets });
         };
+
+        // Sync rate sheets to Firebase whenever they change
+        useEffect(() => {
+            if (firebase.isReady && firebase.syncEnabled && rateSheets) {
+                firebase.saveToFirebase('rateSheets', rateSheets);
+            }
+        }, [rateSheets, firebase.isReady, firebase.syncEnabled]);
+
+        // Listen for real-time updates from Firebase
+        useEffect(() => {
+            if (!firebase.isReady) return;
+
+            firebase.listenToFirebase('rateSheets', (firebaseRateSheets) => {
+                if (firebaseRateSheets) {
+                    console.log('📥 Received updated rate sheets from Firebase');
+                    // Update localStorage through service
+                    const storage = new window.StorageService();
+                    storage.saveGlobal('rateSheets', firebaseRateSheets);
+                    reloadRates();
+                }
+            });
+
+            return () => {
+                firebase.unlistenFromFirebase('rateSheets');
+            };
+        }, [firebase.isReady]);
 
         // Add new equipment rate
         const handleAddEquipmentRate = () => {
