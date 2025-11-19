@@ -233,7 +233,7 @@
             };
 
             // Confirm import
-            const handleConfirmImport = () => {
+            const handleConfirmImport = async () => {
                 if (!importFile) return;
 
                 try {
@@ -245,6 +245,30 @@
                         toast.success(`Data imported successfully! ${results.keysImported + results.keysUpdated} items processed`, {
                             duration: 5000
                         });
+
+                        // Sync imported data to Firebase
+                        if (firebase.isReady && firebase.syncEnabled) {
+                            try {
+                                // Sync all critical data to Firebase
+                                const clientsList = storageService.loadGlobal('clientsList', []);
+                                const rateSheets = storageService.loadGlobal('rateSheets', null);
+                                const invoices = storageService.loadGlobal('invoices', []);
+                                const expenses = storageService.loadGlobal('expenses', []);
+                                const bossReports = storageService.loadGlobal('bossReports', []);
+
+                                if (clientsList.length > 0) await firebase.saveToFirebase('clients', clientsList);
+                                if (rateSheets) await firebase.saveToFirebase('rateSheets', rateSheets);
+                                if (invoices.length > 0) await firebase.saveToFirebase('invoices', invoices);
+                                if (expenses.length > 0) await firebase.saveToFirebase('expenses', expenses);
+                                if (bossReports.length > 0) await firebase.saveToFirebase('reports', bossReports);
+
+                                console.log('✓ Imported data synced to Firebase');
+                            } catch (error) {
+                                console.error('Firebase sync error:', error);
+                                // Don't fail the import if Firebase sync fails
+                            }
+                        }
+
                         setShowImportModal(false);
                         setImportFile(null);
                         setImportPreview(null);
