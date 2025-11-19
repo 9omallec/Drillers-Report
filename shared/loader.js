@@ -58,7 +58,8 @@
     function loadScript(src) {
         return new Promise((resolve, reject) => {
             const script = document.createElement('script');
-            script.src = src;
+            // Add cache-busting for consistent loading
+            script.src = src + '?v=' + Date.now();
             script.onload = () => {
                 console.log('✓ Loaded:', src);
                 resolve();
