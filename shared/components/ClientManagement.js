@@ -6,7 +6,7 @@
 (function() {
     'use strict';
 
-    const { useState, useEffect, useMemo } = React;
+    const { useState, useEffect, useMemo, useRef } = React;
 
     // Client Form Component
     function ClientForm({ client, onSave, onCancel, darkMode }) {
@@ -656,6 +656,8 @@
 
         // Initialize Firebase for real-time sync
         const firebase = window.useFirebase(true);
+        const firebaseInitialized = useRef(false);
+        const isUpdatingFromFirebase = useRef(false);
 
         // Load clients on mount
         useEffect(() => {
@@ -667,9 +669,37 @@
             setClients(allClients);
         };
 
-        // Sync clients to Firebase whenever they change
+        // PULL from Firebase on initial load (Firebase is source of truth)
         useEffect(() => {
-            if (firebase.isReady && firebase.syncEnabled && clients.length > 0) {
+            if (!firebase.isReady || firebaseInitialized.current) return;
+
+            (async () => {
+                try {
+                    const firebaseClients = await firebase.getFromFirebase('clients');
+                    if (firebaseClients && Array.isArray(firebaseClients) && firebaseClients.length > 0) {
+                        console.log('📥 Loading initial clients from Firebase:', firebaseClients.length);
+                        isUpdatingFromFirebase.current = true;
+                        const storage = new window.StorageService();
+                        storage.saveGlobal('clientsList', firebaseClients);
+                        loadClients();
+                        setTimeout(() => { isUpdatingFromFirebase.current = false; }, 100);
+                    } else if (clients.length > 0) {
+                        // Firebase is empty but we have local data - push to Firebase
+                        console.log('📤 Syncing local clients to Firebase:', clients.length);
+                        await firebase.saveToFirebase('clients', clients);
+                    }
+                    firebaseInitialized.current = true;
+                } catch (error) {
+                    console.error('Error loading clients from Firebase:', error);
+                    firebaseInitialized.current = true;
+                }
+            })();
+        }, [firebase.isReady]);
+
+        // PUSH to Firebase when clients change locally (not from Firebase)
+        useEffect(() => {
+            if (!firebase.isReady || !firebaseInitialized.current || isUpdatingFromFirebase.current) return;
+            if (firebase.syncEnabled && clients.length > 0) {
                 firebase.saveToFirebase('clients', clients);
             }
         }, [clients, firebase.isReady, firebase.syncEnabled]);
@@ -686,11 +716,12 @@
                         [...currentIds].some(id => !firebaseIds.has(id));
 
                     if (isDifferent) {
-                        console.log('📥 Received updated clients from Firebase');
-                        // Update localStorage through service
+                        console.log('📥 Received updated clients from Firebase:', firebaseClients.length);
+                        isUpdatingFromFirebase.current = true;
                         const storage = new window.StorageService();
                         storage.saveGlobal('clientsList', firebaseClients);
                         loadClients();
+                        setTimeout(() => { isUpdatingFromFirebase.current = false; }, 100);
                     }
                 }
             });

@@ -4,7 +4,7 @@
 (function() {
     'use strict';
 
-    const { useState, useEffect, useMemo } = React;
+    const { useState, useEffect, useMemo, useRef } = React;
 
     window.ProfitabilityDashboard = function ProfitabilityDashboard({ reports, darkMode }) {
         const [storageService] = useState(() => new window.StorageService());
@@ -15,24 +15,78 @@
 
         // Initialize Firebase for real-time sync
         const firebase = window.useFirebase(true);
+        const firebaseInitialized = useRef(false);
+        const isUpdatingFromFirebase = useRef(false);
 
         const [timeframe, setTimeframe] = useState('all'); // all, month, quarter, year
         const [selectedClient, setSelectedClient] = useState('all');
+        const [dataRefreshTrigger, setDataRefreshTrigger] = useState(0);
 
-        // Sync invoices and expenses to Firebase
+        // PULL from Firebase on initial load (Firebase is source of truth)
         useEffect(() => {
-            if (firebase.isReady && firebase.syncEnabled) {
-                const invoices = invoiceService.getAllInvoices();
-                const expenses = expenseService.getAllExpenses();
+            if (!firebase.isReady || firebaseInitialized.current) return;
 
-                if (invoices.length > 0) {
-                    firebase.saveToFirebase('invoices', invoices);
+            (async () => {
+                try {
+                    const [firebaseInvoices, firebaseExpenses] = await Promise.all([
+                        firebase.getFromFirebase('invoices'),
+                        firebase.getFromFirebase('expenses')
+                    ]);
+
+                    isUpdatingFromFirebase.current = true;
+
+                    // Handle invoices
+                    if (firebaseInvoices && Array.isArray(firebaseInvoices) && firebaseInvoices.length > 0) {
+                        console.log('📥 Loading initial invoices from Firebase:', firebaseInvoices.length);
+                        storageService.saveGlobal('invoices', firebaseInvoices);
+                    } else {
+                        const localInvoices = invoiceService.getAllInvoices();
+                        if (localInvoices.length > 0) {
+                            console.log('📤 Syncing local invoices to Firebase:', localInvoices.length);
+                            await firebase.saveToFirebase('invoices', localInvoices);
+                        }
+                    }
+
+                    // Handle expenses
+                    if (firebaseExpenses && Array.isArray(firebaseExpenses) && firebaseExpenses.length > 0) {
+                        console.log('📥 Loading initial expenses from Firebase:', firebaseExpenses.length);
+                        storageService.saveGlobal('expenses', firebaseExpenses);
+                    } else {
+                        const localExpenses = expenseService.getAllExpenses();
+                        if (localExpenses.length > 0) {
+                            console.log('📤 Syncing local expenses to Firebase:', localExpenses.length);
+                            await firebase.saveToFirebase('expenses', localExpenses);
+                        }
+                    }
+
+                    firebaseInitialized.current = true;
+                    setTimeout(() => {
+                        isUpdatingFromFirebase.current = false;
+                        setDataRefreshTrigger(prev => prev + 1);
+                    }, 100);
+                } catch (error) {
+                    console.error('Error loading invoices/expenses from Firebase:', error);
+                    firebaseInitialized.current = true;
+                    isUpdatingFromFirebase.current = false;
                 }
-                if (expenses.length > 0) {
-                    firebase.saveToFirebase('expenses', expenses);
-                }
+            })();
+        }, [firebase.isReady]);
+
+        // PUSH to Firebase when data changes (triggered by dataRefreshTrigger)
+        useEffect(() => {
+            if (!firebase.isReady || !firebaseInitialized.current || isUpdatingFromFirebase.current) return;
+            if (!firebase.syncEnabled) return;
+
+            const invoices = invoiceService.getAllInvoices();
+            const expenses = expenseService.getAllExpenses();
+
+            if (invoices.length > 0) {
+                firebase.saveToFirebase('invoices', invoices);
             }
-        }, [firebase.isReady, firebase.syncEnabled, invoiceService, expenseService]);
+            if (expenses.length > 0) {
+                firebase.saveToFirebase('expenses', expenses);
+            }
+        }, [dataRefreshTrigger, firebase.isReady, firebase.syncEnabled]);
 
         // Listen for real-time updates from Firebase
         useEffect(() => {
@@ -41,16 +95,26 @@
             // Listen to invoices
             firebase.listenToFirebase('invoices', (firebaseInvoices) => {
                 if (firebaseInvoices && Array.isArray(firebaseInvoices)) {
-                    console.log('📥 Received updated invoices from Firebase');
+                    console.log('📥 Received updated invoices from Firebase:', firebaseInvoices.length);
+                    isUpdatingFromFirebase.current = true;
                     storageService.saveGlobal('invoices', firebaseInvoices);
+                    setTimeout(() => {
+                        isUpdatingFromFirebase.current = false;
+                        setDataRefreshTrigger(prev => prev + 1);
+                    }, 100);
                 }
             });
 
             // Listen to expenses
             firebase.listenToFirebase('expenses', (firebaseExpenses) => {
                 if (firebaseExpenses && Array.isArray(firebaseExpenses)) {
-                    console.log('📥 Received updated expenses from Firebase');
+                    console.log('📥 Received updated expenses from Firebase:', firebaseExpenses.length);
+                    isUpdatingFromFirebase.current = true;
                     storageService.saveGlobal('expenses', firebaseExpenses);
+                    setTimeout(() => {
+                        isUpdatingFromFirebase.current = false;
+                        setDataRefreshTrigger(prev => prev + 1);
+                    }, 100);
                 }
             });
 

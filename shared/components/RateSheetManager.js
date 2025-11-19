@@ -4,7 +4,7 @@
 (function() {
     'use strict';
 
-    const { useState, useEffect } = React;
+    const { useState, useEffect, useRef } = React;
 
     window.RateSheetManager = function RateSheetManager({ darkMode, onClose }) {
         const [rateService] = useState(() => new window.RateSheetService());
@@ -13,6 +13,8 @@
 
         // Initialize Firebase for real-time sync
         const firebase = window.useFirebase(true);
+        const firebaseInitialized = useRef(false);
+        const isUpdatingFromFirebase = useRef(false);
 
         // Form state for adding new rates
         const [newRate, setNewRate] = useState({
@@ -28,9 +30,37 @@
             setRateSheets({ ...rateService.rateSheets });
         };
 
-        // Sync rate sheets to Firebase whenever they change
+        // PULL from Firebase on initial load (Firebase is source of truth)
         useEffect(() => {
-            if (firebase.isReady && firebase.syncEnabled && rateSheets) {
+            if (!firebase.isReady || firebaseInitialized.current) return;
+
+            (async () => {
+                try {
+                    const firebaseRateSheets = await firebase.getFromFirebase('rateSheets');
+                    if (firebaseRateSheets && Object.keys(firebaseRateSheets).length > 0) {
+                        console.log('📥 Loading initial rate sheets from Firebase');
+                        isUpdatingFromFirebase.current = true;
+                        const storage = new window.StorageService();
+                        storage.saveGlobal('rateSheets', firebaseRateSheets);
+                        reloadRates();
+                        setTimeout(() => { isUpdatingFromFirebase.current = false; }, 100);
+                    } else if (rateSheets && Object.keys(rateSheets).length > 0) {
+                        // Firebase is empty but we have local data - push to Firebase
+                        console.log('📤 Syncing local rate sheets to Firebase');
+                        await firebase.saveToFirebase('rateSheets', rateSheets);
+                    }
+                    firebaseInitialized.current = true;
+                } catch (error) {
+                    console.error('Error loading rate sheets from Firebase:', error);
+                    firebaseInitialized.current = true;
+                }
+            })();
+        }, [firebase.isReady]);
+
+        // PUSH to Firebase when rate sheets change locally (not from Firebase)
+        useEffect(() => {
+            if (!firebase.isReady || !firebaseInitialized.current || isUpdatingFromFirebase.current) return;
+            if (firebase.syncEnabled && rateSheets) {
                 firebase.saveToFirebase('rateSheets', rateSheets);
             }
         }, [rateSheets, firebase.isReady, firebase.syncEnabled]);
@@ -42,10 +72,11 @@
             firebase.listenToFirebase('rateSheets', (firebaseRateSheets) => {
                 if (firebaseRateSheets) {
                     console.log('📥 Received updated rate sheets from Firebase');
-                    // Update localStorage through service
+                    isUpdatingFromFirebase.current = true;
                     const storage = new window.StorageService();
                     storage.saveGlobal('rateSheets', firebaseRateSheets);
                     reloadRates();
+                    setTimeout(() => { isUpdatingFromFirebase.current = false; }, 100);
                 }
             });
 
