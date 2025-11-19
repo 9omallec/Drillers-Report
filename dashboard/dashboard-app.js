@@ -42,6 +42,9 @@
 
             // Initialize Firebase for real-time sync
             const firebase = window.useFirebase(true);
+            const { useRef } = React;
+            const firebaseInitialized = useRef(false);
+            const isUpdatingFromFirebase = useRef(false);
 
             // Initialize export/import service
             const exportImportService = useMemo(() => new window.DataExportImportService(storageService), []);
@@ -51,12 +54,37 @@
                 storageService.saveGlobal('bossReports', reports);
             }, [reports]);
 
-            // Sync reports to Firebase whenever they change
+            // PULL from Firebase on initial load (Firebase is source of truth)
             useEffect(() => {
-                if (firebase.isReady && firebase.syncEnabled && reports.length > 0) {
-                    firebase.saveToFirebase('reports', reports);
-                }
-            }, [reports, firebase.isReady, firebase.syncEnabled]);
+                if (!firebase.isReady || firebaseInitialized.current) return;
+
+                (async () => {
+                    try {
+                        const firebaseReports = await firebase.getFromFirebase('reports');
+                        if (firebaseReports && Array.isArray(firebaseReports) && firebaseReports.length > 0) {
+                            console.log('📥 Loading initial reports from Firebase:', firebaseReports.length);
+                            isUpdatingFromFirebase.current = true;
+                            setReports(firebaseReports);
+                            setTimeout(() => { isUpdatingFromFirebase.current = false; }, 100);
+                        } else if (reports.length > 0) {
+                            // Firebase is empty but we have local data - push to Firebase
+                            console.log('📤 Syncing local reports to Firebase:', reports.length);
+                            await firebase.saveToFirebase('reports', reports);
+                        }
+                        firebaseInitialized.current = true;
+                    } catch (error) {
+                        console.error('Error loading from Firebase:', error);
+                        firebaseInitialized.current = true;
+                    }
+                })();
+            }, [firebase.isReady]);
+
+            // PUSH to Firebase when reports change locally (not from Firebase)
+            useEffect(() => {
+                if (!firebase.isReady || !firebaseInitialized.current || isUpdatingFromFirebase.current) return;
+
+                firebase.saveToFirebase('reports', reports);
+            }, [reports, firebase.isReady]);
 
             // Listen for real-time updates from Firebase
             useEffect(() => {
@@ -71,8 +99,10 @@
                             [...currentIds].some(id => !firebaseIds.has(id));
 
                         if (isDifferent) {
-                            console.log('📥 Received updated reports from Firebase');
+                            console.log('📥 Received updated reports from Firebase:', firebaseReports.length);
+                            isUpdatingFromFirebase.current = true;
                             setReports(firebaseReports);
+                            setTimeout(() => { isUpdatingFromFirebase.current = false; }, 100);
                         }
                     }
                 });
