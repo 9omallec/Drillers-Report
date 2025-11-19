@@ -146,9 +146,8 @@
          * Listen for real-time changes
          * @param {string} path - Firebase path
          * @param {Function} callback - Called when data changes
-         * @param {Array} dependencies - React dependencies for the callback
          */
-        const listenToFirebase = useCallback((path, callback, dependencies = []) => {
+        const listenToFirebase = useCallback((path, callback) => {
             if (!isReady) {
                 console.warn('Firebase not ready, cannot listen');
                 return;
@@ -168,7 +167,7 @@
             if (listenerId) {
                 listenersRef.current.set(listenerId, path);
             }
-        }, [isReady, ...dependencies]);
+        }, [isReady]);
 
         /**
          * Stop listening to a path
