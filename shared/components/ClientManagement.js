@@ -235,7 +235,7 @@
                                     React.createElement('button', {
                                         type: 'button',
                                         onClick: () => handleEditContact(contact),
-                                        className: 'px-2 py-1 text-sm bg-yellow-600 hover:bg-yellow-700 text-white rounded'
+                                        className: 'px-2 py-1 text-sm bg-blue-500 hover:bg-blue-600 text-white rounded'
                                     }, '✏️'),
                                     React.createElement('button', {
                                         type: 'button',
@@ -436,7 +436,7 @@
                     }, showDetails ? '▲' : '▼'),
                     React.createElement('button', {
                         onClick: () => onEdit(client),
-                        className: `px-3 py-1.5 text-sm rounded-lg ${darkMode ? 'bg-yellow-600 hover:bg-yellow-700' : 'bg-yellow-500 hover:bg-yellow-600'} text-white`,
+                        className: `px-3 py-1.5 text-sm rounded-lg ${darkMode ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-500 hover:bg-blue-600'} text-white`,
                         title: 'Edit client'
                     }, '✏️'),
                     React.createElement('button', {

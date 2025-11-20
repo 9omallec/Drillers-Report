@@ -1160,7 +1160,7 @@
                                                                             setViewingImages(report.uploadedPhotosDetails.filter(img => img && img.dataURL));
                                                                             setCurrentImageIndex(0);
                                                                         }}
-                                                                        className="px-3 py-1 bg-purple-600 text-white rounded text-xs hover:bg-purple-700"
+                                                                        className="px-3 py-1 bg-blue-500 text-white rounded text-xs hover:bg-blue-600"
                                                                         title={`View ${report.uploadedPhotosDetails.length} image(s)`}
                                                                     >
                                                                         🖼️
