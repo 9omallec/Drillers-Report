@@ -16,6 +16,8 @@
         const [syncEnabled, setSyncEnabled] = useState(true);
         const [lastSyncTime, setLastSyncTime] = useState(null);
         const [error, setError] = useState(null);
+        const [user, setUser] = useState(null);
+        const [isOnline, setIsOnline] = useState(true);
         const firebaseRef = useRef(null);
         const listenersRef = useRef(new Map());
 
@@ -28,6 +30,26 @@
 
                 if (!firebaseRef.current.isReady()) {
                     await firebaseRef.current.initialize();
+
+                    // Set up connection listener
+                    firebaseRef.current.onConnectionChange((online) => {
+                        setIsOnline(online);
+                    });
+
+                    // Set up auth state listener
+                    firebaseRef.current.onAuthStateChange((firebaseUser) => {
+                        if (firebaseUser) {
+                            setUser({
+                                uid: firebaseUser.uid,
+                                email: firebaseUser.email,
+                                displayName: firebaseUser.displayName,
+                                photoURL: firebaseUser.photoURL
+                            });
+                        } else {
+                            setUser(null);
+                        }
+                    });
+
                     setIsReady(true);
                     setError(null);
                     console.log('✓ Firebase ready via useFirebase hook');
@@ -55,6 +77,58 @@
                 listenersRef.current.clear();
             };
         }, [autoInit, initialize]);
+
+        /**
+         * Sign in with Google
+         */
+        const signInWithGoogle = useCallback(async () => {
+            if (!isReady) {
+                console.warn('Firebase not ready');
+                return null;
+            }
+
+            try {
+                const signedInUser = await firebaseRef.current.signInWithGoogle();
+                setError(null);
+                return signedInUser;
+            } catch (err) {
+                console.error('Sign-in error:', err);
+                setError(err.message);
+                throw err;
+            }
+        }, [isReady]);
+
+        /**
+         * Sign out
+         */
+        const signOut = useCallback(async () => {
+            if (!firebaseRef.current) return;
+
+            try {
+                await firebaseRef.current.signOut();
+                setUser(null);
+                setError(null);
+            } catch (err) {
+                console.error('Sign-out error:', err);
+                setError(err.message);
+            }
+        }, []);
+
+        /**
+         * Format last sync time as relative string
+         */
+        const getLastSyncTimeFormatted = useCallback(() => {
+            if (!lastSyncTime) return null;
+
+            const now = new Date();
+            const diff = Math.floor((now - lastSyncTime) / 1000);
+
+            if (diff < 5) return 'Just now';
+            if (diff < 60) return `${diff}s ago`;
+            if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+            if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+            return lastSyncTime.toLocaleDateString();
+        }, [lastSyncTime]);
 
         /**
          * Save data to Firebase
@@ -245,6 +319,8 @@
             syncEnabled,
             lastSyncTime,
             error,
+            user,
+            isOnline,
 
             // Methods
             initialize,
@@ -257,7 +333,10 @@
             syncLocalToFirebase,
             syncFirebaseToLocal,
             toggleSync,
-            getCurrentUser
+            getCurrentUser,
+            signInWithGoogle,
+            signOut,
+            getLastSyncTimeFormatted
         };
     };
 

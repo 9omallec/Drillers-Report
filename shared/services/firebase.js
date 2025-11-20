@@ -16,6 +16,9 @@
         measurementId: "G-3SQ58FJRJM"
     };
 
+    // Allowed email domain for Google Sign-In
+    const ALLOWED_DOMAIN = 'omalleydrilling.com';
+
     class FirebaseService {
         constructor() {
             this.db = null;
@@ -24,10 +27,14 @@
             this.isInitialized = false;
             this.listeners = new Map();
             this.syncEnabled = true;
+            this.isOnline = true;
+            this.lastSyncTime = null;
+            this.connectionListeners = [];
+            this.authStateListeners = [];
         }
 
         /**
-         * Initialize Firebase and authenticate anonymously
+         * Initialize Firebase (without auto sign-in)
          * @returns {Promise<void>}
          */
         async initialize() {
@@ -47,8 +54,19 @@
                 this.db = firebase.database();
                 this.auth = firebase.auth();
 
-                // Sign in anonymously
-                await this.signInAnonymously();
+                // Set up connection state monitoring
+                this.setupConnectionMonitoring();
+
+                // Set up auth state listener
+                this.auth.onAuthStateChanged((user) => {
+                    this.currentUser = user;
+                    this.notifyAuthStateListeners(user);
+                    if (user) {
+                        console.log('✓ User signed in:', user.email);
+                    } else {
+                        console.log('User signed out');
+                    }
+                });
 
                 this.isInitialized = true;
                 console.log('✓ Firebase initialized successfully');
@@ -59,18 +77,92 @@
         }
 
         /**
-         * Sign in anonymously for simple auth
-         * @returns {Promise<void>}
+         * Set up connection state monitoring
          */
-        async signInAnonymously() {
+        setupConnectionMonitoring() {
+            const connectedRef = this.db.ref('.info/connected');
+            connectedRef.on('value', (snap) => {
+                this.isOnline = snap.val() === true;
+                this.notifyConnectionListeners(this.isOnline);
+                console.log(this.isOnline ? '🟢 Connected to Firebase' : '🔴 Disconnected from Firebase');
+            });
+        }
+
+        /**
+         * Sign in with Google (restricted to allowed domain)
+         * @returns {Promise<Object>} - User object
+         */
+        async signInWithGoogle() {
             try {
-                const result = await this.auth.signInAnonymously();
-                this.currentUser = result.user;
-                console.log('✓ Signed in anonymously:', this.currentUser.uid);
+                const provider = new firebase.auth.GoogleAuthProvider();
+                // Force account selection
+                provider.setCustomParameters({ prompt: 'select_account' });
+
+                const result = await this.auth.signInWithPopup(provider);
+                const user = result.user;
+
+                // Check email domain
+                if (!user.email.endsWith('@' + ALLOWED_DOMAIN)) {
+                    await this.signOut();
+                    throw new Error(`Access restricted to @${ALLOWED_DOMAIN} email addresses`);
+                }
+
+                this.currentUser = user;
+                console.log('✓ Signed in with Google:', user.email);
+                return user;
             } catch (error) {
-                console.error('Anonymous sign-in error:', error);
+                console.error('Google sign-in error:', error);
                 throw error;
             }
+        }
+
+        /**
+         * Add listener for connection state changes
+         * @param {Function} callback - Called with boolean (isOnline)
+         */
+        onConnectionChange(callback) {
+            this.connectionListeners.push(callback);
+            // Immediately notify with current state
+            callback(this.isOnline);
+        }
+
+        /**
+         * Add listener for auth state changes
+         * @param {Function} callback - Called with user object or null
+         */
+        onAuthStateChange(callback) {
+            this.authStateListeners.push(callback);
+            // Immediately notify with current state
+            callback(this.currentUser);
+        }
+
+        /**
+         * Notify all connection listeners
+         */
+        notifyConnectionListeners(isOnline) {
+            this.connectionListeners.forEach(cb => cb(isOnline));
+        }
+
+        /**
+         * Notify all auth state listeners
+         */
+        notifyAuthStateListeners(user) {
+            this.authStateListeners.forEach(cb => cb(user));
+        }
+
+        /**
+         * Update last sync time
+         */
+        updateLastSyncTime() {
+            this.lastSyncTime = new Date();
+        }
+
+        /**
+         * Get last sync time
+         * @returns {Date|null}
+         */
+        getLastSyncTime() {
+            return this.lastSyncTime;
         }
 
         /**
@@ -85,9 +177,15 @@
                 return;
             }
 
+            if (!this.currentUser) {
+                console.warn('Not signed in - cannot save to Firebase');
+                return;
+            }
+
             try {
                 const ref = this.db.ref(path);
                 await ref.set(data);
+                this.updateLastSyncTime();
                 console.log(`✓ Saved to Firebase: ${path}`);
             } catch (error) {
                 console.error(`Error saving to Firebase (${path}):`, error);
@@ -269,8 +367,27 @@
         getCurrentUser() {
             return this.currentUser ? {
                 uid: this.currentUser.uid,
-                isAnonymous: this.currentUser.isAnonymous
+                email: this.currentUser.email,
+                displayName: this.currentUser.displayName,
+                photoURL: this.currentUser.photoURL,
+                isAnonymous: this.currentUser.isAnonymous || false
             } : null;
+        }
+
+        /**
+         * Check if user is signed in
+         * @returns {boolean}
+         */
+        isSignedIn() {
+            return this.currentUser !== null;
+        }
+
+        /**
+         * Get connection status
+         * @returns {boolean}
+         */
+        getConnectionStatus() {
+            return this.isOnline;
         }
 
         /**

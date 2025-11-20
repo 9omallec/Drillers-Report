@@ -704,6 +704,55 @@
                             </div>
                         </div>
 
+
+                        {/* Sync Status Bar */}
+                        <div className={`rounded-lg px-4 py-2 mb-4 flex flex-wrap items-center justify-between gap-2 text-sm ${darkMode ? 'bg-gray-800' : 'bg-white'} shadow`}>
+                            <div className="flex items-center gap-4">
+                                {/* Connection Status */}
+                                <div className="flex items-center gap-1.5">
+                                    <div className={`w-2 h-2 rounded-full ${firebase.isOnline ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                                    <span className={darkMode ? 'text-gray-400' : 'text-gray-600'}>
+                                        {firebase.isOnline ? 'Connected' : 'Offline'}
+                                    </span>
+                                </div>
+                                {/* Last Sync Time */}
+                                {firebase.getLastSyncTimeFormatted() && (
+                                    <div className={darkMode ? 'text-gray-500' : 'text-gray-500'}>
+                                        Synced: {firebase.getLastSyncTimeFormatted()}
+                                    </div>
+                                )}
+                            </div>
+                            {/* User Auth */}
+                            <div className="flex items-center gap-2">
+                                {firebase.user ? (
+                                    <>
+                                        <span className={darkMode ? 'text-gray-300' : 'text-gray-700'}>
+                                            {firebase.user.email}
+                                        </span>
+                                        <button
+                                            onClick={() => firebase.signOut()}
+                                            className={`px-2 py-1 rounded text-xs ${darkMode ? 'bg-gray-700 hover:bg-gray-600 text-gray-300' : 'bg-gray-200 hover:bg-gray-300 text-gray-700'}`}
+                                        >
+                                            Sign Out
+                                        </button>
+                                    </>
+                                ) : (
+                                    <button
+                                        onClick={async () => {
+                                            try {
+                                                await firebase.signInWithGoogle();
+                                            } catch (err) {
+                                                toast.error(err.message);
+                                            }
+                                        }}
+                                        className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs font-medium"
+                                    >
+                                        Sign in with Google
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+
                         {/* Statistics */}
                         <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
                             <div className={`rounded-xl p-5 ${darkMode ? 'bg-gray-800' : 'bg-white'} shadow-lg hover:shadow-xl transition-shadow`}>
