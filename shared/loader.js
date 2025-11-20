@@ -23,6 +23,8 @@
         'components/AdvancedAnalytics.js',
         'components/ClientManagement.js',
         'components/Toast.js',
+        'components/Modal.js',
+        'components/ErrorBoundary.js',
         'components/RateSheetManager.js',
         'components/ProfitabilityDashboard.js',
         'components/CalendarView.js',

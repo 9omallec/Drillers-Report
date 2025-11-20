@@ -24,7 +24,7 @@ function useGoogleDrive(scopes) {
         });
 
         service.on('onError', (error) => {
-            alert(error);
+            console.error('Google Drive error:', error);
         });
 
         // Initialize the service

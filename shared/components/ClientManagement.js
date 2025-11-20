@@ -24,6 +24,9 @@
         const [editingContactId, setEditingContactId] = useState(null);
         const [errors, setErrors] = useState({});
 
+        // Toast notifications
+        const { toast } = window.useToast();
+
         const handleChange = (field, value) => {
             setFormData(prev => ({ ...prev, [field]: value }));
             // Clear error when user starts typing
@@ -56,12 +59,12 @@
 
         const handleAddContact = () => {
             if (!newContact.name && !newContact.email && !newContact.phone) {
-                alert('Please enter at least a name, email, or phone for the contact');
+                toast.warning('Please enter at least a name, email, or phone for the contact');
                 return;
             }
 
             if (newContact.email && !newContact.email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
-                alert('Invalid email format');
+                toast.warning('Invalid email format');
                 return;
             }
 
@@ -87,12 +90,12 @@
 
         const handleUpdateContact = () => {
             if (!newContact.name && !newContact.email && !newContact.phone) {
-                alert('Please enter at least a name, email, or phone for the contact');
+                toast.warning('Please enter at least a name, email, or phone for the contact');
                 return;
             }
 
             if (newContact.email && !newContact.email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
-                alert('Invalid email format');
+                toast.warning('Invalid email format');
                 return;
             }
 
@@ -659,6 +662,9 @@
         const firebaseInitialized = useRef(false);
         const isUpdatingFromFirebase = useRef(false);
 
+        // Toast notifications
+        const { toast } = window.useToast();
+
         // Load clients on mount
         useEffect(() => {
             loadClients();
@@ -742,7 +748,7 @@
                 setShowForm(false);
                 setEditingClient(null);
             } catch (error) {
-                alert(error.message);
+                toast.error(error.message);
             }
         };
 
@@ -756,7 +762,7 @@
                 clientService.deleteClient(clientId);
                 loadClients();
             } catch (error) {
-                alert(error.message);
+                toast.error(error.message);
             }
         };
 

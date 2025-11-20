@@ -34,6 +34,9 @@ const { useState, useEffect, useMemo, useCallback } = React;
 
             // Use shared dark mode hook
             const [darkMode, setDarkMode] = window.useDarkMode();
+
+            // Toast notifications
+            const { toast, ToastContainer } = window.useToast();
             
             // Save projects list
             useEffect(() => {
@@ -193,7 +196,7 @@ const { useState, useEffect, useMemo, useCallback } = React;
                             console.log('✓ Loaded report for editing');
                         } catch (error) {
                             console.error('Error loading report for editing:', error);
-                            alert('Error loading report for editing. Please try again.');
+                            toast.error('Error loading report for editing. Please try again.');
                         }
                     }
                 }
@@ -215,7 +218,7 @@ const { useState, useEffect, useMemo, useCallback } = React;
             const uploadToDrive = async (reportJson) => {
                 try {
                     if (!isSignedIn) {
-                        alert('⚠️ Please sign in to Google Drive first');
+                        toast.warning('Please sign in to Google Drive first');
                         return false;
                     }
 
@@ -255,7 +258,7 @@ const { useState, useEffect, useMemo, useCallback } = React;
                     }
                 } catch (error) {
                     console.error('Error uploading to Drive:', error);
-                    alert('Upload failed:\n\n' + error.message + '\n\nPlease try again or check console (F12) for details.');
+                    toast.error('Upload failed: ' + error.message);
                     return false;
                 }
             };
@@ -418,7 +421,7 @@ const { useState, useEffect, useMemo, useCallback } = React;
             // Project Management Functions
             const createNewProject = () => {
                 if (!newProjectName.trim()) {
-                    alert('Please enter a project name');
+                    toast.warning('Please enter a project name');
                     return;
                 }
                 
@@ -709,7 +712,7 @@ const { useState, useEffect, useMemo, useCallback } = React;
                     const result = await window.GeolocationUtils.getCurrentLocation(true);
                     handleReportChange('location', result.address || result.coordinates);
                 } catch (error) {
-                    alert(error.message);
+                    toast.error(error.message);
                 } finally {
                     setIsGettingLocation(false);
                 }
@@ -835,7 +838,7 @@ const { useState, useEffect, useMemo, useCallback } = React;
                             if (data.equipment) setEquipment(data.equipment);
                             if (data.supplies) setSuppliesData(data.supplies);
                         } catch (error) {
-                            alert('Error loading file');
+                            toast.error('Error loading file');
                         }
                     };
                     reader.readAsText(file);
@@ -865,17 +868,17 @@ const { useState, useEffect, useMemo, useCallback } = React;
                     storageService.remove('suppliesData', projectId);
                 }
 
-                alert('Form has been reset to default values.');
+                toast.info('Form has been reset to default values.');
             };
 
             const handleLoadFromDrive = async () => {
-                
+
                 console.log('=== LOAD BUTTON CLICKED ===');
                 console.log('Signed in:', isSignedIn);
                 console.log('Folder ID:', GOOGLE_DRIVE_CONFIG.FOLDER_ID);
-                
+
                 if (!isSignedIn) {
-                    alert('Please sign in to Google Drive first');
+                    toast.warning('Please sign in to Google Drive first');
                     return;
                 }
 
@@ -917,13 +920,13 @@ const { useState, useEffect, useMemo, useCallback } = React;
                             
                             if (reportFiles.length > 0) {
                                 files = reportFiles;
-                                alert('Found ' + reportFiles.length + ' reports using broad search.');
+                                toast.info('Found ' + reportFiles.length + ' reports using broad search.');
                             } else {
-                                alert('Found JSON files but none look like reports. Check console.');
+                                toast.warning('Found JSON files but none look like reports. Check console.');
                                 return;
                             }
                         } else {
-                            alert('No JSON files found anywhere in your Drive.');
+                            toast.warning('No JSON files found anywhere in your Drive.');
                             return;
                         }
                     }
@@ -941,7 +944,7 @@ const { useState, useEffect, useMemo, useCallback } = React;
                     
                     const index = parseInt(selection) - 1;
                     if (isNaN(index) || index < 0 || index >= files.length) {
-                        alert('Invalid selection');
+                        toast.error('Invalid selection');
                         return;
                     }
 
@@ -959,11 +962,11 @@ const { useState, useEffect, useMemo, useCallback } = React;
                     if (data.borings) setBorings(data.borings);
                     if (data.equipment) setEquipment(data.equipment);
                     if (data.supplies) setSuppliesData(data.supplies);
-                    
-                    alert('Report loaded successfully from Google Drive');
+
+                    toast.success('Report loaded successfully from Google Drive');
                 } catch (error) {
                     console.error('Error loading from Drive:', error);
-                    alert('Error loading report from Google Drive: ' + error.message);
+                    toast.error('Error loading report from Google Drive: ' + error.message);
                 }
             };
 
@@ -1043,13 +1046,13 @@ const { useState, useEffect, useMemo, useCallback } = React;
                 // Validate form before proceeding
                 const validationErrors = validateReport();
                 if (validationErrors.length > 0) {
-                    alert('⚠️ Please fix the following errors:\n\n' + validationErrors.join('\n'));
+                    toast.error('Please fix errors: ' + validationErrors.join(', '));
                     return;
                 }
 
                 // Check if user is signed in to Google Drive
                 if (!isSignedIn) {
-                    alert('⚠️ Please sign in to Google Drive first!\n\nClick the "📁 Sign in to Drive" button above, then try submitting again.');
+                    toast.warning('Please sign in to Google Drive first');
                     return;
                 }
 
@@ -1129,7 +1132,7 @@ const { useState, useEffect, useMemo, useCallback } = React;
                           '✓ Everyone can see it now!\n\n' +
                           'You can now start a new report or close this page.';
 
-                    alert(successMessage);
+                    toast.success(isEditMode ? 'Report updated successfully!' : 'Report submitted successfully!');
 
                     // Optional: Ask if they want to view it in Drive
                     const viewInDrive = confirm('Would you like to view the report in Google Drive?');
@@ -1159,7 +1162,7 @@ const { useState, useEffect, useMemo, useCallback } = React;
                         jsonLink.click();
                         URL.revokeObjectURL(jsonUrl);
 
-                        alert('File downloaded. Please upload it manually to Google Drive.');
+                        toast.info('File downloaded. Please upload it manually to Google Drive.');
                         window.open(`https://drive.google.com/drive/folders/${GOOGLE_DRIVE_CONFIG.FOLDER_ID}`, '_blank');
                     }
                 }
@@ -2788,10 +2791,18 @@ const { useState, useEffect, useMemo, useCallback } = React;
                             </div>
                         </div>
                     )}
+
+                    {/* Toast Notifications */}
+                    <ToastContainer />
                 </div>
             );
         }
 
         // Render app immediately - modules are already loaded when this script runs
         console.log('Report app script loaded, rendering...');
-        ReactDOM.render(<DailyDrillReport />, document.getElementById('root'));
+        ReactDOM.render(
+            <ErrorBoundary>
+                <DailyDrillReport />
+            </ErrorBoundary>,
+            document.getElementById('root')
+        );

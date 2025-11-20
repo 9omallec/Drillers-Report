@@ -167,23 +167,46 @@
          * Save data to Firebase
          * @param {string} path - Firebase path
          * @param {any} data - Data to save
+         * @param {Object} options - Save options
+         * @param {boolean} options.immediate - Skip debouncing
          */
-        const saveToFirebase = useCallback(async (path, data) => {
+        const saveToFirebase = useCallback(async (path, data, options = {}) => {
             if (!isReady || !syncEnabled) {
                 console.warn('Firebase not ready or sync disabled');
                 return false;
             }
 
-            try {
-                await firebaseRef.current.save(path, data);
-                setLastSyncTime(new Date());
+            const { immediate = false } = options;
+
+            const doSave = async () => {
+                setIsSyncing(true);
+                try {
+                    if (!isOnline) {
+                        // Queue for later when offline
+                        pendingSavesRef.current.push({ path, data });
+                        console.log('📥 Queued save for when online:', path);
+                        return true;
+                    }
+
+                    await firebaseRef.current.save(path, data);
+                    setLastSyncTime(new Date());
+                    return true;
+                } catch (err) {
+                    console.error('Error saving to Firebase:', err);
+                    setError(err.message);
+                    return false;
+                } finally {
+                    setIsSyncing(false);
+                }
+            };
+
+            if (immediate) {
+                return doSave();
+            } else {
+                debounce(path, doSave, 500);
                 return true;
-            } catch (err) {
-                console.error('Error saving to Firebase:', err);
-                setError(err.message);
-                return false;
             }
-        }, [isReady, syncEnabled]);
+        }, [isReady, syncEnabled, isOnline]);
 
         /**
          * Update data in Firebase

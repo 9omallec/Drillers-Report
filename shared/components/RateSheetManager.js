@@ -16,6 +16,9 @@
         const firebaseInitialized = useRef(false);
         const isUpdatingFromFirebase = useRef(false);
 
+        // Toast notifications
+        const { toast } = window.useToast();
+
         // Form state for adding new rates
         const [newRate, setNewRate] = useState({
             name: '',
@@ -88,7 +91,7 @@
         // Add new equipment rate
         const handleAddEquipmentRate = () => {
             if (!newRate.name || !newRate.rate) {
-                alert('Please enter equipment name and rate');
+                toast.warning('Please enter equipment name and rate');
                 return;
             }
 
@@ -106,7 +109,7 @@
         // Add new labor rate
         const handleAddLaborRate = () => {
             if (!newRate.name || !newRate.rate) {
-                alert('Please enter labor type and rate');
+                toast.warning('Please enter labor type and rate');
                 return;
             }
 
@@ -124,7 +127,7 @@
         // Update standby rate
         const handleUpdateStandbyRate = () => {
             if (!newRate.rate) {
-                alert('Please enter a rate');
+                toast.warning('Please enter a rate');
                 return;
             }
 
@@ -168,9 +171,9 @@
                 reader.onload = (e) => {
                     if (rateService.importFromJSON(e.target.result)) {
                         reloadRates();
-                        alert('Rate sheets imported successfully!');
+                        toast.success('Rate sheets imported successfully!');
                     } else {
-                        alert('Error importing rate sheets. Invalid format.');
+                        toast.error('Error importing rate sheets. Invalid format.');
                     }
                 };
                 reader.readAsText(file);

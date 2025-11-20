@@ -2108,4 +2108,9 @@
 
         // Render app immediately - modules are already loaded when this script runs
         console.log('Dashboard app script loaded, rendering...');
-        ReactDOM.render(<BossDashboard />, document.getElementById('root'));
+        ReactDOM.render(
+            <ErrorBoundary>
+                <BossDashboard />
+            </ErrorBoundary>,
+            document.getElementById('root')
+        );
