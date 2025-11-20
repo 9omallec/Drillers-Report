@@ -52,7 +52,6 @@
                         setIsOnline(online);
                         // Auto-retry pending saves when back online
                         if (online && pendingSavesRef.current.length > 0) {
-                            console.log('🔄 Retrying pending saves...');
                             const pending = [...pendingSavesRef.current];
                             pendingSavesRef.current = [];
                             pending.forEach(({ path, data }) => {
@@ -80,7 +79,6 @@
 
                     setIsReady(true);
                     setError(null);
-                    console.log('✓ Firebase ready via useFirebase hook');
                 }
             } catch (err) {
                 console.error('Firebase initialization error:', err);
@@ -184,7 +182,6 @@
                     if (!isOnline) {
                         // Queue for later when offline
                         pendingSavesRef.current.push({ path, data });
-                        console.log('📥 Queued save for when online:', path);
                         return true;
                     }
 
@@ -400,7 +397,5 @@
             getLastSyncTimeFormatted
         };
     };
-
-    console.log('✓ useFirebase hook initialized');
 
 })();

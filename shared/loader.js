@@ -63,7 +63,6 @@
             // Add cache-busting for consistent loading
             script.src = src + '?v=' + Date.now();
             script.onload = () => {
-                console.log('✓ Loaded:', src);
                 resolve();
             };
             script.onerror = () => {
@@ -76,13 +75,10 @@
 
     // Load all modules sequentially
     async function loadAllModules() {
-        console.log('📦 Loading shared modules...');
-
         try {
             for (const module of modules) {
                 await loadScript(SHARED_BASE_PATH + module);
             }
-            console.log('✓ All shared modules loaded successfully!');
 
             // Dispatch event to notify app that modules are ready
             window.dispatchEvent(new Event('sharedModulesLoaded'));

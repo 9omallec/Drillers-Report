@@ -39,7 +39,6 @@
          */
         async initialize() {
             if (this.isInitialized) {
-                console.log('Firebase already initialized');
                 return;
             }
 
@@ -61,15 +60,9 @@
                 this.auth.onAuthStateChanged((user) => {
                     this.currentUser = user;
                     this.notifyAuthStateListeners(user);
-                    if (user) {
-                        console.log('✓ User signed in:', user.email);
-                    } else {
-                        console.log('User signed out');
-                    }
                 });
 
                 this.isInitialized = true;
-                console.log('✓ Firebase initialized successfully');
             } catch (error) {
                 console.error('Firebase initialization error:', error);
                 throw error;
@@ -84,7 +77,6 @@
             connectedRef.on('value', (snap) => {
                 this.isOnline = snap.val() === true;
                 this.notifyConnectionListeners(this.isOnline);
-                console.log(this.isOnline ? '🟢 Connected to Firebase' : '🔴 Disconnected from Firebase');
             });
         }
 
@@ -108,7 +100,6 @@
                 }
 
                 this.currentUser = user;
-                console.log('✓ Signed in with Google:', user.email);
                 return user;
             } catch (error) {
                 console.error('Google sign-in error:', error);
@@ -186,7 +177,6 @@
                 const ref = this.db.ref(path);
                 await ref.set(data);
                 this.updateLastSyncTime();
-                console.log(`✓ Saved to Firebase: ${path}`);
             } catch (error) {
                 console.error(`Error saving to Firebase (${path}):`, error);
                 throw error;
@@ -208,7 +198,6 @@
             try {
                 const ref = this.db.ref(path);
                 await ref.update(updates);
-                console.log(`✓ Updated Firebase: ${path}`);
             } catch (error) {
                 console.error(`Error updating Firebase (${path}):`, error);
                 throw error;
@@ -250,7 +239,6 @@
             try {
                 const ref = this.db.ref(path);
                 await ref.remove();
-                console.log(`✓ Deleted from Firebase: ${path}`);
             } catch (error) {
                 console.error(`Error deleting from Firebase (${path}):`, error);
                 throw error;
@@ -279,7 +267,6 @@
                 });
 
                 this.listeners.set(listenerId, { path, ref });
-                console.log(`✓ Listening to Firebase: ${path}`);
                 return listenerId;
             } catch (error) {
                 console.error(`Error setting up listener (${path}):`, error);
@@ -296,7 +283,6 @@
             if (listener) {
                 listener.ref.off('value');
                 this.listeners.delete(listenerId);
-                console.log(`✓ Stopped listening to Firebase: ${listener.path}`);
             }
         }
 
@@ -341,7 +327,6 @@
          */
         setSyncEnabled(enabled) {
             this.syncEnabled = enabled;
-            console.log(`Firebase sync ${enabled ? 'enabled' : 'disabled'}`);
         }
 
         /**
@@ -398,14 +383,11 @@
             if (this.auth) {
                 await this.auth.signOut();
                 this.currentUser = null;
-                console.log('✓ Signed out from Firebase');
             }
         }
     }
 
     // Export service
     window.FirebaseService = FirebaseService;
-
-    console.log('✓ FirebaseService class loaded');
 
 })();
