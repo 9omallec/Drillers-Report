@@ -18,8 +18,24 @@
         const [error, setError] = useState(null);
         const [user, setUser] = useState(null);
         const [isOnline, setIsOnline] = useState(true);
+        const [isLoading, setIsLoading] = useState(false);
+        const [isSyncing, setIsSyncing] = useState(false);
         const firebaseRef = useRef(null);
         const listenersRef = useRef(new Map());
+        const pendingSavesRef = useRef([]);
+        const debounceTimersRef = useRef(new Map());
+
+        // Debounce utility
+        const debounce = (key, fn, delay = 500) => {
+            if (debounceTimersRef.current.has(key)) {
+                clearTimeout(debounceTimersRef.current.get(key));
+            }
+            const timer = setTimeout(() => {
+                fn();
+                debounceTimersRef.current.delete(key);
+            }, delay);
+            debounceTimersRef.current.set(key, timer);
+        };
 
         // Initialize Firebase service
         const initialize = useCallback(async () => {
@@ -31,9 +47,21 @@
                 if (!firebaseRef.current.isReady()) {
                     await firebaseRef.current.initialize();
 
-                    // Set up connection listener
+                    // Set up connection listener with auto-retry
                     firebaseRef.current.onConnectionChange((online) => {
                         setIsOnline(online);
+                        // Auto-retry pending saves when back online
+                        if (online && pendingSavesRef.current.length > 0) {
+                            console.log('🔄 Retrying pending saves...');
+                            const pending = [...pendingSavesRef.current];
+                            pendingSavesRef.current = [];
+                            pending.forEach(({ path, data }) => {
+                                firebaseRef.current.save(path, data).catch(err => {
+                                    console.error('Retry failed:', err);
+                                    pendingSavesRef.current.push({ path, data });
+                                });
+                            });
+                        }
                     });
 
                     // Set up auth state listener
@@ -101,8 +129,13 @@
         /**
          * Sign out
          */
-        const signOut = useCallback(async () => {
+        const signOut = useCallback(async (skipConfirm = false) => {
             if (!firebaseRef.current) return;
+
+            // Confirmation dialog
+            if (!skipConfirm && !confirm('Are you sure you want to sign out? You will need to sign in again to sync data.')) {
+                return;
+            }
 
             try {
                 await firebaseRef.current.signOut();
@@ -185,6 +218,7 @@
                 return null;
             }
 
+            setIsLoading(true);
             try {
                 const data = await firebaseRef.current.get(path);
                 return data;
@@ -192,6 +226,8 @@
                 console.error('Error getting from Firebase:', err);
                 setError(err.message);
                 return null;
+            } finally {
+                setIsLoading(false);
             }
         }, [isReady]);
 
@@ -321,6 +357,8 @@
             error,
             user,
             isOnline,
+            isLoading,
+            isSyncing,
 
             // Methods
             initialize,

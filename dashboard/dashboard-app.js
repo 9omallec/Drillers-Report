@@ -706,19 +706,29 @@
 
 
                         {/* Sync Status Bar */}
-                        <div className={`rounded-lg px-4 py-2 mb-4 flex flex-wrap items-center justify-between gap-2 text-sm ${darkMode ? 'bg-gray-800' : 'bg-white'} shadow`}>
-                            <div className="flex items-center gap-4">
+                        <div className={`rounded-lg px-3 py-2 mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs sm:text-sm ${darkMode ? 'bg-gray-800' : 'bg-white'} shadow`}>
+                            <div className="flex items-center gap-3 sm:gap-4 flex-wrap">
                                 {/* Connection Status */}
                                 <div className="flex items-center gap-1.5">
                                     <div className={`w-2 h-2 rounded-full ${firebase.isOnline ? 'bg-green-500' : 'bg-red-500'}`}></div>
                                     <span className={darkMode ? 'text-gray-400' : 'text-gray-600'}>
-                                        {firebase.isOnline ? 'Connected' : 'Offline'}
+                                        {firebase.isOnline ? 'Online' : 'Offline'}
                                     </span>
                                 </div>
+                                {/* Syncing Indicator */}
+                                {firebase.isSyncing && (
+                                    <div className="flex items-center gap-1.5 text-blue-500">
+                                        <svg className="animate-spin h-3 w-3" viewBox="0 0 24 24">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"></circle>
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        <span>Syncing...</span>
+                                    </div>
+                                )}
                                 {/* Last Sync Time */}
-                                {firebase.getLastSyncTimeFormatted() && (
+                                {!firebase.isSyncing && firebase.getLastSyncTimeFormatted() && (
                                     <div className={darkMode ? 'text-gray-500' : 'text-gray-500'}>
-                                        Synced: {firebase.getLastSyncTimeFormatted()}
+                                        {firebase.getLastSyncTimeFormatted()}
                                     </div>
                                 )}
                             </div>
