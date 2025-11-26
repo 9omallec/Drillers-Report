@@ -41,9 +41,8 @@
             const toast = window.useToast();
 
             // Use modals for confirmations and prompts
-            const { ConfirmModal, PromptModal, useModal } = window;
-            const deleteConfirmModal = useModal();
-            const changesPromptModal = useModal();
+            const deleteConfirmModal = window.useModal();
+            const changesPromptModal = window.useModal();
 
             // Initialize Firebase for real-time sync
             const firebase = window.useFirebase(true);
@@ -2108,27 +2107,27 @@
             </div>
 
             {/* Confirmation and Prompt Modals */}
-            <ConfirmModal
-                isOpen={deleteConfirmModal.isOpen}
-                onConfirm={() => deleteConfirmModal.modalData?.onConfirm?.()}
-                onCancel={deleteConfirmModal.close}
-                title="Delete Report"
-                message="Are you sure you want to delete this report?"
-                confirmText="Delete"
-                variant="danger"
-                darkMode={darkMode}
-            />
+            {React.createElement(window.ConfirmModal, {
+                isOpen: deleteConfirmModal.isOpen,
+                onConfirm: () => deleteConfirmModal.modalData?.onConfirm?.(),
+                onCancel: deleteConfirmModal.close,
+                title: "Delete Report",
+                message: "Are you sure you want to delete this report?",
+                confirmText: "Delete",
+                variant: "danger",
+                darkMode: darkMode
+            })}
 
-            <PromptModal
-                isOpen={changesPromptModal.isOpen}
-                onSubmit={(value) => changesPromptModal.modalData?.onSubmit?.(value)}
-                onCancel={changesPromptModal.close}
-                title="Request Changes"
-                message="What changes are needed?"
-                placeholder="Enter the changes needed..."
-                multiline={true}
-                darkMode={darkMode}
-            />
+            {React.createElement(window.PromptModal, {
+                isOpen: changesPromptModal.isOpen,
+                onSubmit: (value) => changesPromptModal.modalData?.onSubmit?.(value),
+                onCancel: changesPromptModal.close,
+                title: "Request Changes",
+                message: "What changes are needed?",
+                placeholder: "Enter the changes needed...",
+                multiline: true,
+                darkMode: darkMode
+            })}
 
             {/* Toast Notifications */}
             <ToastComponents.ToastContainer toasts={toast.toasts} removeToast={toast.removeToast} position="top-right" darkMode={darkMode} />

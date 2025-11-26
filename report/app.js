@@ -39,13 +39,12 @@ const { useState, useEffect, useMemo, useCallback } = React;
             const { toast, ToastContainer } = window.useToast();
 
             // Use modals for confirmations and prompts
-            const { ConfirmModal, PromptModal, useModal } = window;
-            const deleteProjectModal = useModal();
-            const resetFormModal = useModal();
-            const submitConfirmModal = useModal();
-            const viewInDriveModal = useModal();
-            const retryUploadModal = useModal();
-            const selectReportPrompt = useModal();
+            const deleteProjectModal = window.useModal();
+            const resetFormModal = window.useModal();
+            const submitConfirmModal = window.useModal();
+            const viewInDriveModal = window.useModal();
+            const retryUploadModal = window.useModal();
+            const selectReportPrompt = window.useModal();
 
             // Save projects list
             useEffect(() => {
@@ -2768,62 +2767,62 @@ const { useState, useEffect, useMemo, useCallback } = React;
                     )}
 
                     {/* Confirmation and Prompt Modals */}
-                    <ConfirmModal
-                        isOpen={deleteProjectModal.isOpen}
-                        onConfirm={() => deleteProjectModal.modalData?.onConfirm?.()}
-                        onCancel={deleteProjectModal.close}
-                        title="Delete Project"
-                        message="Are you sure you want to delete this project? This cannot be undone."
-                        confirmText="Delete"
-                        variant="danger"
-                        darkMode={darkMode}
-                    />
+                    {React.createElement(window.ConfirmModal, {
+                        isOpen: deleteProjectModal.isOpen,
+                        onConfirm: () => deleteProjectModal.modalData?.onConfirm?.(),
+                        onCancel: deleteProjectModal.close,
+                        title: "Delete Project",
+                        message: "Are you sure you want to delete this project? This cannot be undone.",
+                        confirmText: "Delete",
+                        variant: "danger",
+                        darkMode: darkMode
+                    })}
 
-                    <ConfirmModal
-                        isOpen={resetFormModal.isOpen}
-                        onConfirm={() => resetFormModal.modalData?.onConfirm?.()}
-                        onCancel={resetFormModal.close}
-                        title="Reset Form"
-                        message="Are you sure you want to clear all fields and reset the form? This cannot be undone."
-                        confirmText="Reset"
-                        variant="danger"
-                        darkMode={darkMode}
-                    />
+                    {React.createElement(window.ConfirmModal, {
+                        isOpen: resetFormModal.isOpen,
+                        onConfirm: () => resetFormModal.modalData?.onConfirm?.(),
+                        onCancel: resetFormModal.close,
+                        title: "Reset Form",
+                        message: "Are you sure you want to clear all fields and reset the form? This cannot be undone.",
+                        confirmText: "Reset",
+                        variant: "danger",
+                        darkMode: darkMode
+                    })}
 
-                    <ConfirmModal
-                        isOpen={submitConfirmModal.isOpen}
-                        onConfirm={() => submitConfirmModal.modalData?.onConfirm?.()}
-                        onCancel={submitConfirmModal.close}
-                        title={isEditMode ? "Update Report" : "Submit Report"}
-                        message={submitConfirmModal.modalData?.message || "Ready to submit your report?"}
-                        confirmText={isEditMode ? "Update" : "Submit"}
-                        variant="primary"
-                        darkMode={darkMode}
-                    />
+                    {React.createElement(window.ConfirmModal, {
+                        isOpen: submitConfirmModal.isOpen,
+                        onConfirm: () => submitConfirmModal.modalData?.onConfirm?.(),
+                        onCancel: submitConfirmModal.close,
+                        title: isEditMode ? "Update Report" : "Submit Report",
+                        message: submitConfirmModal.modalData?.message || "Ready to submit your report?",
+                        confirmText: isEditMode ? "Update" : "Submit",
+                        variant: "primary",
+                        darkMode: darkMode
+                    })}
 
-                    <ConfirmModal
-                        isOpen={viewInDriveModal.isOpen}
-                        onConfirm={() => viewInDriveModal.modalData?.onConfirm?.()}
-                        onCancel={viewInDriveModal.close}
-                        title="View in Google Drive"
-                        message="Would you like to view the report in Google Drive?"
-                        confirmText="Open Drive"
-                        cancelText="Close"
-                        variant="primary"
-                        darkMode={darkMode}
-                    />
+                    {React.createElement(window.ConfirmModal, {
+                        isOpen: viewInDriveModal.isOpen,
+                        onConfirm: () => viewInDriveModal.modalData?.onConfirm?.(),
+                        onCancel: viewInDriveModal.close,
+                        title: "View in Google Drive",
+                        message: "Would you like to view the report in Google Drive?",
+                        confirmText: "Open Drive",
+                        cancelText: "Close",
+                        variant: "primary",
+                        darkMode: darkMode
+                    })}
 
-                    <ConfirmModal
-                        isOpen={retryUploadModal.isOpen}
-                        onConfirm={() => retryUploadModal.modalData?.onConfirm?.()}
-                        onCancel={() => retryUploadModal.modalData?.onCancel?.()}
-                        title="Upload Failed"
-                        message="Could not upload to Google Drive. Would you like to try again or download the file manually?"
-                        confirmText="Try Again"
-                        cancelText="Download Manually"
-                        variant="danger"
-                        darkMode={darkMode}
-                    />
+                    {React.createElement(window.ConfirmModal, {
+                        isOpen: retryUploadModal.isOpen,
+                        onConfirm: () => retryUploadModal.modalData?.onConfirm?.(),
+                        onCancel: () => retryUploadModal.modalData?.onCancel?.(),
+                        title: "Upload Failed",
+                        message: "Could not upload to Google Drive. Would you like to try again or download the file manually?",
+                        confirmText: "Try Again",
+                        cancelText: "Download Manually",
+                        variant: "danger",
+                        darkMode: darkMode
+                    })}
 
                     {/* Toast Notifications */}
                     <ToastContainer />

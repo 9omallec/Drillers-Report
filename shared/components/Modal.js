@@ -281,4 +281,6 @@
     window.PromptModal = PromptModal;
     window.useModal = useModal;
 
+    console.log('✓ Modal components initialized');
+
 })();
