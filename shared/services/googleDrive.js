@@ -226,6 +226,12 @@ class GoogleDriveService {
                 this.emit('onStatusChange', '✓ Successfully uploaded to Google Drive!');
                 setTimeout(() => this.emit('onStatusChange', ''), 3000);
                 return result;
+            } else if (response.status === 401) {
+                // Token expired - clear it and prompt user to sign in again
+                console.error('Upload failed: Token expired (401)');
+                this.clearToken();
+                this.emit('onAuthChange', { isSignedIn: false });
+                throw new Error('Your Google Drive session has expired. Please sign in again.');
             } else {
                 const errorText = await response.text();
                 console.error('Upload failed:', response.status, errorText);
@@ -261,6 +267,13 @@ class GoogleDriveService {
 
             return response.result.files || [];
         } catch (error) {
+            // Check if token expired (401)
+            if (error.result?.error?.code === 401 || error.status === 401) {
+                console.error('List files failed: Token expired (401)');
+                this.clearToken();
+                this.emit('onAuthChange', { isSignedIn: false });
+                throw new Error('Your Google Drive session has expired. Please sign in again.');
+            }
             console.error('Error listing files:', error);
             this.emit('onError', 'Error listing files: ' + error.message);
             throw error;
@@ -284,6 +297,13 @@ class GoogleDriveService {
 
             return response.result;
         } catch (error) {
+            // Check if token expired (401)
+            if (error.result?.error?.code === 401 || error.status === 401) {
+                console.error('Download file failed: Token expired (401)');
+                this.clearToken();
+                this.emit('onAuthChange', { isSignedIn: false });
+                throw new Error('Your Google Drive session has expired. Please sign in again.');
+            }
             console.error('Error downloading file:', error);
             this.emit('onError', 'Error downloading file: ' + error.message);
             throw error;
@@ -333,6 +353,12 @@ class GoogleDriveService {
                 this.emit('onStatusChange', '✓ Successfully updated on Google Drive!');
                 setTimeout(() => this.emit('onStatusChange', ''), 3000);
                 return result;
+            } else if (response.status === 401) {
+                // Token expired - clear it and prompt user to sign in again
+                console.error('Update failed: Token expired (401)');
+                this.clearToken();
+                this.emit('onAuthChange', { isSignedIn: false });
+                throw new Error('Your Google Drive session has expired. Please sign in again.');
             } else {
                 const errorText = await response.text();
                 console.error('Update failed:', response.status, errorText);
