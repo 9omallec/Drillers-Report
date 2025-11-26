@@ -36,7 +36,7 @@ const { useState, useEffect, useMemo, useCallback } = React;
             const [darkMode, setDarkMode] = window.useDarkMode();
 
             // Toast notifications
-            const { toast, ToastContainer } = window.useToast();
+            const toast = window.useToast();
 
             // Use modals for confirmations and prompts
             const deleteProjectModal = window.useModal();
@@ -2825,7 +2825,7 @@ const { useState, useEffect, useMemo, useCallback } = React;
                     })}
 
                     {/* Toast Notifications */}
-                    <ToastContainer />
+                    <ToastComponents.ToastContainer toasts={toast.toasts} removeToast={toast.removeToast} position="top-right" darkMode={darkMode} />
                 </div>
             );
         }
