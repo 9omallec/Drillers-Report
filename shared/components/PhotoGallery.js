@@ -157,6 +157,9 @@
      * PhotoGallery Component - Main photo gallery with all features
      */
     function PhotoGallery({ photos, onPhotosChange, section = 'details', darkMode = false }) {
+        // Handle undefined or null photos
+        if (!photos || !Array.isArray(photos)) return null;
+
         const handleRemove = (index) => {
             const newPhotos = photos.filter((_, i) => i !== index);
             onPhotosChange(newPhotos);
