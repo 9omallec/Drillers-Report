@@ -20,9 +20,8 @@
         const { toast } = window.useToast();
 
         // Use modals for confirmations
-        const { ConfirmModal, useModal } = window;
-        const deleteRateModal = useModal();
-        const resetRatesModal = useModal();
+        const deleteRateModal = window.useModal();
+        const resetRatesModal = window.useModal();
 
         // Form state for adding new rates
         const [newRate, setNewRate] = useState({
@@ -457,7 +456,7 @@
                     }, 'Close')
                 ),
                 // Confirmation Modals
-                React.createElement(ConfirmModal, {
+                window.ConfirmModal && React.createElement(window.ConfirmModal, {
                     isOpen: deleteRateModal.isOpen,
                     onConfirm: () => deleteRateModal.modalData?.onConfirm?.(),
                     onCancel: deleteRateModal.close,
@@ -467,7 +466,7 @@
                     variant: 'danger',
                     darkMode: darkMode
                 }),
-                React.createElement(ConfirmModal, {
+                window.ConfirmModal && React.createElement(window.ConfirmModal, {
                     isOpen: resetRatesModal.isOpen,
                     onConfirm: () => resetRatesModal.modalData?.onConfirm?.(),
                     onCancel: resetRatesModal.close,

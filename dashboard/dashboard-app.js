@@ -2107,7 +2107,7 @@
             </div>
 
             {/* Confirmation and Prompt Modals */}
-            {React.createElement(window.ConfirmModal, {
+            {window.ConfirmModal && React.createElement(window.ConfirmModal, {
                 isOpen: deleteConfirmModal.isOpen,
                 onConfirm: () => deleteConfirmModal.modalData?.onConfirm?.(),
                 onCancel: deleteConfirmModal.close,
@@ -2118,7 +2118,7 @@
                 darkMode: darkMode
             })}
 
-            {React.createElement(window.PromptModal, {
+            {window.PromptModal && React.createElement(window.PromptModal, {
                 isOpen: changesPromptModal.isOpen,
                 onSubmit: (value) => changesPromptModal.modalData?.onSubmit?.(value),
                 onCancel: changesPromptModal.close,

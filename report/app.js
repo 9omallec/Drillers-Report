@@ -2767,7 +2767,7 @@ const { useState, useEffect, useMemo, useCallback } = React;
                     )}
 
                     {/* Confirmation and Prompt Modals */}
-                    {React.createElement(window.ConfirmModal, {
+                    {window.ConfirmModal && React.createElement(window.ConfirmModal, {
                         isOpen: deleteProjectModal.isOpen,
                         onConfirm: () => deleteProjectModal.modalData?.onConfirm?.(),
                         onCancel: deleteProjectModal.close,
@@ -2778,7 +2778,7 @@ const { useState, useEffect, useMemo, useCallback } = React;
                         darkMode: darkMode
                     })}
 
-                    {React.createElement(window.ConfirmModal, {
+                    {window.ConfirmModal && React.createElement(window.ConfirmModal, {
                         isOpen: resetFormModal.isOpen,
                         onConfirm: () => resetFormModal.modalData?.onConfirm?.(),
                         onCancel: resetFormModal.close,
@@ -2789,7 +2789,7 @@ const { useState, useEffect, useMemo, useCallback } = React;
                         darkMode: darkMode
                     })}
 
-                    {React.createElement(window.ConfirmModal, {
+                    {window.ConfirmModal && React.createElement(window.ConfirmModal, {
                         isOpen: submitConfirmModal.isOpen,
                         onConfirm: () => submitConfirmModal.modalData?.onConfirm?.(),
                         onCancel: submitConfirmModal.close,
@@ -2800,7 +2800,7 @@ const { useState, useEffect, useMemo, useCallback } = React;
                         darkMode: darkMode
                     })}
 
-                    {React.createElement(window.ConfirmModal, {
+                    {window.ConfirmModal && React.createElement(window.ConfirmModal, {
                         isOpen: viewInDriveModal.isOpen,
                         onConfirm: () => viewInDriveModal.modalData?.onConfirm?.(),
                         onCancel: viewInDriveModal.close,
@@ -2812,7 +2812,7 @@ const { useState, useEffect, useMemo, useCallback } = React;
                         darkMode: darkMode
                     })}
 
-                    {React.createElement(window.ConfirmModal, {
+                    {window.ConfirmModal && React.createElement(window.ConfirmModal, {
                         isOpen: retryUploadModal.isOpen,
                         onConfirm: () => retryUploadModal.modalData?.onConfirm?.(),
                         onCancel: () => retryUploadModal.modalData?.onCancel?.(),

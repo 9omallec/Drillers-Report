@@ -28,8 +28,7 @@
         const { toast } = window.useToast();
 
         // Use modals for confirmations
-        const { ConfirmModal, useModal } = window;
-        const deleteContactModal = useModal();
+        const deleteContactModal = window.useModal();
 
         const handleChange = (field, value) => {
             setFormData(prev => ({ ...prev, [field]: value }));
@@ -361,7 +360,7 @@
             ),
 
             // Confirmation Modal
-            React.createElement(ConfirmModal, {
+            window.ConfirmModal && React.createElement(window.ConfirmModal, {
                 isOpen: deleteContactModal.isOpen,
                 onConfirm: () => deleteContactModal.modalData?.onConfirm?.(),
                 onCancel: deleteContactModal.close,
@@ -681,8 +680,7 @@
         const { toast } = window.useToast();
 
         // Use modals for confirmations
-        const { ConfirmModal, useModal } = window;
-        const deleteClientModal = useModal();
+        const deleteClientModal = window.useModal();
 
         // Load clients on mount
         useEffect(() => {
@@ -898,7 +896,7 @@
                 }),
 
                 // Confirmation Modal
-                React.createElement(ConfirmModal, {
+                window.ConfirmModal && React.createElement(window.ConfirmModal, {
                     isOpen: deleteClientModal.isOpen,
                     onConfirm: () => deleteClientModal.modalData?.onConfirm?.(),
                     onCancel: deleteClientModal.close,
