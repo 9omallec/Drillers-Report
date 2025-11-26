@@ -2110,7 +2110,7 @@
             {/* Confirmation and Prompt Modals */}
             <ConfirmModal
                 isOpen={deleteConfirmModal.isOpen}
-                onConfirm={() => deleteConfirmModal.config.onConfirm?.()}
+                onConfirm={() => deleteConfirmModal.modalData?.onConfirm?.()}
                 onCancel={deleteConfirmModal.close}
                 title="Delete Report"
                 message="Are you sure you want to delete this report?"
@@ -2121,7 +2121,7 @@
 
             <PromptModal
                 isOpen={changesPromptModal.isOpen}
-                onSubmit={(value) => changesPromptModal.config.onSubmit?.(value)}
+                onSubmit={(value) => changesPromptModal.modalData?.onSubmit?.(value)}
                 onCancel={changesPromptModal.close}
                 title="Request Changes"
                 message="What changes are needed?"

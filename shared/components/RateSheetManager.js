@@ -459,17 +459,17 @@
                 // Confirmation Modals
                 React.createElement(ConfirmModal, {
                     isOpen: deleteRateModal.isOpen,
-                    onConfirm: () => deleteRateModal.config.onConfirm?.(),
+                    onConfirm: () => deleteRateModal.modalData?.onConfirm?.(),
                     onCancel: deleteRateModal.close,
                     title: 'Delete Rate',
-                    message: deleteRateModal.config.message || 'Are you sure you want to delete this rate?',
+                    message: deleteRateModal.modalData?.message || 'Are you sure you want to delete this rate?',
                     confirmText: 'Delete',
                     variant: 'danger',
                     darkMode: darkMode
                 }),
                 React.createElement(ConfirmModal, {
                     isOpen: resetRatesModal.isOpen,
-                    onConfirm: () => resetRatesModal.config.onConfirm?.(),
+                    onConfirm: () => resetRatesModal.modalData?.onConfirm?.(),
                     onCancel: resetRatesModal.close,
                     title: 'Reset to Defaults',
                     message: 'Reset all rates to defaults? This cannot be undone.',

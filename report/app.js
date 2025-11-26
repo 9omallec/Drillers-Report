@@ -2770,7 +2770,7 @@ const { useState, useEffect, useMemo, useCallback } = React;
                     {/* Confirmation and Prompt Modals */}
                     <ConfirmModal
                         isOpen={deleteProjectModal.isOpen}
-                        onConfirm={() => deleteProjectModal.config.onConfirm?.()}
+                        onConfirm={() => deleteProjectModal.modalData?.onConfirm?.()}
                         onCancel={deleteProjectModal.close}
                         title="Delete Project"
                         message="Are you sure you want to delete this project? This cannot be undone."
@@ -2781,7 +2781,7 @@ const { useState, useEffect, useMemo, useCallback } = React;
 
                     <ConfirmModal
                         isOpen={resetFormModal.isOpen}
-                        onConfirm={() => resetFormModal.config.onConfirm?.()}
+                        onConfirm={() => resetFormModal.modalData?.onConfirm?.()}
                         onCancel={resetFormModal.close}
                         title="Reset Form"
                         message="Are you sure you want to clear all fields and reset the form? This cannot be undone."
@@ -2792,10 +2792,10 @@ const { useState, useEffect, useMemo, useCallback } = React;
 
                     <ConfirmModal
                         isOpen={submitConfirmModal.isOpen}
-                        onConfirm={() => submitConfirmModal.config.onConfirm?.()}
+                        onConfirm={() => submitConfirmModal.modalData?.onConfirm?.()}
                         onCancel={submitConfirmModal.close}
                         title={isEditMode ? "Update Report" : "Submit Report"}
-                        message={submitConfirmModal.config.message || "Ready to submit your report?"}
+                        message={submitConfirmModal.modalData?.message || "Ready to submit your report?"}
                         confirmText={isEditMode ? "Update" : "Submit"}
                         variant="primary"
                         darkMode={darkMode}
@@ -2803,7 +2803,7 @@ const { useState, useEffect, useMemo, useCallback } = React;
 
                     <ConfirmModal
                         isOpen={viewInDriveModal.isOpen}
-                        onConfirm={() => viewInDriveModal.config.onConfirm?.()}
+                        onConfirm={() => viewInDriveModal.modalData?.onConfirm?.()}
                         onCancel={viewInDriveModal.close}
                         title="View in Google Drive"
                         message="Would you like to view the report in Google Drive?"
@@ -2815,8 +2815,8 @@ const { useState, useEffect, useMemo, useCallback } = React;
 
                     <ConfirmModal
                         isOpen={retryUploadModal.isOpen}
-                        onConfirm={() => retryUploadModal.config.onConfirm?.()}
-                        onCancel={() => retryUploadModal.config.onCancel?.()}
+                        onConfirm={() => retryUploadModal.modalData?.onConfirm?.()}
+                        onCancel={() => retryUploadModal.modalData?.onCancel?.()}
                         title="Upload Failed"
                         message="Could not upload to Google Drive. Would you like to try again or download the file manually?"
                         confirmText="Try Again"

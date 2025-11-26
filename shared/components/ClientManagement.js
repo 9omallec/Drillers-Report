@@ -363,7 +363,7 @@
             // Confirmation Modal
             React.createElement(ConfirmModal, {
                 isOpen: deleteContactModal.isOpen,
-                onConfirm: () => deleteContactModal.config.onConfirm?.(),
+                onConfirm: () => deleteContactModal.modalData?.onConfirm?.(),
                 onCancel: deleteContactModal.close,
                 title: 'Delete Contact',
                 message: 'Delete this contact?',
@@ -900,10 +900,10 @@
                 // Confirmation Modal
                 React.createElement(ConfirmModal, {
                     isOpen: deleteClientModal.isOpen,
-                    onConfirm: () => deleteClientModal.config.onConfirm?.(),
+                    onConfirm: () => deleteClientModal.modalData?.onConfirm?.(),
                     onCancel: deleteClientModal.close,
                     title: 'Delete Client',
-                    message: deleteClientModal.config.message || 'Are you sure you want to delete this client?',
+                    message: deleteClientModal.modalData?.message || 'Are you sure you want to delete this client?',
                     confirmText: 'Delete',
                     variant: 'danger',
                     darkMode: darkMode
