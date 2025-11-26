@@ -37,7 +37,16 @@ const { useState, useEffect, useMemo, useCallback } = React;
 
             // Toast notifications
             const { toast, ToastContainer } = window.useToast();
-            
+
+            // Use modals for confirmations and prompts
+            const { ConfirmModal, PromptModal, useModal } = window;
+            const deleteProjectModal = useModal();
+            const resetFormModal = useModal();
+            const submitConfirmModal = useModal();
+            const viewInDriveModal = useModal();
+            const retryUploadModal = useModal();
+            const selectReportPrompt = useModal();
+
             // Save projects list
             useEffect(() => {
                 storageService.saveGlobal('projectsList', projects);
@@ -493,9 +502,10 @@ const { useState, useEffect, useMemo, useCallback } = React;
             };
             
             const deleteProject = (projectIdToDelete) => {
-                if (confirm('Are you sure you want to delete this project? This cannot be undone.')) {
-                    // Remove from projects list
-                    setProjects(projects.filter(p => p.id !== projectIdToDelete));
+                deleteProjectModal.open({
+                    onConfirm: () => {
+                        // Remove from projects list
+                        setProjects(projects.filter(p => p.id !== projectIdToDelete));
                     
                     // Clear data from localStorage
                     const keysToDelete = [
@@ -513,7 +523,9 @@ const { useState, useEffect, useMemo, useCallback } = React;
                         setProjectName('Default Project');
                         window.location.reload();
                     }
-                }
+                        deleteProjectModal.close();
+                    }
+                });
             };
 
             const addBoring = () => {
@@ -840,28 +852,29 @@ const { useState, useEffect, useMemo, useCallback } = React;
             
 
             const handleReset = () => {
-                if (!confirm('Are you sure you want to clear all fields and reset the form? This cannot be undone.')) {
-                    return;
-                }
-
-                // Reset all state to initial values using shared defaults
-                const defaults = window.DEFAULT_STATES.getCompleteDefaults();
+                resetFormModal.open({
+                    onConfirm: () => {
+                        // Reset all state to initial values using shared defaults
+                        const defaults = window.DEFAULT_STATES.getCompleteDefaults();
                 setReportData(defaults.reportData);
                 setEquipment(defaults.equipment);
                 setWorkDays(defaults.workDays);
                 setBorings(defaults.borings);
                 setSuppliesData(defaults.suppliesData);
 
-                // Clear localStorage for current project
-                if (projectId) {
-                    storageService.remove('reportData', projectId);
-                    storageService.remove('equipment', projectId);
-                    storageService.remove('workDays', projectId);
-                    storageService.remove('borings', projectId);
-                    storageService.remove('suppliesData', projectId);
-                }
+                        // Clear localStorage for current project
+                        if (projectId) {
+                            storageService.remove('reportData', projectId);
+                            storageService.remove('equipment', projectId);
+                            storageService.remove('workDays', projectId);
+                            storageService.remove('borings', projectId);
+                            storageService.remove('suppliesData', projectId);
+                        }
 
-                toast.info('Form has been reset to default values.');
+                        toast.info('Form has been reset to default values.');
+                        resetFormModal.close();
+                    }
+                });
             };
 
             const handleLoadFromDrive = async () => {
@@ -1037,112 +1050,97 @@ const { useState, useEffect, useMemo, useCallback } = React;
                 // Confirmation dialog - different message for edit mode
                 const confirmMessage = isEditMode
                     ? '📝 Ready to update this report?\n\n' +
-                      'This will overwrite the existing report on Google Drive.\n\n' +
-                      'Click OK to update, or Cancel to continue editing.'
-                    : '📤 Ready to submit your report?\n\n' +
-                      'Your report will be uploaded directly to Google Drive.\n\n' +
-                      'Click OK to submit, or Cancel to continue editing.';
+                      'This will overwrite the existing report on Google Drive.'
+                    : 'Your report will be uploaded directly to Google Drive.';
 
-                const confirmed = confirm(confirmMessage);
+                // Open confirmation modal
+                submitConfirmModal.open({
+                    message: confirmMessage,
+                    onConfirm: async () => {
+                        submitConfirmModal.close();
 
-                if (!confirmed) {
-                    return; // User wants to keep editing
-                }
+                        // Generate report data
+                        const reportData_json = {
+                            report: reportData,
+                            workDays: workDays,
+                            borings: borings,
+                            equipment: equipment,
+                            supplies: suppliesData,
+                            savedAt: new Date().toISOString()
+                        };
 
-                // Generate report data
-                const reportData_json = {
-                    report: reportData,
-                    workDays: workDays,
-                    borings: borings,
-                    equipment: equipment,
-                    supplies: suppliesData,
-                    savedAt: new Date().toISOString()
-                };
+                        // Upload to Google Drive (status messages handled by hook)
+                        const uploaded = await uploadToDrive(reportData_json);
 
-                // Upload to Google Drive (status messages handled by hook)
-                const uploaded = await uploadToDrive(reportData_json);
+                        if (uploaded) {
+                            // Also upload JSON to Firebase for real-time sync
+                            if (firebase.isReady && firebase.syncEnabled) {
+                                try {
+                                    // Get existing reports from Firebase
+                                    const existingReports = await firebase.getFromFirebase('reports') || [];
 
-                if (uploaded) {
-                    // Also upload JSON to Firebase for real-time sync
-                    if (firebase.isReady && firebase.syncEnabled) {
-                        try {
-                            // Get existing reports from Firebase
-                            const existingReports = await firebase.getFromFirebase('reports') || [];
+                                    // Create report object with unique ID
+                                    const reportForFirebase = {
+                                        ...reportData_json,
+                                        id: isEditMode && editingReportId ? editingReportId : Date.now(),
+                                        uploadedAt: new Date().toISOString()
+                                    };
 
-                            // Create report object with unique ID
-                            const reportForFirebase = {
-                                ...reportData_json,
-                                id: isEditMode && editingReportId ? editingReportId : Date.now(),
-                                uploadedAt: new Date().toISOString()
-                            };
+                                    // Update or add report
+                                    let updatedReports;
+                                    if (isEditMode && editingReportId) {
+                                        // Update existing report
+                                        updatedReports = existingReports.map(r =>
+                                            r.id === editingReportId ? reportForFirebase : r
+                                        );
+                                    } else {
+                                        // Add new report
+                                        updatedReports = [reportForFirebase, ...existingReports];
+                                    }
 
-                            // Update or add report
-                            let updatedReports;
-                            if (isEditMode && editingReportId) {
-                                // Update existing report
-                                updatedReports = existingReports.map(r =>
-                                    r.id === editingReportId ? reportForFirebase : r
-                                );
-                            } else {
-                                // Add new report
-                                updatedReports = [reportForFirebase, ...existingReports];
+                                    // Save to Firebase
+                                    await firebase.saveToFirebase('reports', updatedReports);
+                                } catch (error) {
+                                    console.error('Firebase sync error:', error);
+                                    // Don't fail the whole submission if Firebase fails
+                                }
                             }
 
-                            // Save to Firebase
-                            await firebase.saveToFirebase('reports', updatedReports);
-                        } catch (error) {
-                            console.error('Firebase sync error:', error);
-                            // Don't fail the whole submission if Firebase fails
+                            toast.success(isEditMode ? 'Report updated successfully!' : 'Report submitted successfully!');
+
+                            // Optional: Ask if they want to view it in Drive
+                            viewInDriveModal.open({
+                                onConfirm: () => {
+                                    window.open(`https://drive.google.com/drive/folders/${GOOGLE_DRIVE_CONFIG.FOLDER_ID}`, '_blank');
+                                    viewInDriveModal.close();
+                                }
+                            });
+                        } else {
+                            // Upload failed - ask if they want to retry or download manually
+                            retryUploadModal.open({
+                                onConfirm: () => {
+                                    retryUploadModal.close();
+                                    // Try again
+                                    handleSubmitReport();
+                                },
+                                onCancel: () => {
+                                    retryUploadModal.close();
+                                    // Manual download as backup
+                                    const jsonBlob = new Blob([JSON.stringify(reportData_json, null, 2)], { type: 'application/json' });
+                                    const jsonUrl = URL.createObjectURL(jsonBlob);
+                                    const jsonLink = document.createElement('a');
+                                    jsonLink.href = jsonUrl;
+                                    jsonLink.download = `Report-${reportData.jobName || 'Report'}-${new Date().toISOString().split('T')[0]}.json`;
+                                    jsonLink.click();
+                                    URL.revokeObjectURL(jsonUrl);
+
+                                    toast.info('File downloaded. Please upload it manually to Google Drive.');
+                                    window.open(`https://drive.google.com/drive/folders/${GOOGLE_DRIVE_CONFIG.FOLDER_ID}`, '_blank');
+                                }
+                            });
                         }
                     }
-
-                    // Success! - different message for edit mode
-                    const successMessage = isEditMode
-                        ? '✅ Report Updated Successfully!\n\n' +
-                          '✓ Updated on Google Drive\n' +
-                          '✓ Synced to real-time dashboard\n' +
-                          '✓ Changes are now visible everywhere\n\n' +
-                          'You can close this page or continue editing.'
-                        : '✅ Report Submitted Successfully!\n\n' +
-                          '✓ Uploaded to Google Drive (backup)\n' +
-                          '✓ Synced to real-time dashboard\n' +
-                          '✓ Everyone can see it now!\n\n' +
-                          'You can now start a new report or close this page.';
-
-                    toast.success(isEditMode ? 'Report updated successfully!' : 'Report submitted successfully!');
-
-                    // Optional: Ask if they want to view it in Drive
-                    const viewInDrive = confirm('Would you like to view the report in Google Drive?');
-                    if (viewInDrive) {
-                        window.open(`https://drive.google.com/drive/folders/${GOOGLE_DRIVE_CONFIG.FOLDER_ID}`, '_blank');
-                    }
-                } else {
-                    // Upload failed
-                    const retry = confirm(
-                        '❌ Upload Failed\n\n' +
-                        'Could not upload to Google Drive.\n\n' +
-                        'Would you like to:\n' +
-                        '• OK - Try again\n' +
-                        '• Cancel - Download file manually instead'
-                    );
-
-                    if (retry) {
-                        // Try again
-                        handleSubmitReport();
-                    } else {
-                        // Manual download as backup
-                        const jsonBlob = new Blob([JSON.stringify(reportData_json, null, 2)], { type: 'application/json' });
-                        const jsonUrl = URL.createObjectURL(jsonBlob);
-                        const jsonLink = document.createElement('a');
-                        jsonLink.href = jsonUrl;
-                        jsonLink.download = `Report-${reportData.jobName || 'Report'}-${new Date().toISOString().split('T')[0]}.json`;
-                        jsonLink.click();
-                        URL.revokeObjectURL(jsonUrl);
-
-                        toast.info('File downloaded. Please upload it manually to Google Drive.');
-                        window.open(`https://drive.google.com/drive/folders/${GOOGLE_DRIVE_CONFIG.FOLDER_ID}`, '_blank');
-                    }
-                }
+                });
             };
 
             // Generate a standalone HTML report for attachment
@@ -2768,6 +2766,64 @@ const { useState, useEffect, useMemo, useCallback } = React;
                             </div>
                         </div>
                     )}
+
+                    {/* Confirmation and Prompt Modals */}
+                    <ConfirmModal
+                        isOpen={deleteProjectModal.isOpen}
+                        onConfirm={() => deleteProjectModal.config.onConfirm?.()}
+                        onCancel={deleteProjectModal.close}
+                        title="Delete Project"
+                        message="Are you sure you want to delete this project? This cannot be undone."
+                        confirmText="Delete"
+                        variant="danger"
+                        darkMode={darkMode}
+                    />
+
+                    <ConfirmModal
+                        isOpen={resetFormModal.isOpen}
+                        onConfirm={() => resetFormModal.config.onConfirm?.()}
+                        onCancel={resetFormModal.close}
+                        title="Reset Form"
+                        message="Are you sure you want to clear all fields and reset the form? This cannot be undone."
+                        confirmText="Reset"
+                        variant="danger"
+                        darkMode={darkMode}
+                    />
+
+                    <ConfirmModal
+                        isOpen={submitConfirmModal.isOpen}
+                        onConfirm={() => submitConfirmModal.config.onConfirm?.()}
+                        onCancel={submitConfirmModal.close}
+                        title={isEditMode ? "Update Report" : "Submit Report"}
+                        message={submitConfirmModal.config.message || "Ready to submit your report?"}
+                        confirmText={isEditMode ? "Update" : "Submit"}
+                        variant="primary"
+                        darkMode={darkMode}
+                    />
+
+                    <ConfirmModal
+                        isOpen={viewInDriveModal.isOpen}
+                        onConfirm={() => viewInDriveModal.config.onConfirm?.()}
+                        onCancel={viewInDriveModal.close}
+                        title="View in Google Drive"
+                        message="Would you like to view the report in Google Drive?"
+                        confirmText="Open Drive"
+                        cancelText="Close"
+                        variant="primary"
+                        darkMode={darkMode}
+                    />
+
+                    <ConfirmModal
+                        isOpen={retryUploadModal.isOpen}
+                        onConfirm={() => retryUploadModal.config.onConfirm?.()}
+                        onCancel={() => retryUploadModal.config.onCancel?.()}
+                        title="Upload Failed"
+                        message="Could not upload to Google Drive. Would you like to try again or download the file manually?"
+                        confirmText="Try Again"
+                        cancelText="Download Manually"
+                        variant="danger"
+                        darkMode={darkMode}
+                    />
 
                     {/* Toast Notifications */}
                     <ToastContainer />

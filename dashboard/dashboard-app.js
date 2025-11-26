@@ -40,6 +40,11 @@
             // Use toast notifications
             const toast = window.useToast();
 
+            // Use modals for confirmations and prompts
+            const { ConfirmModal, PromptModal, useModal } = window;
+            const deleteConfirmModal = useModal();
+            const changesPromptModal = useModal();
+
             // Initialize Firebase for real-time sync
             const firebase = window.useFirebase(true);
             const { useRef } = React;
@@ -212,19 +217,26 @@
 
             // Request changes on a report
             const requestChanges = (id) => {
-                const reason = prompt('What changes are needed?');
-                if (reason) {
-                    setReports(reports.map(r => 
-                        r.id === id ? { ...r, status: 'changes_requested', changeReason: reason } : r
-                    ));
-                }
+                changesPromptModal.open({
+                    onSubmit: (reason) => {
+                        if (reason) {
+                            setReports(reports.map(r =>
+                                r.id === id ? { ...r, status: 'changes_requested', changeReason: reason } : r
+                            ));
+                        }
+                        changesPromptModal.close();
+                    }
+                });
             };
 
             // Delete a report
             const deleteReport = (id) => {
-                if (confirm('Are you sure you want to delete this report?')) {
-                    setReports(reports.filter(r => r.id !== id));
-                }
+                deleteConfirmModal.open({
+                    onConfirm: () => {
+                        setReports(reports.filter(r => r.id !== id));
+                        deleteConfirmModal.close();
+                    }
+                });
             };
 
             // Export all app data
@@ -2094,6 +2106,29 @@
                     )}
                 </div>
             </div>
+
+            {/* Confirmation and Prompt Modals */}
+            <ConfirmModal
+                isOpen={deleteConfirmModal.isOpen}
+                onConfirm={() => deleteConfirmModal.config.onConfirm?.()}
+                onCancel={deleteConfirmModal.close}
+                title="Delete Report"
+                message="Are you sure you want to delete this report?"
+                confirmText="Delete"
+                variant="danger"
+                darkMode={darkMode}
+            />
+
+            <PromptModal
+                isOpen={changesPromptModal.isOpen}
+                onSubmit={(value) => changesPromptModal.config.onSubmit?.(value)}
+                onCancel={changesPromptModal.close}
+                title="Request Changes"
+                message="What changes are needed?"
+                placeholder="Enter the changes needed..."
+                multiline={true}
+                darkMode={darkMode}
+            />
 
             {/* Toast Notifications */}
             <ToastComponents.ToastContainer toasts={toast.toasts} removeToast={toast.removeToast} position="top-right" darkMode={darkMode} />
