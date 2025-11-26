@@ -19,6 +19,11 @@
         // Toast notifications
         const { toast } = window.useToast();
 
+        // Use modals for confirmations
+        const { ConfirmModal, useModal } = window;
+        const deleteRateModal = useModal();
+        const resetRatesModal = useModal();
+
         // Form state for adding new rates
         const [newRate, setNewRate] = useState({
             name: '',
@@ -137,18 +142,25 @@
 
         // Delete a rate
         const handleDeleteRate = (category, name, effectiveDate) => {
-            if (confirm(`Delete ${name} rate from ${effectiveDate}?`)) {
-                rateService.deleteRate(category, name, effectiveDate);
-                reloadRates();
-            }
+            deleteRateModal.open({
+                message: `Delete ${name} rate from ${effectiveDate}?`,
+                onConfirm: () => {
+                    rateService.deleteRate(category, name, effectiveDate);
+                    reloadRates();
+                    deleteRateModal.close();
+                }
+            });
         };
 
         // Reset to defaults
         const handleReset = () => {
-            if (confirm('Reset all rates to defaults? This cannot be undone.')) {
-                rateService.resetToDefaults();
-                reloadRates();
-            }
+            resetRatesModal.open({
+                onConfirm: () => {
+                    rateService.resetToDefaults();
+                    reloadRates();
+                    resetRatesModal.close();
+                }
+            });
         };
 
         // Export rates
@@ -443,7 +455,28 @@
                         onClick: onClose,
                         className: `px-6 py-2 ${darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-300 hover:bg-gray-400'} rounded font-semibold ${textColor}`
                     }, 'Close')
-                )
+                ),
+                // Confirmation Modals
+                React.createElement(ConfirmModal, {
+                    isOpen: deleteRateModal.isOpen,
+                    onConfirm: () => deleteRateModal.config.onConfirm?.(),
+                    onCancel: deleteRateModal.close,
+                    title: 'Delete Rate',
+                    message: deleteRateModal.config.message || 'Are you sure you want to delete this rate?',
+                    confirmText: 'Delete',
+                    variant: 'danger',
+                    darkMode: darkMode
+                }),
+                React.createElement(ConfirmModal, {
+                    isOpen: resetRatesModal.isOpen,
+                    onConfirm: () => resetRatesModal.config.onConfirm?.(),
+                    onCancel: resetRatesModal.close,
+                    title: 'Reset to Defaults',
+                    message: 'Reset all rates to defaults? This cannot be undone.',
+                    confirmText: 'Reset',
+                    variant: 'danger',
+                    darkMode: darkMode
+                })
             )
         );
     };

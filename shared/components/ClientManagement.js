@@ -27,6 +27,10 @@
         // Toast notifications
         const { toast } = window.useToast();
 
+        // Use modals for confirmations
+        const { ConfirmModal, useModal } = window;
+        const deleteContactModal = useModal();
+
         const handleChange = (field, value) => {
             setFormData(prev => ({ ...prev, [field]: value }));
             // Clear error when user starts typing
@@ -113,9 +117,12 @@
         };
 
         const handleDeleteContact = (contactId) => {
-            if (confirm('Delete this contact?')) {
-                setContacts(prev => prev.filter(c => c.id !== contactId));
-            }
+            deleteContactModal.open({
+                onConfirm: () => {
+                    setContacts(prev => prev.filter(c => c.id !== contactId));
+                    deleteContactModal.close();
+                }
+            });
         };
 
         const handleCancelEdit = () => {
@@ -351,7 +358,19 @@
                     type: 'submit',
                     className: 'px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700'
                 }, client ? 'Update Client' : 'Create Client')
-            )
+            ),
+
+            // Confirmation Modal
+            React.createElement(ConfirmModal, {
+                isOpen: deleteContactModal.isOpen,
+                onConfirm: () => deleteContactModal.config.onConfirm?.(),
+                onCancel: deleteContactModal.close,
+                title: 'Delete Contact',
+                message: 'Delete this contact?',
+                confirmText: 'Delete',
+                variant: 'danger',
+                darkMode: darkMode
+            })
         );
     }
 
@@ -443,11 +462,7 @@
                         title: 'Edit client'
                     }, '✏️'),
                     React.createElement('button', {
-                        onClick: () => {
-                            if (confirm(`Delete client "${client.name}"? This cannot be undone.`)) {
-                                onDelete(client.id);
-                            }
-                        },
+                        onClick: () => onDelete(client.id),
                         className: 'px-3 py-1.5 text-sm rounded-lg bg-red-600 hover:bg-red-700 text-white',
                         title: 'Delete client'
                     }, '🗑️')
@@ -665,6 +680,10 @@
         // Toast notifications
         const { toast } = window.useToast();
 
+        // Use modals for confirmations
+        const { ConfirmModal, useModal } = window;
+        const deleteClientModal = useModal();
+
         // Load clients on mount
         useEffect(() => {
             loadClients();
@@ -758,12 +777,20 @@
         };
 
         const handleDelete = (clientId) => {
-            try {
-                clientService.deleteClient(clientId);
-                loadClients();
-            } catch (error) {
-                toast.error(error.message);
-            }
+            const client = clients.find(c => c.id === clientId);
+            deleteClientModal.open({
+                message: `Delete client "${client?.name}"? This cannot be undone.`,
+                onConfirm: () => {
+                    try {
+                        clientService.deleteClient(clientId);
+                        loadClients();
+                        deleteClientModal.close();
+                    } catch (error) {
+                        toast.error(error.message);
+                        deleteClientModal.close();
+                    }
+                }
+            });
         };
 
         const handleViewHistory = (client) => {
@@ -868,6 +895,18 @@
                     onClose: () => setViewingHistory(null),
                     onViewReport,
                     darkMode
+                }),
+
+                // Confirmation Modal
+                React.createElement(ConfirmModal, {
+                    isOpen: deleteClientModal.isOpen,
+                    onConfirm: () => deleteClientModal.config.onConfirm?.(),
+                    onCancel: deleteClientModal.close,
+                    title: 'Delete Client',
+                    message: deleteClientModal.config.message || 'Are you sure you want to delete this client?',
+                    confirmText: 'Delete',
+                    variant: 'danger',
+                    darkMode: darkMode
                 })
         );
     }
