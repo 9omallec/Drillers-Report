@@ -148,7 +148,6 @@ const { useState, useEffect, useMemo, useCallback } = React;
 
                                     if (response.result.files && response.result.files.length > 0) {
                                         setEditingCsvId(response.result.files[0].id);
-                                        console.log('✓ Found CSV file for editing:', csvFileName);
                                     } else {
                                         console.warn('⚠ CSV file not found, will create new one on update');
                                     }
@@ -192,8 +191,6 @@ const { useState, useEffect, useMemo, useCallback } = React;
 
                             // Clean up localStorage
                             localStorage.removeItem('editingReport');
-
-                            console.log('✓ Loaded report for editing');
                         } catch (error) {
                             console.error('Error loading report for editing:', error);
                             toast.error('Error loading report for editing. Please try again.');
@@ -235,22 +232,18 @@ const { useState, useEffect, useMemo, useCallback } = React;
                     // Check if we're in edit mode
                     if (isEditMode && editingReportId) {
                         // Update existing files
-                        console.log('Updating existing report...');
                         await updateFile(editingReportId, jsonFileName, jsonContent, 'application/json');
 
                         // Update CSV file if we have the ID, otherwise create new one
                         if (editingCsvId) {
-                            console.log('Updating existing CSV file...');
                             await updateFile(editingCsvId, csvFileName, csvContent, 'text/csv');
                         } else {
-                            console.log('CSV file ID not found, creating new CSV...');
                             await uploadFile(csvFileName, csvContent, 'text/csv');
                         }
 
                         return true;
                     } else {
                         // Upload new files
-                        console.log('Uploading new report...');
                         await uploadFile(jsonFileName, jsonContent, 'application/json');
                         await uploadFile(csvFileName, csvContent, 'text/csv');
 
@@ -872,11 +865,6 @@ const { useState, useEffect, useMemo, useCallback } = React;
             };
 
             const handleLoadFromDrive = async () => {
-
-                console.log('=== LOAD BUTTON CLICKED ===');
-                console.log('Signed in:', isSignedIn);
-                console.log('Folder ID:', GOOGLE_DRIVE_CONFIG.FOLDER_ID);
-
                 if (!isSignedIn) {
                     toast.warning('Please sign in to Google Drive first');
                     return;
@@ -895,28 +883,18 @@ const { useState, useEffect, useMemo, useCallback } = React;
                     });
 
                     let files = response.result.files;
-                    console.log('API Response:', response);
-                    console.log('Files found:', files ? files.length : 0, 'files');
-                    if (files && files.length > 0) {
-                        console.log('First file:', files[0]);
-                    }
                     if (!files || files.length === 0) {
-                        console.log('No files in folder. Searching ALL JSON files...');
-                        
                         const fallbackResponse = await gapi.client.drive.files.list({
                             q: "mimeType='application/json' and trashed=false",
                             fields: 'files(id, name, modifiedTime, parents)',
                             orderBy: 'modifiedTime desc',
                             pageSize: 100
                         });
-                        
+
                         const allFiles = fallbackResponse.result.files;
-                        console.log('Total JSON files in Drive:', allFiles ? allFiles.length : 0);
-                        
+
                         if (allFiles && allFiles.length > 0) {
-                            console.log('Files found:', allFiles);
                             const reportFiles = allFiles.filter(f => f.name.includes(' - ') && f.name.endsWith('.json'));
-                            console.log('Report-like files:', reportFiles.length);
                             
                             if (reportFiles.length > 0) {
                                 files = reportFiles;
@@ -1112,7 +1090,6 @@ const { useState, useEffect, useMemo, useCallback } = React;
 
                             // Save to Firebase
                             await firebase.saveToFirebase('reports', updatedReports);
-                            console.log('✓ Report synced to Firebase');
                         } catch (error) {
                             console.error('Firebase sync error:', error);
                             // Don't fail the whole submission if Firebase fails
@@ -2799,7 +2776,6 @@ const { useState, useEffect, useMemo, useCallback } = React;
         }
 
         // Render app immediately - modules are already loaded when this script runs
-        console.log('Report app script loaded, rendering...');
         ReactDOM.render(
             <ErrorBoundary>
                 <DailyDrillReport />

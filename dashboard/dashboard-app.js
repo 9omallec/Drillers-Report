@@ -62,13 +62,11 @@
                     try {
                         const firebaseReports = await firebase.getFromFirebase('reports');
                         if (firebaseReports && Array.isArray(firebaseReports) && firebaseReports.length > 0) {
-                            console.log('📥 Loading initial reports from Firebase:', firebaseReports.length);
                             isUpdatingFromFirebase.current = true;
                             setReports(firebaseReports);
                             setTimeout(() => { isUpdatingFromFirebase.current = false; }, 100);
                         } else if (reports.length > 0) {
                             // Firebase is empty but we have local data - push to Firebase
-                            console.log('📤 Syncing local reports to Firebase:', reports.length);
                             await firebase.saveToFirebase('reports', reports);
                         }
                         firebaseInitialized.current = true;
@@ -99,7 +97,6 @@
                             [...currentIds].some(id => !firebaseIds.has(id));
 
                         if (isDifferent) {
-                            console.log('📥 Received updated reports from Firebase:', firebaseReports.length);
                             isUpdatingFromFirebase.current = true;
                             setReports(firebaseReports);
                             setTimeout(() => { isUpdatingFromFirebase.current = false; }, 100);
@@ -291,8 +288,6 @@
                                 if (invoices.length > 0) await firebase.saveToFirebase('invoices', invoices);
                                 if (expenses.length > 0) await firebase.saveToFirebase('expenses', expenses);
                                 if (bossReports.length > 0) await firebase.saveToFirebase('reports', bossReports);
-
-                                console.log('✓ Imported data synced to Firebase');
                             } catch (error) {
                                 console.error('Firebase sync error:', error);
                                 // Don't fail the import if Firebase sync fails
@@ -2107,7 +2102,6 @@
         }
 
         // Render app immediately - modules are already loaded when this script runs
-        console.log('Dashboard app script loaded, rendering...');
         ReactDOM.render(
             <ErrorBoundary>
                 <BossDashboard />

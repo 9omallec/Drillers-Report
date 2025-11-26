@@ -46,12 +46,8 @@ class GoogleDriveService {
                 this.accessToken = savedToken;
                 this.currentScopes = savedScopes;
                 this.emit('onAuthChange', { isSignedIn: true, token: savedToken });
-                console.log('✓ Restored saved Google session');
                 return true;
             } else {
-                if (savedScopes !== requiredScopes) {
-                    console.log('⚠️ Saved token has different scopes, clearing...');
-                }
                 this.clearToken();
             }
         }
@@ -86,12 +82,10 @@ class GoogleDriveService {
         return new Promise((resolve, reject) => {
             const init = () => {
                 if (!window.gapi || !window.google?.accounts?.oauth2) {
-                    console.log('Waiting for Google libraries...');
                     setTimeout(init, 500);
                     return;
                 }
 
-                console.log('✓ Google libraries loaded');
                 this.emit('onStatusChange', '🔄 Initializing Google Drive...');
 
                 window.gapi.load('client', async () => {
@@ -99,7 +93,6 @@ class GoogleDriveService {
                         await window.gapi.client.init({
                             discoveryDocs: this.config.DISCOVERY_DOCS,
                         });
-                        console.log('✓ gapi client initialized');
 
                         this.tokenClient = window.google.accounts.oauth2.initTokenClient({
                             client_id: this.config.CLIENT_ID,
@@ -124,7 +117,6 @@ class GoogleDriveService {
                                     return;
                                 }
 
-                                console.log('✓ Access token received');
                                 this.saveToken(response.access_token, scopes);
                                 this.emit('onAuthChange', { isSignedIn: true, token: response.access_token });
                                 this.emit('onStatusChange', '✓ Signed in to Google Drive');
@@ -133,7 +125,6 @@ class GoogleDriveService {
 
                         this.isInitialized = true;
                         this.emit('onStatusChange', '');
-                        console.log('✓ Google Drive ready!');
                         resolve();
 
                     } catch (error) {
@@ -167,7 +158,6 @@ class GoogleDriveService {
         }
 
         try {
-            console.log('Requesting access token...');
             this.emit('onStatusChange', '🔄 Opening sign-in...');
             this.tokenClient.requestAccessToken({ prompt: 'consent' });
         } catch (error) {
@@ -181,9 +171,7 @@ class GoogleDriveService {
     signOut() {
         try {
             if (this.accessToken) {
-                window.google.accounts.oauth2.revoke(this.accessToken, () => {
-                    console.log('Token revoked');
-                });
+                window.google.accounts.oauth2.revoke(this.accessToken, () => {});
             }
             this.clearToken();
             this.emit('onAuthChange', { isSignedIn: false });
@@ -235,7 +223,6 @@ class GoogleDriveService {
 
             if (response.ok) {
                 const result = await response.json();
-                console.log('✓ Upload successful:', result);
                 this.emit('onStatusChange', '✓ Successfully uploaded to Google Drive!');
                 setTimeout(() => this.emit('onStatusChange', ''), 3000);
                 return result;
@@ -343,7 +330,6 @@ class GoogleDriveService {
 
             if (response.ok) {
                 const result = await response.json();
-                console.log('✓ Update successful:', result);
                 this.emit('onStatusChange', '✓ Successfully updated on Google Drive!');
                 setTimeout(() => this.emit('onStatusChange', ''), 3000);
                 return result;
