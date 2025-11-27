@@ -45,6 +45,7 @@ const { useState, useEffect, useMemo, useCallback } = React;
             const viewInDriveModal = window.useModal();
             const retryUploadModal = window.useModal();
             const selectReportPrompt = window.useModal();
+            const deleteWorkDayModal = window.useModal();
 
             // Save projects list
             useEffect(() => {
@@ -567,9 +568,12 @@ const { useState, useEffect, useMemo, useCallback } = React;
                 const lastDay = workDays[workDays.length - 1];
                 const nextDate = new Date(lastDay.date);
                 nextDate.setDate(nextDate.getDate() + 1);
-                
+
+                // Use timestamp-based ID to avoid collisions when days are deleted
+                const newId = Date.now();
+
                 setWorkDays([...workDays, {
-                    id: workDays.length + 1,
+                    id: newId,
                     date: nextDate.toISOString().split('T')[0],
                     timeLeftShop: '',
                     arrivedOnSite: '',
@@ -589,7 +593,17 @@ const { useState, useEffect, useMemo, useCallback } = React;
 
             const removeWorkDay = (id) => {
                 if (workDays.length > 1) {
-                    setWorkDays(workDays.filter(d => d.id !== id));
+                    // Find the day being deleted to show in confirmation
+                    const dayToDelete = workDays.find(d => d.id === id);
+                    const dayDate = dayToDelete ? dayToDelete.date : 'this day';
+
+                    deleteWorkDayModal.open({
+                        message: `Are you sure you want to delete the work day for ${dayDate}?\n\nThis action cannot be undone.`,
+                        onConfirm: () => {
+                            setWorkDays(workDays.filter(d => d.id !== id));
+                            toast.success('Work day deleted');
+                        }
+                    });
                 }
             };
 
@@ -2823,6 +2837,18 @@ const { useState, useEffect, useMemo, useCallback } = React;
                         message: "Could not upload to Google Drive. Would you like to try again or download the file manually?",
                         confirmText: "Try Again",
                         cancelText: "Download Manually",
+                        variant: "danger",
+                        darkMode: darkMode
+                    })}
+
+                    {window.ConfirmModal && React.createElement(window.ConfirmModal, {
+                        isOpen: deleteWorkDayModal.isOpen,
+                        onConfirm: () => deleteWorkDayModal.modalData?.onConfirm?.(),
+                        onCancel: deleteWorkDayModal.close,
+                        title: "Delete Work Day",
+                        message: deleteWorkDayModal.modalData?.message || "Are you sure you want to delete this work day?",
+                        confirmText: "Delete",
+                        cancelText: "Cancel",
                         variant: "danger",
                         darkMode: darkMode
                     })}
