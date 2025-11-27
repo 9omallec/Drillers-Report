@@ -1000,14 +1000,14 @@
                             </div>
                         ) : currentView === 'profitability' ? (
                             <div className="mb-6">
-                                {React.createElement(window.ProfitabilityDashboard, {
+                                {window.ProfitabilityDashboard && React.createElement(window.ProfitabilityDashboard, {
                                     reports: reports,
                                     darkMode: darkMode
                                 })}
                             </div>
                         ) : currentView === 'calendar' ? (
                             <div className="mb-6">
-                                {React.createElement(window.CalendarView, {
+                                {window.CalendarView && React.createElement(window.CalendarView, {
                                     reports: reports,
                                     onViewReport: (report) => setViewingReport(report),
                                     darkMode: darkMode
