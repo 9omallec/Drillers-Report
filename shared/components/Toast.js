@@ -18,7 +18,7 @@
 
                 return () => clearTimeout(timer);
             }
-        }, [toast.id, toast.duration]);
+        }, [toast.id, toast.duration, onClose]);
 
         const typeStyles = {
             success: 'bg-green-600 text-white',
