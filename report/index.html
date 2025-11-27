@@ -43,8 +43,8 @@
     <!-- Main Application - Load after modules are ready -->
     <script>
         // Wait for shared modules before loading main app
-        window.addEventListener('sharedModulesLoaded', async () => {
-            console.log('sharedModulesLoaded event received, fetching app.js...');
+        window.addEventListener('sharedModulesLoaded', () => {
+            console.log('sharedModulesLoaded event received, loading app.js...');
 
             // Update loading message
             const rootEl = document.getElementById('root');
@@ -52,32 +52,18 @@
                 rootEl.innerHTML = '<div style="display: flex; justify-content: center; align-items: center; height: 100vh; font-family: sans-serif; flex-direction: column;"><div style="font-size: 24px; margin-bottom: 10px;">Loading Application...</div><div style="font-size: 14px; color: #666;">Please wait, this may take a moment on mobile devices</div></div>';
             }
 
-            try {
-                // Fetch the script content with cache-busting
-                const response = await fetch(`app.js?v=${Date.now()}`);
-                const code = await response.text();
-                console.log('app.js fetched, creating inline script...');
-
-                // Create inline script with the code
-                const script = document.createElement('script');
-                script.type = 'text/babel';
-                script.textContent = code;
-                document.body.appendChild(script);
-
-                console.log('Script appended, triggering Babel transformation...');
-
-                // Trigger Babel transformation
-                if (window.Babel && window.Babel.transformScriptTags) {
-                    window.Babel.transformScriptTags();
-                } else {
-                    throw new Error('Babel not loaded');
-                }
-            } catch (error) {
-                console.error('Failed to load app.js:', error);
+            // Load script directly with src (better for mobile browsers with large files)
+            const script = document.createElement('script');
+            script.type = 'text/babel';
+            script.src = `app.js?v=${Date.now()}`;
+            script.onerror = () => {
+                console.error('Failed to load app.js');
                 if (rootEl) {
                     rootEl.innerHTML = '<div style="display: flex; justify-content: center; align-items: center; height: 100vh; font-family: sans-serif; flex-direction: column; padding: 20px; text-align: center;"><div style="font-size: 24px; margin-bottom: 10px; color: #dc2626;">Error Loading App</div><div style="font-size: 14px; color: #666; margin-bottom: 20px;">Failed to load the application. Please try:</div><div style="font-size: 14px; color: #666;">1. Refresh the page (pull down or F5)</div><div style="font-size: 14px; color: #666;">2. Clear browser cache</div><div style="font-size: 14px; color: #666;">3. Check your internet connection</div></div>';
                 }
-            }
+            };
+            document.body.appendChild(script);
+            console.log('Script tag added, Babel will transform automatically');
         });
     </script>
 
