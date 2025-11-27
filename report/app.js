@@ -239,12 +239,15 @@ const { useState, useEffect, useMemo, useCallback } = React;
 
                     // Check if we're in edit mode
                     if (isEditMode && editingReportId) {
-                        // Update existing files
-                        await updateFile(editingReportId, jsonFileName, jsonContent, 'application/json');
+                        // Update existing files - preserve original file names to avoid duplicates
+                        const originalJsonFileName = editingFileName || jsonFileName;
+                        const originalCsvFileName = editingFileName ? editingFileName.replace('.json', '-Backup.csv') : csvFileName;
+
+                        await updateFile(editingReportId, originalJsonFileName, jsonContent, 'application/json');
 
                         // Update CSV file if we have the ID, otherwise create new one
                         if (editingCsvId) {
-                            await updateFile(editingCsvId, csvFileName, csvContent, 'text/csv');
+                            await updateFile(editingCsvId, originalCsvFileName, csvContent, 'text/csv');
                         } else {
                             await uploadFile(csvFileName, csvContent, 'text/csv');
                         }
