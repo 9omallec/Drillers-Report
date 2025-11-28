@@ -149,6 +149,13 @@ class GoogleDriveService {
         });
     }
 
+    // Check if running in PWA standalone mode
+    isStandaloneMode() {
+        return window.matchMedia('(display-mode: standalone)').matches ||
+               window.navigator.standalone === true ||
+               document.referrer.includes('android-app://');
+    }
+
     // Sign in to Google Drive
     signIn() {
         if (!this.isInitialized || !this.tokenClient) {
@@ -159,6 +166,23 @@ class GoogleDriveService {
 
         try {
             this.emit('onStatusChange', '🔄 Opening sign-in...');
+
+            // In standalone PWA mode, popups don't work well on iOS
+            // So we provide instructions to open in browser
+            if (this.isStandaloneMode()) {
+                const msg = '📱 PWA Sign-In Instructions\n\n' +
+                    'Google sign-in doesn\'t work in PWA mode on iOS.\n\n' +
+                    'Please:\n' +
+                    '1. Open Safari (or your browser)\n' +
+                    '2. Go to your dashboard URL\n' +
+                    '3. Sign in to Google Drive there\n' +
+                    '4. The sign-in will sync to this app\n\n' +
+                    'Or use the browser version instead of the home screen app.';
+                this.emit('onStatusChange', '');
+                this.emit('onError', msg);
+                return;
+            }
+
             this.tokenClient.requestAccessToken({ prompt: 'consent' });
         } catch (error) {
             console.error('❌ Sign in error:', error);
