@@ -1,8 +1,8 @@
 // Service Worker for Drillers Report App
 // Provides offline capability and faster loading
 
-const CACHE_NAME = 'drillers-report-v7-mobile-live';
-const STATIC_CACHE = 'drillers-report-static-v7-mobile-live';
+const CACHE_NAME = 'drillers-report-v8-auto-update';
+const STATIC_CACHE = 'drillers-report-static-v8-auto-update';
 
 // Files to cache for offline use
 const STATIC_FILES = [
@@ -53,7 +53,7 @@ self.addEventListener('activate', (event) => {
     );
 });
 
-// Fetch event - serve from cache when offline, network when online
+// Fetch event - network-first for HTML, cache-first for assets
 self.addEventListener('fetch', (event) => {
     // Skip cross-origin requests
     if (!event.request.url.startsWith(self.location.origin)) {
@@ -66,42 +66,70 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
-    event.respondWith(
-        caches.match(event.request)
-            .then((response) => {
-                // Return cached version if available
-                if (response) {
-                    return response;
-                }
+    const url = new URL(event.request.url);
+    const isHTMLRequest = event.request.headers.get('accept')?.includes('text/html') ||
+                         url.pathname.endsWith('.html') ||
+                         url.pathname.endsWith('/');
 
-                // Clone the request
-                const fetchRequest = event.request.clone();
-
-                // Network request
-                return fetch(fetchRequest)
-                    .then((response) => {
-                        // Check if valid response
-                        if (!response || response.status !== 200 || response.type !== 'basic') {
-                            return response;
-                        }
-
-                        // Clone the response
+    // NETWORK-FIRST for HTML files (always get fresh HTML)
+    if (isHTMLRequest) {
+        event.respondWith(
+            fetch(event.request)
+                .then((response) => {
+                    // Cache the fresh HTML
+                    if (response && response.status === 200) {
                         const responseToCache = response.clone();
-
-                        // Cache the response for future use
-                        caches.open(CACHE_NAME)
-                            .then((cache) => {
-                                cache.put(event.request, responseToCache);
-                            });
-
+                        caches.open(CACHE_NAME).then((cache) => {
+                            cache.put(event.request, responseToCache);
+                        });
+                    }
+                    return response;
+                })
+                .catch(() => {
+                    // Network failed, fallback to cache (offline support)
+                    return caches.match(event.request);
+                })
+        );
+    }
+    // CACHE-FIRST for CSS, JS, images (fast loading)
+    else {
+        event.respondWith(
+            caches.match(event.request)
+                .then((response) => {
+                    // Return cached version if available
+                    if (response) {
                         return response;
-                    })
-                    .catch(() => {
-                        // Network failed, try to return cached version
-                        return caches.match(event.request);
-                    });
-            })
-    );
+                    }
+
+                    // Clone the request
+                    const fetchRequest = event.request.clone();
+
+                    // Network request
+                    return fetch(fetchRequest)
+                        .then((response) => {
+                            // Check if valid response
+                            if (!response || response.status !== 200 || response.type !== 'basic') {
+                                return response;
+                            }
+
+                            // Clone the response
+                            const responseToCache = response.clone();
+
+                            // Cache the response for future use
+                            caches.open(CACHE_NAME)
+                                .then((cache) => {
+                                    cache.put(event.request, responseToCache);
+                                });
+
+                            return response;
+                        })
+                        .catch(() => {
+                            // Network failed, try to return cached version
+                            return caches.match(event.request);
+                        });
+                })
+        );
+    }
 });
 
 // Listen for messages from the client
