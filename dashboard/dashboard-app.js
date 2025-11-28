@@ -1,7 +1,9 @@
-// Version: 1763066342.9972708
+// Version: 1.0.0
         const { useState, useEffect, useMemo, useCallback } = React;
 
         function BossDashboard() {
+            // App version for automatic update detection
+            const APP_VERSION = '1.0.0';
             // Initialize shared storage service
             const storageService = new window.StorageService();
 
@@ -33,6 +35,7 @@
             const [importFile, setImportFile] = useState(null);
             const [importPreview, setImportPreview] = useState(null);
             const [importMode, setImportMode] = useState('replace'); // 'replace' or 'merge'
+            const [updateAvailable, setUpdateAvailable] = useState(false);
 
             // Use shared dark mode hook
             const [darkMode, setDarkMode] = window.useDarkMode();
@@ -112,6 +115,54 @@
                     firebase.unlistenFromFirebase('reports');
                 };
             }, [firebase.isReady]);
+
+            // ====== AUTOMATIC UPDATE DETECTION ======
+            useEffect(() => {
+                // Check for app updates every 5 minutes
+                const checkForUpdates = async () => {
+                    try {
+                        const response = await fetch(`dashboard-app.js?check=${Date.now()}`);
+                        const text = await response.text();
+                        const versionMatch = text.match(/\/\/ Version: (.+)/);
+
+                        if (versionMatch) {
+                            const latestVersion = versionMatch[1].trim();
+                            const currentVersion = APP_VERSION;
+
+                            if (latestVersion !== currentVersion) {
+                                console.log(`Update available: ${currentVersion} → ${latestVersion}`);
+                                setUpdateAvailable(true);
+                            }
+                        }
+                    } catch (error) {
+                        // Silently fail - don't bother users with update check errors
+                        console.log('Update check failed:', error);
+                    }
+                };
+
+                // Check immediately
+                checkForUpdates();
+
+                // Then check every 5 minutes
+                const interval = setInterval(checkForUpdates, 5 * 60 * 1000);
+                return () => clearInterval(interval);
+            }, []);
+
+            // Reload function for updates
+            const handleUpdate = () => {
+                // Clear all caches before reload
+                if ('caches' in window) {
+                    caches.keys().then(names => {
+                        names.forEach(name => caches.delete(name));
+                    });
+                }
+                // Send message to service worker to skip waiting
+                if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+                    navigator.serviceWorker.controller.postMessage({ type: 'SKIP_WAITING' });
+                }
+                // Force reload from server
+                window.location.reload(true);
+            };
 
             // ====== GOOGLE DRIVE API INTEGRATION (Shared Hook) ======
             const {
@@ -685,7 +736,26 @@
 
             return (
                 <div className={`min-h-screen ${darkMode ? 'bg-gray-900' : 'bg-gradient-to-br from-gray-50 to-gray-100'}`}>
-                    <div className="max-w-7xl mx-auto p-4">
+                    {updateAvailable && (
+                        <div className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-green-500 to-green-600 text-white px-4 py-3 shadow-lg">
+                            <div className="max-w-7xl mx-auto flex items-center justify-between flex-wrap gap-2">
+                                <div className="flex items-center gap-3">
+                                    <span className="text-2xl">🔄</span>
+                                    <div>
+                                        <p className="font-bold">Update Available!</p>
+                                        <p className="text-sm opacity-90">A new version is ready. Click to update now.</p>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={handleUpdate}
+                                    className="px-6 py-2 bg-white text-green-600 font-bold rounded-lg hover:bg-gray-100 transition-all shadow-md hover:shadow-lg"
+                                >
+                                    Update Now
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                    <div className={`max-w-7xl mx-auto p-4 ${updateAvailable ? 'mt-20' : ''}`}>
                         {/* Header */}
                         <div className={`rounded-xl p-6 mb-6 shadow-xl ${darkMode ? 'bg-gradient-to-r from-gray-800 to-gray-900' : 'bg-gradient-to-r from-white to-gray-50'}`} style={{borderTop: '4px solid #16a34a'}}>
                             <div className="flex justify-between items-center flex-wrap gap-4">
