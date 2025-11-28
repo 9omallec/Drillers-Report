@@ -230,3 +230,119 @@
                 white-space: nowrap;
             }
         }
+
+        /* Phone-specific optimizations (phones only, not tablets) */
+        @media (max-width: 480px) {
+            /* Stats boxes - reduce size and text */
+            .grid.grid-cols-2.md\:grid-cols-5 > div {
+                padding: 0.75rem !important;
+            }
+
+            .grid.grid-cols-2.md\:grid-cols-5 > div > div:first-child {
+                font-size: 1.5rem !important;
+                line-height: 2rem !important;
+            }
+
+            .grid.grid-cols-2.md\:grid-cols-5 > div > div:last-child {
+                font-size: 0.75rem !important;
+            }
+
+            /* Action buttons - grid layout instead of stacked */
+            .flex.flex-col.gap-3.mb-6 {
+                display: grid !important;
+                grid-template-columns: 1fr 1fr !important;
+                gap: 0.5rem !important;
+            }
+
+            .flex.flex-col.gap-3.mb-6 button,
+            .flex.flex-col.gap-3.mb-6 > div {
+                margin-bottom: 0 !important;
+                padding: 0.5rem 0.75rem !important;
+                font-size: 0.875rem !important;
+            }
+
+            /* Navigation tabs - icons only, no text */
+            .flex.gap-2.overflow-x-auto button span:nth-child(2) {
+                display: none !important;
+            }
+
+            .flex.gap-2.overflow-x-auto button {
+                padding: 0.75rem !important;
+                min-width: 3rem !important;
+                justify-content: center !important;
+            }
+
+            /* Report cards - better mobile layout */
+            .grid.grid-cols-1.md\:grid-cols-2.lg\:grid-cols-3 {
+                grid-template-columns: 1fr !important;
+                gap: 0.75rem !important;
+            }
+
+            .grid.grid-cols-1.md\:grid-cols-2.lg\:grid-cols-3 > div {
+                padding: 0.75rem !important;
+            }
+
+            /* Report card internal grid - single column on mobile */
+            .grid.grid-cols-1.md\:grid-cols-2.gap-3 {
+                grid-template-columns: 1fr !important;
+                gap: 0.5rem !important;
+            }
+
+            /* Report card text sizes */
+            .grid.grid-cols-1.md\:grid-cols-2.lg\:grid-cols-3 h3 {
+                font-size: 0.875rem !important;
+            }
+
+            .grid.grid-cols-1.md\:grid-cols-2.lg\:grid-cols-3 p {
+                font-size: 0.75rem !important;
+            }
+
+            /* Calendar view - better spacing */
+            .calendar-view .grid {
+                gap: 0.25rem !important;
+            }
+
+            .calendar-view button,
+            .calendar-view div[class*="p-"] {
+                padding: 0.5rem !important;
+                font-size: 0.75rem !important;
+            }
+
+            /* Search and filter inputs */
+            input[type="text"],
+            input[type="search"],
+            select {
+                padding: 0.5rem !important;
+                font-size: 0.875rem !important;
+            }
+
+            /* Reduce overall padding for content area */
+            .p-6 {
+                padding: 0.75rem !important;
+            }
+
+            .p-4 {
+                padding: 0.5rem !important;
+            }
+
+            /* Modal adjustments for phone */
+            .max-w-5xl,
+            .max-w-4xl,
+            .max-w-3xl {
+                max-width: 95vw !important;
+                margin: 0.5rem !important;
+            }
+
+            /* Smaller gaps everywhere */
+            .gap-4 {
+                gap: 0.5rem !important;
+            }
+
+            .gap-3 {
+                gap: 0.375rem !important;
+            }
+
+            .gap-2 {
+                gap: 0.25rem !important;
+            }
+        }

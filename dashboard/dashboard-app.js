@@ -893,7 +893,7 @@
                                                 : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                                         }`}
                                     >
-                                        📋 Reports
+                                        <span>📋</span> <span>Reports</span>
                                     </button>
                                     <button
                                         onClick={() => setCurrentView('calendar')}
@@ -905,7 +905,7 @@
                                                 : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                                         }`}
                                     >
-                                        📅 Calendar
+                                        <span>📅</span> <span>Calendar</span>
                                     </button>
                                     <button
                                         onClick={() => setCurrentView('clients')}
@@ -917,7 +917,7 @@
                                                 : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                                         }`}
                                     >
-                                        👥 Clients
+                                        <span>👥</span> <span>Clients</span>
                                     </button>
                                     <button
                                         onClick={() => setCurrentView('analytics')}
@@ -929,7 +929,7 @@
                                                 : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                                         }`}
                                     >
-                                        📊 Analytics
+                                        <span>📊</span> <span>Analytics</span>
                                     </button>
                                     <button
                                         onClick={() => setCurrentView('profitability')}
@@ -941,7 +941,7 @@
                                                 : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                                         }`}
                                     >
-                                        💰 Profitability
+                                        <span>💰</span> <span>Profitability</span>
                                     </button>
                                 </div>
                                 <select
