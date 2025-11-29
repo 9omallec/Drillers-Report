@@ -25,6 +25,23 @@ function useGoogleDrive(scopes) {
 
         service.on('onError', (error) => {
             console.error('Google Drive error:', error);
+            // Display error to user via toast if available
+            if (window.useToast && typeof window.useToast === 'function') {
+                // For multi-line error messages, show in alert as toast is single-line
+                if (error.includes('\n')) {
+                    alert(error);
+                } else {
+                    const toast = window.useToast();
+                    if (toast && toast.error) {
+                        toast.error(error);
+                    } else {
+                        alert(error);
+                    }
+                }
+            } else {
+                // Fallback to alert if toast not available
+                alert(error);
+            }
         });
 
         // Initialize the service
