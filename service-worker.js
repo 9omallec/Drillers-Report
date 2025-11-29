@@ -1,17 +1,24 @@
 // Service Worker for Drillers Report App
 // Provides offline capability and faster loading
 
-const CACHE_NAME = 'drillers-report-v8-auto-update';
-const STATIC_CACHE = 'drillers-report-static-v8-auto-update';
+const CACHE_NAME = 'drillers-report-v9-optimized';
+const STATIC_CACHE = 'drillers-report-static-v9-optimized';
 
 // Files to cache for offline use
 const STATIC_FILES = [
     './',
     './dashboard/index.html',
     './report/index.html',
+    './dashboard/dashboard-app.js',
+    './report/app.js',
+    './dashboard/dashboard-styles.css',
+    './report/styles.css',
     './shared/loader.js',
     './shared/styles.css',
-    // Add more critical files as needed
+    './shared/services/storage.js',
+    './shared/hooks/useLocalStorage.js',
+    './shared/hooks/useDarkMode.js',
+    './shared/components/Loading.js'
 ];
 
 // Install event - cache static files

@@ -1,9 +1,9 @@
-// Version: 1.0.0
+// Version: 1.0.1
 const { useState, useEffect, useMemo, useCallback } = React;
 
         function DailyDrillReport() {
             // App version for automatic update detection
-            const APP_VERSION = '1.0.0';
+            const APP_VERSION = '1.0.1';
             // Initialize shared services
             const storageService = new window.StorageService();
 
@@ -57,9 +57,13 @@ const { useState, useEffect, useMemo, useCallback } = React;
                 // Check for app updates every 5 minutes
                 const checkForUpdates = async () => {
                     try {
-                        const response = await fetch(`app.js?check=${Date.now()}`);
+                        // Fetch only the first 100 bytes to get version comment
+                        const response = await fetch(`app.js?v=${Date.now()}`, {
+                            headers: { 'Range': 'bytes=0-99' }
+                        });
+                        
                         const text = await response.text();
-                        const versionMatch = text.match(/\/\/ Version: (.+)/);
+                        const versionMatch = text.match(/\/\/ Version: ([\d\.]+)/);
 
                         if (versionMatch) {
                             const latestVersion = versionMatch[1].trim();
@@ -71,7 +75,6 @@ const { useState, useEffect, useMemo, useCallback } = React;
                             }
                         }
                     } catch (error) {
-                        // Silently fail - don't bother users with update check errors
                         console.log('Update check failed:', error);
                     }
                 };

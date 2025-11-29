@@ -9,7 +9,17 @@
     <meta name="theme-color" content="#16a34a">
     <link rel="manifest" href="../manifest.json">
     <title>Daily Drilling Report</title>
-    
+
+    <!-- Resource Hints for Performance -->
+    <link rel="dns-prefetch" href="https://unpkg.com">
+    <link rel="dns-prefetch" href="https://cdn.tailwindcss.com">
+    <link rel="dns-prefetch" href="https://www.gstatic.com">
+    <link rel="dns-prefetch" href="https://apis.google.com">
+    <link rel="dns-prefetch" href="https://accounts.google.com">
+    <link rel="preconnect" href="https://unpkg.com" crossorigin>
+    <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://apis.google.com">
+
     <!-- External Dependencies -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
@@ -53,8 +63,8 @@
             }
 
             try {
-                // Fetch the script content with cache-busting
-                const response = await fetch(`app.js?v=${Date.now()}`);
+                // Fetch the script content (service worker handles caching)
+                const response = await fetch('app.js');
                 const code = await response.text();
                 console.log('app.js fetched, creating inline script...');
 
