@@ -1,9 +1,9 @@
-// Version: 1.0.3
+// Version: 1.0.4
         const { useState, useEffect, useMemo, useCallback } = React;
 
         function BossDashboard() {
             // App version for automatic update detection
-            const APP_VERSION = '1.0.3';
+            const APP_VERSION = '1.0.4';
             // Initialize shared storage service
             const storageService = new window.StorageService();
 
@@ -229,6 +229,73 @@
                 } catch (error) {
                     console.error('Error syncing from Drive:', error);
                     toast.error('Error syncing from Google Drive');
+                }
+            };
+
+            // Upload shared data (clients, rate sheets, approvals) to Google Drive
+            const uploadSharedData = async () => {
+                try {
+                    if (!isSignedIn) {
+                        toast.warning('Please sign in to Google Drive first');
+                        return;
+                    }
+
+                    const driveHook = window.useGoogleDrive(window.GOOGLE_DRIVE_CONFIG.SCOPES_FULL);
+                    const result = await sharedDataSync.uploadSharedData(
+                        driveHook.driveService,
+                        (status) => toast.info(status, { duration: 2000 })
+                    );
+
+                    if (result.success) {
+                        const { clients, rateSheets, approvedReports } = result.itemsUploaded;
+                        toast.success(
+                            `Shared data uploaded! ${clients} clients, ${rateSheets} rate sheets, ${approvedReports} approved reports`,
+                            { duration: 5000 }
+                        );
+                    }
+                } catch (error) {
+                    if (error.message.includes('CONFLICT')) {
+                        toast.error(error.message, { duration: 8000 });
+                    } else {
+                        console.error('Error uploading shared data:', error);
+                        toast.error('Error uploading shared data: ' + error.message);
+                    }
+                }
+            };
+
+            // Download shared data (clients, rate sheets, approvals) from Google Drive
+            const downloadSharedData = async () => {
+                try {
+                    if (!isSignedIn) {
+                        toast.warning('Please sign in to Google Drive first');
+                        return;
+                    }
+
+                    const driveHook = window.useGoogleDrive(window.GOOGLE_DRIVE_CONFIG.SCOPES_FULL);
+                    const result = await sharedDataSync.downloadSharedData(
+                        driveHook.driveService,
+                        (status) => toast.info(status, { duration: 2000 })
+                    );
+
+                    if (!result) {
+                        toast.info('No shared data file found in Drive');
+                        return;
+                    }
+
+                    if (result.applied) {
+                        const { clients, rateSheets, approvedReports } = result.itemsDownloaded;
+                        toast.success(
+                            `Shared data downloaded! ${clients} clients, ${rateSheets} rate sheets, ${approvedReports} approved reports`,
+                            { duration: 5000 }
+                        );
+                        // Reload page to reflect changes
+                        setTimeout(() => window.location.reload(), 1500);
+                    } else {
+                        toast.info(result.message || 'No updates needed');
+                    }
+                } catch (error) {
+                    console.error('Error downloading shared data:', error);
+                    toast.error('Error downloading shared data: ' + error.message);
                 }
             };
             // ====== END GOOGLE DRIVE API ======
