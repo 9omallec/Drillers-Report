@@ -35,6 +35,7 @@
         'services/dataExportImport.js',
         'services/clientService.js',
         'services/googleDrive.js',
+        'services/sharedDataSync.js',
         'services/rateSheets.js',
         'services/invoiceService.js',
         'services/expenseService.js',

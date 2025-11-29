@@ -1,8 +1,8 @@
 // Service Worker for Drillers Report App
 // Provides offline capability and faster loading
 
-const CACHE_NAME = 'drillers-report-v12-token-expiry';
-const STATIC_CACHE = 'drillers-report-static-v12-token-expiry';
+const CACHE_NAME = 'drillers-report-v13-shared-sync';
+const STATIC_CACHE = 'drillers-report-static-v13-shared-sync';
 
 // Files to cache for offline use
 const STATIC_FILES = [
@@ -16,6 +16,7 @@ const STATIC_FILES = [
     './shared/loader.js',
     './shared/styles.css',
     './shared/services/storage.js',
+    './shared/services/sharedDataSync.js',
     './shared/hooks/useLocalStorage.js',
     './shared/hooks/useDarkMode.js',
     './shared/components/Loading.js'

@@ -47,11 +47,9 @@
             const deleteConfirmModal = window.useModal();
             const changesPromptModal = window.useModal();
 
-            // Initialize Firebase for real-time sync
-            const firebase = window.useFirebase(true);
+            // Initialize shared data sync service
+            const sharedDataSync = new window.SharedDataSyncService();
             const { useRef } = React;
-            const firebaseInitialized = useRef(false);
-            const isUpdatingFromFirebase = useRef(false);
 
             // Initialize export/import service
             const exportImportService = useMemo(() => new window.DataExportImportService(storageService), []);
@@ -785,65 +783,6 @@
                             </div>
                         </div>
 
-
-                        {/* Sync Status Bar */}
-                        <div className={`rounded-lg px-3 py-2 mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs sm:text-sm ${darkMode ? 'bg-gray-800' : 'bg-white'} shadow`}>
-                            <div className="flex items-center gap-3 sm:gap-4 flex-wrap">
-                                {/* Connection Status */}
-                                <div className="flex items-center gap-1.5">
-                                    <div className={`w-2 h-2 rounded-full ${firebase.isOnline ? 'bg-green-500' : 'bg-red-500'}`}></div>
-                                    <span className={darkMode ? 'text-gray-400' : 'text-gray-600'}>
-                                        {firebase.isOnline ? 'Online' : 'Offline'}
-                                    </span>
-                                </div>
-                                {/* Syncing Indicator */}
-                                {firebase.isSyncing && (
-                                    <div className="flex items-center gap-1.5 text-blue-500">
-                                        <svg className="animate-spin h-3 w-3" viewBox="0 0 24 24">
-                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"></circle>
-                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                        </svg>
-                                        <span>Syncing...</span>
-                                    </div>
-                                )}
-                                {/* Last Sync Time */}
-                                {!firebase.isSyncing && firebase.getLastSyncTimeFormatted() && (
-                                    <div className={darkMode ? 'text-gray-500' : 'text-gray-500'}>
-                                        {firebase.getLastSyncTimeFormatted()}
-                                    </div>
-                                )}
-                            </div>
-                            {/* User Auth */}
-                            <div className="flex items-center gap-2">
-                                {firebase.user ? (
-                                    <>
-                                        <span className={darkMode ? 'text-gray-300' : 'text-gray-700'}>
-                                            {firebase.user.email}
-                                        </span>
-                                        <button
-                                            onClick={() => firebase.signOut()}
-                                            className={`px-2 py-1 rounded text-xs ${darkMode ? 'bg-gray-700 hover:bg-gray-600 text-gray-300' : 'bg-gray-200 hover:bg-gray-300 text-gray-700'}`}
-                                        >
-                                            Sign Out
-                                        </button>
-                                    </>
-                                ) : (
-                                    <button
-                                        onClick={async () => {
-                                            try {
-                                                await firebase.signInWithGoogle();
-                                            } catch (err) {
-                                                toast.error(err.message);
-                                            }
-                                        }}
-                                        className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs font-medium"
-                                    >
-                                        Sign in with Google
-                                    </button>
-                                )}
-                            </div>
-                        </div>
-
                         {/* Statistics */}
                         <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
                             <div className={`rounded-xl p-5 ${darkMode ? 'bg-gray-800' : 'bg-white'} shadow-lg hover:shadow-xl transition-shadow`}>
@@ -891,7 +830,19 @@
                                             onClick={syncFromDrive}
                                             className="px-5 py-2.5 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-lg hover:shadow-lg font-semibold transition-all"
                                         >
-                                            ♻️ Sync from Drive
+                                            ♻️ Sync Reports from Drive
+                                        </button>
+                                        <button
+                                            onClick={downloadSharedData}
+                                            className="px-5 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-lg hover:shadow-lg font-semibold transition-all"
+                                        >
+                                            ⬇️ Download Shared Data
+                                        </button>
+                                        <button
+                                            onClick={uploadSharedData}
+                                            className="px-5 py-2.5 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white rounded-lg hover:shadow-lg font-semibold transition-all"
+                                        >
+                                            ⬆️ Upload Shared Data
                                         </button>
                                         <button
                                             onClick={signOutFromDrive}
