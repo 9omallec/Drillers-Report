@@ -1,9 +1,9 @@
-// Version: 1.0.1
+// Version: 1.0.3
         const { useState, useEffect, useMemo, useCallback } = React;
 
         function BossDashboard() {
             // App version for automatic update detection
-            const APP_VERSION = '1.0.1';
+            const APP_VERSION = '1.0.3';
             // Initialize shared storage service
             const storageService = new window.StorageService();
 
