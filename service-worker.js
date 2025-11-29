@@ -1,8 +1,8 @@
 // Service Worker for Drillers Report App
 // Provides offline capability and faster loading
 
-const CACHE_NAME = 'drillers-report-v9-optimized';
-const STATIC_CACHE = 'drillers-report-static-v9-optimized';
+const CACHE_NAME = 'drillers-report-v10-fixed';
+const STATIC_CACHE = 'drillers-report-static-v10-fixed';
 
 // Files to cache for offline use
 const STATIC_FILES = [
