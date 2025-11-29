@@ -1,9 +1,9 @@
-// Version: 1.0.1
+// Version: 1.0.2
 const { useState, useEffect, useMemo, useCallback } = React;
 
         function DailyDrillReport() {
             // App version for automatic update detection
-            const APP_VERSION = '1.0.1';
+            const APP_VERSION = '1.0.2';
             // Initialize shared services
             const storageService = new window.StorageService();
 
@@ -1671,6 +1671,7 @@ const { useState, useEffect, useMemo, useCallback } = React;
             const boringStats = useMemo(() => getBoringStats(), [borings]);
 
             return (
+                <div className={`min-h-screen transition-colors ${darkMode ? 'bg-gray-900' : 'bg-white'}`}>
                     {updateAvailable && (
                         <div className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-green-500 to-green-600 text-white px-4 py-3 shadow-lg">
                             <div className="max-w-7xl mx-auto flex items-center justify-between flex-wrap gap-2">
@@ -1690,7 +1691,7 @@ const { useState, useEffect, useMemo, useCallback } = React;
                             </div>
                         </div>
                     )}
-                <div className={`min-h-screen transition-colors ${darkMode ? 'bg-gray-900' : 'bg-white'}`}><div className={`max-w-7xl mx-auto p-3 ${updateAvailable ? 'mt-20' : ''}`}>
+                    <div className={`max-w-7xl mx-auto p-3 ${updateAvailable ? 'mt-20' : ''}`}>
                         {/* Header with Logo and Company Name */}
                         <div className={`shadow-sm rounded-lg p-4 mb-4 no-print ${darkMode ? 'bg-gray-800' : 'bg-white border border-gray-200'}`}>
                             <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
