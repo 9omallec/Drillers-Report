@@ -100,34 +100,6 @@
                 return () => clearInterval(interval);
             }, []);
 
-            // ====== AUTOMATIC REPORT SYNC FROM GOOGLE DRIVE ======
-            useEffect(() => {
-                if (!isSignedIn) return;
-
-                // Auto-sync from Google Drive every 2 minutes if signed in
-                const autoSync = async () => {
-                    try {
-                        // Silently sync in background (pass true for silent mode)
-                        await syncFromDrive(true);
-                    } catch (error) {
-                        // Silent fail - don't interrupt user
-                        console.log('Auto-sync failed:', error);
-                    }
-                };
-
-                // Wait 30 seconds after load, then sync every 2 minutes
-                let interval = null;
-                const initialDelay = setTimeout(() => {
-                    autoSync();
-                    interval = setInterval(autoSync, 2 * 60 * 1000);
-                }, 30000);
-
-                return () => {
-                    clearTimeout(initialDelay);
-                    if (interval) clearInterval(interval);
-                };
-            }, [isSignedIn, syncFromDrive]);
-
             // Reload function for updates
             const handleUpdate = () => {
                 // Clear all caches before reload
@@ -227,6 +199,34 @@
                     if (!silent) toast.error('Error syncing from Google Drive');
                 }
             }, [isSignedIn, listFiles, downloadFile, reports]);
+
+            // ====== AUTOMATIC REPORT SYNC FROM GOOGLE DRIVE ======
+            useEffect(() => {
+                if (!isSignedIn) return;
+
+                // Auto-sync from Google Drive every 2 minutes if signed in
+                const autoSync = async () => {
+                    try {
+                        // Silently sync in background (pass true for silent mode)
+                        await syncFromDrive(true);
+                    } catch (error) {
+                        // Silent fail - don't interrupt user
+                        console.log('Auto-sync failed:', error);
+                    }
+                };
+
+                // Wait 30 seconds after load, then sync every 2 minutes
+                let interval = null;
+                const initialDelay = setTimeout(() => {
+                    autoSync();
+                    interval = setInterval(autoSync, 2 * 60 * 1000);
+                }, 30000);
+
+                return () => {
+                    clearTimeout(initialDelay);
+                    if (interval) clearInterval(interval);
+                };
+            }, [isSignedIn, syncFromDrive]);
 
             // Upload shared data (clients, rate sheets, approvals) to Google Drive
             const uploadSharedData = async () => {
