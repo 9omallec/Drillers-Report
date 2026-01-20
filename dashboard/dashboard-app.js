@@ -1,4 +1,4 @@
-// Version: 1.0.4
+// Version: 1.0.5
         const { useState, useEffect, useMemo, useCallback } = React;
 
         // Import components from window to ensure proper scope
@@ -6,7 +6,7 @@
 
         function BossDashboard() {
             // App version for automatic update detection
-            const APP_VERSION = '1.0.4';
+            const APP_VERSION = '1.0.5';
             // Initialize shared storage service
             const storageService = new window.StorageService();
 

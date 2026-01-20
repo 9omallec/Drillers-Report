@@ -1,8 +1,8 @@
 // Service Worker for Drillers Report App
 // Provides offline capability and faster loading
 
-const CACHE_NAME = 'drillers-report-v13-shared-sync';
-const STATIC_CACHE = 'drillers-report-static-v13-shared-sync';
+const CACHE_NAME = 'drillers-report-v14-firebase-removal';
+const STATIC_CACHE = 'drillers-report-static-v14-firebase-removal';
 
 // Files to cache for offline use
 const STATIC_FILES = [
