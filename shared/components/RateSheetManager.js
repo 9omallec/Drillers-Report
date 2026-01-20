@@ -11,11 +11,6 @@
         const [activeTab, setActiveTab] = useState('equipment'); // equipment, labor, standby
         const [rateSheets, setRateSheets] = useState(rateService.rateSheets);
 
-        // Initialize Firebase for real-time sync
-        const firebase = window.useFirebase(true);
-        const firebaseInitialized = useRef(false);
-        const isUpdatingFromFirebase = useRef(false);
-
         // Toast notifications
         const { toast } = window.useToast();
 
@@ -36,61 +31,6 @@
             rateService.loadRateSheets();
             setRateSheets({ ...rateService.rateSheets });
         };
-
-        // PULL from Firebase on initial load (Firebase is source of truth)
-        useEffect(() => {
-            if (!firebase.isReady || firebaseInitialized.current) return;
-
-            (async () => {
-                try {
-                    const firebaseRateSheets = await firebase.getFromFirebase('rateSheets');
-                    if (firebaseRateSheets && Object.keys(firebaseRateSheets).length > 0) {
-                        console.log('📥 Loading initial rate sheets from Firebase');
-                        isUpdatingFromFirebase.current = true;
-                        const storage = new window.StorageService();
-                        storage.saveGlobal('rateSheets', firebaseRateSheets);
-                        reloadRates();
-                        setTimeout(() => { isUpdatingFromFirebase.current = false; }, 100);
-                    } else if (rateSheets && Object.keys(rateSheets).length > 0) {
-                        // Firebase is empty but we have local data - push to Firebase
-                        console.log('📤 Syncing local rate sheets to Firebase');
-                        await firebase.saveToFirebase('rateSheets', rateSheets);
-                    }
-                    firebaseInitialized.current = true;
-                } catch (error) {
-                    console.error('Error loading rate sheets from Firebase:', error);
-                    firebaseInitialized.current = true;
-                }
-            })();
-        }, [firebase.isReady]);
-
-        // PUSH to Firebase when rate sheets change locally (not from Firebase)
-        useEffect(() => {
-            if (!firebase.isReady || !firebaseInitialized.current || isUpdatingFromFirebase.current) return;
-            if (firebase.syncEnabled && rateSheets) {
-                firebase.saveToFirebase('rateSheets', rateSheets);
-            }
-        }, [rateSheets, firebase.isReady, firebase.syncEnabled]);
-
-        // Listen for real-time updates from Firebase
-        useEffect(() => {
-            if (!firebase.isReady) return;
-
-            firebase.listenToFirebase('rateSheets', (firebaseRateSheets) => {
-                if (firebaseRateSheets) {
-                    console.log('📥 Received updated rate sheets from Firebase');
-                    isUpdatingFromFirebase.current = true;
-                    const storage = new window.StorageService();
-                    storage.saveGlobal('rateSheets', firebaseRateSheets);
-                    reloadRates();
-                    setTimeout(() => { isUpdatingFromFirebase.current = false; }, 100);
-                }
-            });
-
-            return () => {
-                firebase.unlistenFromFirebase('rateSheets');
-            };
-        }, [firebase.isReady]);
 
         // Add new equipment rate
         const handleAddEquipmentRate = () => {

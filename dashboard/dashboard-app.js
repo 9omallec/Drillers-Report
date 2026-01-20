@@ -1,6 +1,9 @@
 // Version: 1.0.4
         const { useState, useEffect, useMemo, useCallback } = React;
 
+        // Import components from window to ensure proper scope
+        const { RateSheetManager, ErrorBoundary, ProfitabilityDashboard, CalendarView } = window;
+
         function BossDashboard() {
             // App version for automatic update detection
             const APP_VERSION = '1.0.4';
@@ -59,60 +62,6 @@
                 storageService.saveGlobal('bossReports', reports);
             }, [reports]);
 
-            // PULL from Firebase on initial load (Firebase is source of truth)
-            useEffect(() => {
-                if (!firebase.isReady || firebaseInitialized.current) return;
-
-                (async () => {
-                    try {
-                        const firebaseReports = await firebase.getFromFirebase('reports');
-                        if (firebaseReports && Array.isArray(firebaseReports) && firebaseReports.length > 0) {
-                            isUpdatingFromFirebase.current = true;
-                            setReports(firebaseReports);
-                            setTimeout(() => { isUpdatingFromFirebase.current = false; }, 100);
-                        } else if (reports.length > 0) {
-                            // Firebase is empty but we have local data - push to Firebase
-                            await firebase.saveToFirebase('reports', reports);
-                        }
-                        firebaseInitialized.current = true;
-                    } catch (error) {
-                        console.error('Error loading from Firebase:', error);
-                        firebaseInitialized.current = true;
-                    }
-                })();
-            }, [firebase.isReady]);
-
-            // PUSH to Firebase when reports change locally (not from Firebase)
-            useEffect(() => {
-                if (!firebase.isReady || !firebaseInitialized.current || isUpdatingFromFirebase.current) return;
-
-                firebase.saveToFirebase('reports', reports);
-            }, [reports, firebase.isReady]);
-
-            // Listen for real-time updates from Firebase
-            useEffect(() => {
-                if (!firebase.isReady) return;
-
-                firebase.listenToFirebase('reports', (firebaseReports) => {
-                    if (firebaseReports && Array.isArray(firebaseReports)) {
-                        // Only update if data is different
-                        const currentIds = new Set(reports.map(r => r.id));
-                        const firebaseIds = new Set(firebaseReports.map(r => r.id));
-                        const isDifferent = currentIds.size !== firebaseIds.size ||
-                            [...currentIds].some(id => !firebaseIds.has(id));
-
-                        if (isDifferent) {
-                            isUpdatingFromFirebase.current = true;
-                            setReports(firebaseReports);
-                            setTimeout(() => { isUpdatingFromFirebase.current = false; }, 100);
-                        }
-                    }
-                });
-
-                return () => {
-                    firebase.unlistenFromFirebase('reports');
-                };
-            }, [firebase.isReady]);
 
             // ====== AUTOMATIC UPDATE DETECTION ======
             useEffect(() => {
@@ -151,6 +100,34 @@
                 return () => clearInterval(interval);
             }, []);
 
+            // ====== AUTOMATIC REPORT SYNC FROM GOOGLE DRIVE ======
+            useEffect(() => {
+                if (!isSignedIn) return;
+
+                // Auto-sync from Google Drive every 2 minutes if signed in
+                const autoSync = async () => {
+                    try {
+                        // Silently sync in background (pass true for silent mode)
+                        await syncFromDrive(true);
+                    } catch (error) {
+                        // Silent fail - don't interrupt user
+                        console.log('Auto-sync failed:', error);
+                    }
+                };
+
+                // Wait 30 seconds after load, then sync every 2 minutes
+                let interval = null;
+                const initialDelay = setTimeout(() => {
+                    autoSync();
+                    interval = setInterval(autoSync, 2 * 60 * 1000);
+                }, 30000);
+
+                return () => {
+                    clearTimeout(initialDelay);
+                    if (interval) clearInterval(interval);
+                };
+            }, [isSignedIn, syncFromDrive]);
+
             // Reload function for updates
             const handleUpdate = () => {
                 // Clear all caches before reload
@@ -168,20 +145,22 @@
             };
 
             // ====== GOOGLE DRIVE API INTEGRATION (Shared Hook) ======
+            // Use SCOPES_FULL so we can both read and write without multiple sign-ins
             const {
                 isSignedIn,
                 driveStatus,
                 signIn: signInToDrive,
                 signOut: signOutFromDrive,
                 listFiles,
-                downloadFile
-            } = window.useGoogleDrive(window.GOOGLE_DRIVE_CONFIG.SCOPES_READONLY);
+                downloadFile,
+                driveService
+            } = window.useGoogleDrive(window.GOOGLE_DRIVE_CONFIG.SCOPES_FULL);
 
             // Sync reports from Google Drive using shared hook
-            const syncFromDrive = async () => {
+            const syncFromDrive = useCallback(async (silent = false) => {
                 try {
                     if (!isSignedIn) {
-                        toast.warning('Please sign in to Google Drive first');
+                        if (!silent) toast.warning('Please sign in to Google Drive first');
                         return;
                     }
 
@@ -189,60 +168,77 @@
                     const files = await listFiles();
 
                     if (!files || files.length === 0) {
-                        toast.info('No reports found in Drive folder');
+                        if (!silent) toast.info('No reports found in Drive folder');
                         return;
                     }
 
-                    let importedCount = 0;
+                    const newReports = [];
 
                     for (const file of files) {
                         // Check if already imported
                         const alreadyImported = reports.some(r => r.driveFileId === file.id);
                         if (alreadyImported) continue;
 
-                        // Download and parse file using shared hook
-                        const data = await downloadFile(file.id);
+                        try {
+                            // Download and parse file using shared hook
+                            const data = await downloadFile(file.id);
 
-                        const newReport = {
-                            id: Date.now() + importedCount,
-                            importedAt: file.createdTime,
-                            status: 'pending',
-                            driveFileId: file.id,
-                            driveFileName: file.name,
-                            ...data.report,
-                            workDays: data.workDays,
-                            borings: data.borings,
-                            equipment: data.equipment,
-                            supplies: data.supplies
-                        };
+                            // Validate data structure
+                            if (!data || !data.report) {
+                                console.warn(`Skipping ${file.name}: Invalid data structure`);
+                                continue;
+                            }
 
-                        setReports(prev => [newReport, ...prev]);
-                        importedCount++;
+                            const newReport = {
+                                id: Date.now() + newReports.length,
+                                importedAt: file.createdTime,
+                                status: 'pending',
+                                driveFileId: file.id,
+                                driveFileName: file.name,
+                                ...data.report,
+                                workDays: data.workDays || [],
+                                borings: data.borings || [],
+                                equipment: data.equipment || {},
+                                supplies: data.supplies || []
+                            };
+
+                            newReports.push(newReport);
+                        } catch (fileError) {
+                            console.error(`Error importing ${file.name}:`, fileError);
+                            // Continue with next file
+                        }
                     }
 
-                    if (importedCount > 0) {
-                        toast.success(`Imported ${importedCount} new report(s) from Drive!`);
-                    } else {
+                    // Single state update with all new reports
+                    if (newReports.length > 0) {
+                        setReports(prev => [...newReports, ...prev]);
+
+                        if (!silent) {
+                            toast.success(`Imported ${newReports.length} new report(s) from Drive!`);
+                        } else {
+                            console.log(`Auto-imported ${newReports.length} new report(s) from Drive`);
+                        }
+                    } else if (!silent) {
                         toast.info('All reports already imported');
                     }
 
                 } catch (error) {
                     console.error('Error syncing from Drive:', error);
-                    toast.error('Error syncing from Google Drive');
+                    if (!silent) toast.error('Error syncing from Google Drive');
                 }
-            };
+            }, [isSignedIn, listFiles, downloadFile, reports]);
 
             // Upload shared data (clients, rate sheets, approvals) to Google Drive
             const uploadSharedData = async () => {
                 try {
                     if (!isSignedIn) {
                         toast.warning('Please sign in to Google Drive first');
+                        signInToDrive();
                         return;
                     }
 
-                    const driveHook = window.useGoogleDrive(window.GOOGLE_DRIVE_CONFIG.SCOPES_FULL);
                     const result = await sharedDataSync.uploadSharedData(
-                        driveHook.driveService,
+                        driveService,
                         (status) => toast.info(status, { duration: 2000 })
                     );
 
@@ -268,12 +264,12 @@
                 try {
                     if (!isSignedIn) {
                         toast.warning('Please sign in to Google Drive first');
+                        signInToDrive();
                         return;
                     }
 
-                    const driveHook = window.useGoogleDrive(window.GOOGLE_DRIVE_CONFIG.SCOPES_FULL);
                     const result = await sharedDataSync.downloadSharedData(
-                        driveHook.driveService,
+                        driveService,
                         (status) => toast.info(status, { duration: 2000 })
                     );
 
@@ -308,19 +304,26 @@
                     reader.onload = (e) => {
                         try {
                             const data = JSON.parse(e.target.result);
+
+                            // Validate data structure
+                            if (!data || !data.report) {
+                                throw new Error('Invalid report format: missing report data');
+                            }
+
                             const newReport = {
                                 id: Date.now(),
                                 importedAt: new Date().toISOString(),
                                 status: 'pending',
                                 ...data.report,
-                                workDays: data.workDays,
-                                borings: data.borings,
-                                equipment: data.equipment,
-                                supplies: data.supplies
+                                workDays: data.workDays || [],
+                                borings: data.borings || [],
+                                equipment: data.equipment || {},
+                                supplies: data.supplies || []
                             };
                             setReports([newReport, ...reports]);
                             toast.success('Report imported successfully!');
                         } catch (error) {
+                            console.error('Import error:', error);
                             toast.error('Error importing report. Please ensure it\'s a valid report file.');
                         }
                     };
@@ -405,26 +408,6 @@
                             duration: 5000
                         });
 
-                        // Sync imported data to Firebase
-                        if (firebase.isReady && firebase.syncEnabled) {
-                            try {
-                                // Sync all critical data to Firebase
-                                const clientsList = storageService.loadGlobal('clientsList', []);
-                                const rateSheets = storageService.loadGlobal('rateSheets', null);
-                                const invoices = storageService.loadGlobal('invoices', []);
-                                const expenses = storageService.loadGlobal('expenses', []);
-                                const bossReports = storageService.loadGlobal('bossReports', []);
-
-                                if (clientsList.length > 0) await firebase.saveToFirebase('clients', clientsList);
-                                if (rateSheets) await firebase.saveToFirebase('rateSheets', rateSheets);
-                                if (invoices.length > 0) await firebase.saveToFirebase('invoices', invoices);
-                                if (expenses.length > 0) await firebase.saveToFirebase('expenses', expenses);
-                                if (bossReports.length > 0) await firebase.saveToFirebase('reports', bossReports);
-                            } catch (error) {
-                                console.error('Firebase sync error:', error);
-                                // Don't fail the import if Firebase sync fails
-                            }
-                        }
 
                         setShowImportModal(false);
                         setImportFile(null);
@@ -879,7 +862,7 @@
                             {/* Action Buttons Row */}
                             <div className="flex flex-wrap gap-3 mb-3">
                                 <button
-                                    onClick={() => window.open(`https://drive.google.com/drive/folders/${GOOGLE_DRIVE_CONFIG.FOLDER_ID}`, '_blank')}
+                                    onClick={() => window.open(`https://drive.google.com/drive/folders/${window.GOOGLE_DRIVE_CONFIG.FOLDER_ID}`, '_blank')}
                                     className="px-5 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-lg hover:shadow-lg font-semibold transition-all"
                                 >
                                     📁 Open Drive Folder
@@ -2068,12 +2051,10 @@
                     )}
 
                     {/* Rate Sheet Manager Modal */}
-                    {showRateSheetManager && (
-                        <RateSheetManager
-                            darkMode={darkMode}
-                            onClose={() => setShowRateSheetManager(false)}
-                        />
-                    )}
+                    {showRateSheetManager && RateSheetManager && React.createElement(RateSheetManager, {
+                        darkMode: darkMode,
+                        onClose: () => setShowRateSheetManager(false)
+                    })}
 
                     {/* Import Data Modal */}
                     {showImportModal && importPreview && (
@@ -2230,8 +2211,8 @@
 
         // Render app immediately - modules are already loaded when this script runs
         ReactDOM.render(
-            <ErrorBoundary>
-                <BossDashboard />
-            </ErrorBoundary>,
+            React.createElement(window.ErrorBoundary, {},
+                React.createElement(BossDashboard)
+            ),
             document.getElementById('root')
         );

@@ -27,11 +27,6 @@
     <script src="https://apis.google.com/js/api.js"></script>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
 
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-
     <!-- Custom Styles -->
     <link rel="stylesheet" href="dashboard-styles.css?v=7.0-mobile-live">
 </head>
@@ -67,16 +62,33 @@
                 // Create inline script with the code
                 const script = document.createElement('script');
                 script.type = 'text/babel';
+                script.setAttribute('data-presets', 'react');
                 script.textContent = code;
                 document.body.appendChild(script);
 
-                console.log('Script appended, triggering Babel transformation...');
+                console.log('Script appended, waiting for browser idle time...');
 
-                // Trigger Babel transformation
-                if (window.Babel && window.Babel.transformScriptTags) {
-                    window.Babel.transformScriptTags();
+                // Use requestIdleCallback for better Safari/Brave compatibility
+                const transformBabel = () => {
+                    try {
+                        if (window.Babel && window.Babel.transformScriptTags) {
+                            console.log('Triggering Babel transformation...');
+                            window.Babel.transformScriptTags();
+                            console.log('Babel transformation complete');
+                        } else {
+                            throw new Error('Babel not loaded');
+                        }
+                    } catch (error) {
+                        console.error('Babel transformation error:', error);
+                        throw error;
+                    }
+                };
+
+                // Use requestIdleCallback for Safari/Brave, or setTimeout as fallback
+                if (window.requestIdleCallback) {
+                    requestIdleCallback(transformBabel, { timeout: 3000 });
                 } else {
-                    throw new Error('Babel not loaded');
+                    setTimeout(transformBabel, 200);
                 }
             } catch (error) {
                 console.error('Failed to load dashboard-app.js:', error);

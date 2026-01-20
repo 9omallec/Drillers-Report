@@ -25,7 +25,7 @@
         const [errors, setErrors] = useState({});
 
         // Toast notifications
-        const { toast } = window.useToast();
+        const toast = window.useToast();
 
         // Use modals for confirmations
         const deleteContactModal = window.useModal();
@@ -671,13 +671,8 @@
             return new window.ClientService(new window.StorageService());
         }, []);
 
-        // Initialize Firebase for real-time sync
-        const firebase = window.useFirebase(true);
-        const firebaseInitialized = useRef(false);
-        const isUpdatingFromFirebase = useRef(false);
-
         // Toast notifications
-        const { toast } = window.useToast();
+        const toast = window.useToast();
 
         // Use modals for confirmations
         const deleteClientModal = window.useModal();
@@ -691,68 +686,6 @@
             const allClients = clientService.getSortedClients(sortBy, sortOrder);
             setClients(allClients);
         };
-
-        // PULL from Firebase on initial load (Firebase is source of truth)
-        useEffect(() => {
-            if (!firebase.isReady || firebaseInitialized.current) return;
-
-            (async () => {
-                try {
-                    const firebaseClients = await firebase.getFromFirebase('clients');
-                    if (firebaseClients && Array.isArray(firebaseClients) && firebaseClients.length > 0) {
-                        console.log('📥 Loading initial clients from Firebase:', firebaseClients.length);
-                        isUpdatingFromFirebase.current = true;
-                        const storage = new window.StorageService();
-                        storage.saveGlobal('clientsList', firebaseClients);
-                        loadClients();
-                        setTimeout(() => { isUpdatingFromFirebase.current = false; }, 100);
-                    } else if (clients.length > 0) {
-                        // Firebase is empty but we have local data - push to Firebase
-                        console.log('📤 Syncing local clients to Firebase:', clients.length);
-                        await firebase.saveToFirebase('clients', clients);
-                    }
-                    firebaseInitialized.current = true;
-                } catch (error) {
-                    console.error('Error loading clients from Firebase:', error);
-                    firebaseInitialized.current = true;
-                }
-            })();
-        }, [firebase.isReady]);
-
-        // PUSH to Firebase when clients change locally (not from Firebase)
-        useEffect(() => {
-            if (!firebase.isReady || !firebaseInitialized.current || isUpdatingFromFirebase.current) return;
-            if (firebase.syncEnabled && clients.length > 0) {
-                firebase.saveToFirebase('clients', clients);
-            }
-        }, [clients, firebase.isReady, firebase.syncEnabled]);
-
-        // Listen for real-time updates from Firebase
-        useEffect(() => {
-            if (!firebase.isReady) return;
-
-            firebase.listenToFirebase('clients', (firebaseClients) => {
-                if (firebaseClients && Array.isArray(firebaseClients)) {
-                    const currentIds = new Set(clients.map(c => c.id));
-                    const firebaseIds = new Set(firebaseClients.map(c => c.id));
-                    const isDifferent = currentIds.size !== firebaseIds.size ||
-                        [...currentIds].some(id => !firebaseIds.has(id));
-
-                    if (isDifferent) {
-                        console.log('📥 Received updated clients from Firebase:', firebaseClients.length);
-                        isUpdatingFromFirebase.current = true;
-                        const storage = new window.StorageService();
-                        storage.saveGlobal('clientsList', firebaseClients);
-                        loadClients();
-                        setTimeout(() => { isUpdatingFromFirebase.current = false; }, 100);
-                    }
-                }
-            });
-
-            return () => {
-                firebase.unlistenFromFirebase('clients');
-            };
-        }, [firebase.isReady]);
 
         const handleSave = (clientData) => {
             try {

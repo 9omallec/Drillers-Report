@@ -4,13 +4,21 @@
 (function() {
     'use strict';
 
-    const { useEffect, useState } = React;
+    const { useEffect, useState, useRef } = React;
 
     window.useKeyboardShortcuts = function useKeyboardShortcuts(callbacks = {}) {
         const [showShortcutsHelp, setShowShortcutsHelp] = useState(false);
+        const callbacksRef = useRef(callbacks);
+
+        // Update ref when callbacks change to avoid stale closures
+        useEffect(() => {
+            callbacksRef.current = callbacks;
+        }, [callbacks]);
 
         useEffect(() => {
             const handleKeyPress = (e) => {
+                // Use ref to get current callbacks and avoid stale closures
+                const currentCallbacks = callbacksRef.current;
                 // Ignore if user is typing in an input/textarea
                 if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') {
                     // Except for Escape key
@@ -20,25 +28,25 @@
                 // Cmd/Ctrl + K: Search
                 if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
                     e.preventDefault();
-                    callbacks.onSearch?.();
+                    currentCallbacks.onSearch?.();
                 }
 
                 // Cmd/Ctrl + N: New Report/Item
                 if ((e.metaKey || e.ctrlKey) && e.key === 'n') {
                     e.preventDefault();
-                    callbacks.onNew?.();
+                    currentCallbacks.onNew?.();
                 }
 
                 // Cmd/Ctrl + S: Save (prevent browser save)
                 if ((e.metaKey || e.ctrlKey) && e.key === 's') {
                     e.preventDefault();
-                    callbacks.onSave?.();
+                    currentCallbacks.onSave?.();
                 }
 
                 // Cmd/Ctrl + P: Print
                 if ((e.metaKey || e.ctrlKey) && e.key === 'p') {
                     e.preventDefault();
-                    callbacks.onPrint?.();
+                    currentCallbacks.onPrint?.();
                 }
 
                 // Cmd/Ctrl + /: Show shortcuts help
@@ -49,50 +57,50 @@
 
                 // Escape: Close modals/cancel
                 if (e.key === 'Escape') {
-                    callbacks.onEscape?.();
+                    currentCallbacks.onEscape?.();
                 }
 
                 // Cmd/Ctrl + D: Toggle dark mode
                 if ((e.metaKey || e.ctrlKey) && e.key === 'd') {
                     e.preventDefault();
-                    callbacks.onToggleDarkMode?.();
+                    currentCallbacks.onToggleDarkMode?.();
                 }
 
                 // Cmd/Ctrl + 1-5: Switch views
                 if ((e.metaKey || e.ctrlKey) && ['1', '2', '3', '4', '5'].includes(e.key)) {
                     e.preventDefault();
-                    callbacks.onSwitchView?.(parseInt(e.key) - 1);
+                    currentCallbacks.onSwitchView?.(parseInt(e.key) - 1);
                 }
 
                 // Arrow keys for navigation (only when not in input)
                 if (!['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) {
                     if (e.key === 'ArrowUp') {
-                        callbacks.onNavigateUp?.();
+                        currentCallbacks.onNavigateUp?.();
                     }
                     if (e.key === 'ArrowDown') {
-                        callbacks.onNavigateDown?.();
+                        currentCallbacks.onNavigateDown?.();
                     }
                     if (e.key === 'Enter') {
-                        callbacks.onEnter?.();
+                        currentCallbacks.onEnter?.();
                     }
                 }
 
                 // Cmd/Ctrl + E: Export
                 if ((e.metaKey || e.ctrlKey) && e.key === 'e') {
                     e.preventDefault();
-                    callbacks.onExport?.();
+                    currentCallbacks.onExport?.();
                 }
 
                 // Cmd/Ctrl + F: Filter/Search
                 if ((e.metaKey || e.ctrlKey) && e.key === 'f') {
                     e.preventDefault();
-                    callbacks.onFilter?.();
+                    currentCallbacks.onFilter?.();
                 }
 
                 // Cmd/Ctrl + R: Refresh/Sync
                 if ((e.metaKey || e.ctrlKey) && e.key === 'r') {
                     e.preventDefault();
-                    callbacks.onRefresh?.();
+                    currentCallbacks.onRefresh?.();
                 }
             };
 
@@ -101,7 +109,7 @@
             return () => {
                 window.removeEventListener('keydown', handleKeyPress);
             };
-        }, [callbacks]);
+        }, []); // Empty array since we use ref for callbacks
 
         return {
             showShortcutsHelp,

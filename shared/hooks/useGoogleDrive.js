@@ -59,7 +59,7 @@ function useGoogleDrive(scopes) {
             setIsSignedIn(true);
         }
 
-    }, []); // Only run once on mount
+    }, [scopes]); // Re-initialize if scopes change
 
     const signIn = () => {
         if (driveService) {

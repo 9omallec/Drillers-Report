@@ -12,7 +12,7 @@ class ClientService {
 
     // Generate unique ID for new clients
     generateId() {
-        return 'client_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        return 'client_' + Date.now() + '_' + Math.random().toString(36).substring(2, 11);
     }
 
     // Get all clients

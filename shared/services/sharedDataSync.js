@@ -20,6 +20,9 @@
          * @returns {Object} Shared data with metadata
          */
         getLocalSharedData() {
+            if (!window.StorageService) {
+                throw new Error('StorageService not loaded. Ensure shared/loader.js loaded modules in correct order.');
+            }
             const storageService = window.StorageService;
 
             return {
@@ -38,6 +41,9 @@
          * @returns {Array} Array of approved report IDs
          */
         getApprovedReportIds() {
+            if (!window.StorageService) {
+                throw new Error('StorageService not loaded. Ensure shared/loader.js loaded modules in correct order.');
+            }
             const storageService = window.StorageService;
             const reports = storageService.loadGlobal('bossReports', []);
             return reports
@@ -168,6 +174,9 @@
                 if (onProgress) onProgress('Applying shared data...');
 
                 // Apply the data
+                if (!window.StorageService) {
+                    throw new Error('StorageService not loaded. Ensure shared/loader.js loaded modules in correct order.');
+                }
                 const storageService = window.StorageService;
                 let itemsUpdated = 0;
 
@@ -216,6 +225,9 @@
          * @param {Array} approvedReports - Array of approved report IDs
          */
         applyApprovedReports(approvedReports) {
+            if (!window.StorageService) {
+                throw new Error('StorageService not loaded. Ensure shared/loader.js loaded modules in correct order.');
+            }
             const storageService = window.StorageService;
             const reports = storageService.loadGlobal('bossReports', []);
             const approvedIds = new Set(approvedReports.map(r => r.id));

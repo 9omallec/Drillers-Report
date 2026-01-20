@@ -31,7 +31,6 @@
 
         // Services
         'services/storage.js',
-        'services/firebase.js',
         'services/dataExportImport.js',
         'services/clientService.js',
         'services/googleDrive.js',
@@ -51,7 +50,6 @@
         'hooks/useDarkMode.js',
         'hooks/useLocalStorage.js',
         'hooks/useGoogleDrive.js',
-        'hooks/useFirebase.js',
         'hooks/useToast.js',
         'hooks/useKeyboardShortcuts.js',
         'hooks/useDebounce.js'

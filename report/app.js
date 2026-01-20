@@ -7,9 +7,6 @@ const { useState, useEffect, useMemo, useCallback } = React;
             // Initialize shared services
             const storageService = new window.StorageService();
 
-            // Initialize Firebase for real-time sync
-            const firebase = window.useFirebase(true);
-
             // Get current project ID first - this is critical for loading correct data
             const currentProjectId = storageService.getCurrentProjectId();
             
@@ -203,7 +200,7 @@ const { useState, useEffect, useMemo, useCallback } = React;
 
                                     const response = await gapi.client.drive.files.list({
                                         q: "name='" + csvFileName + "' and mimeType='text/csv' and trashed=false",
-                                        driveId: GOOGLE_DRIVE_CONFIG.FOLDER_ID,
+                                        driveId: window.GOOGLE_DRIVE_CONFIG.FOLDER_ID,
                                         corpora: 'drive',
                                         includeItemsFromAllDrives: true,
                                         supportsAllDrives: true,
@@ -958,7 +955,7 @@ const { useState, useEffect, useMemo, useCallback } = React;
                 try {
                     const response = await gapi.client.drive.files.list({
                         q: "mimeType='application/json' and trashed=false",
-                        driveId: GOOGLE_DRIVE_CONFIG.FOLDER_ID,
+                        driveId: window.GOOGLE_DRIVE_CONFIG.FOLDER_ID,
                         corpora: 'drive',
                         includeItemsFromAllDrives: true,
                         supportsAllDrives: true,
@@ -1145,45 +1142,12 @@ const { useState, useEffect, useMemo, useCallback } = React;
                         const uploaded = await uploadToDrive(reportData_json);
 
                         if (uploaded) {
-                            // Also upload JSON to Firebase for real-time sync
-                            if (firebase.isReady && firebase.syncEnabled) {
-                                try {
-                                    // Get existing reports from Firebase
-                                    const existingReports = await firebase.getFromFirebase('reports') || [];
-
-                                    // Create report object with unique ID
-                                    const reportForFirebase = {
-                                        ...reportData_json,
-                                        id: isEditMode && editingReportId ? editingReportId : Date.now(),
-                                        uploadedAt: new Date().toISOString()
-                                    };
-
-                                    // Update or add report
-                                    let updatedReports;
-                                    if (isEditMode && editingReportId) {
-                                        // Update existing report
-                                        updatedReports = existingReports.map(r =>
-                                            r.id === editingReportId ? reportForFirebase : r
-                                        );
-                                    } else {
-                                        // Add new report
-                                        updatedReports = [reportForFirebase, ...existingReports];
-                                    }
-
-                                    // Save to Firebase
-                                    await firebase.saveToFirebase('reports', updatedReports);
-                                } catch (error) {
-                                    console.error('Firebase sync error:', error);
-                                    // Don't fail the whole submission if Firebase fails
-                                }
-                            }
-
                             toast.success(isEditMode ? 'Report updated successfully!' : 'Report submitted successfully!');
 
                             // Optional: Ask if they want to view it in Drive
                             viewInDriveModal.open({
                                 onConfirm: () => {
-                                    window.open(`https://drive.google.com/drive/folders/${GOOGLE_DRIVE_CONFIG.FOLDER_ID}`, '_blank');
+                                    window.open(`https://drive.google.com/drive/folders/${window.GOOGLE_DRIVE_CONFIG.FOLDER_ID}`, '_blank');
                                     viewInDriveModal.close();
                                 }
                             });
@@ -1207,7 +1171,7 @@ const { useState, useEffect, useMemo, useCallback } = React;
                                     URL.revokeObjectURL(jsonUrl);
 
                                     toast.info('File downloaded. Please upload it manually to Google Drive.');
-                                    window.open(`https://drive.google.com/drive/folders/${GOOGLE_DRIVE_CONFIG.FOLDER_ID}`, '_blank');
+                                    window.open(`https://drive.google.com/drive/folders/${window.GOOGLE_DRIVE_CONFIG.FOLDER_ID}`, '_blank');
                                 }
                             });
                         }

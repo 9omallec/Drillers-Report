@@ -1,13 +1,13 @@
 /* Base Touch & Mobile Optimizations */
 
-- { -webkit-tap-highlight-color: rgba(22, 163, 74, 0.2); touch-action: manipulation; }
-  button, a, label, input[type=“checkbox”], input[type=“radio”], select { min-height: 44px; min-width: 44px; }
-  input, select, textarea { font-size: 16px !important; -webkit-appearance: none; appearance: none; }
-  select { background: url(“data:image/svg+xml,%3Csvg xmlns=‘http://www.w3.org/2000/svg’ width=‘12’ height=‘12’ viewBox=‘0 0 12 12’%3E%3Cpath fill=’%23333’ d=‘M6 9L1 4h10z’/%3E%3C/svg%3E”) no-repeat right 8px center; padding-right: 32px; }
-  html { scroll-behavior: smooth; -webkit-overflow-scrolling: touch; }
-  .no-select { -webkit-user-select: none; user-select: none; }
-  .table-container { overflow-x: auto; -webkit-overflow-scrolling: touch; max-width: 100%; }
-  .collapsible-header { cursor: pointer; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
+* { -webkit-tap-highlight-color: rgba(22, 163, 74, 0.2); touch-action: manipulation; }
+button, a, label, input[type="checkbox"], input[type="radio"], select { min-height: 44px; min-width: 44px; }
+input, select, textarea { font-size: 16px !important; -webkit-appearance: none; appearance: none; }
+select { background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 9L1 4h10z'/%3E%3C/svg%3E") no-repeat right 8px center; padding-right: 32px; }
+html { scroll-behavior: smooth; -webkit-overflow-scrolling: touch; }
+.no-select { -webkit-user-select: none; user-select: none; }
+.table-container { overflow-x: auto; -webkit-overflow-scrolling: touch; max-width: 100%; }
+.collapsible-header { cursor: pointer; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
 
 /* Checkboxes - Green Style - Enhanced Visibility */
 input[type="checkbox"] {
@@ -95,7 +95,6 @@ input[type=“checkbox”] { width: 24px; height: 24px; }
 .mb-6 { margin-bottom: 1rem !important; }
 .w-16 { width: 3rem !important; height: 3rem !important; }
 
-```
 /* Button Fixes for Mobile */
 button[title*="theme" i], button[aria-label*="theme" i], .theme-toggle-btn { 
     min-height: 44px !important; min-width: 44px !important; width: 44px !important; height: 44px !important; 
@@ -132,7 +131,6 @@ button[title*="theme" i], button[aria-label*="theme" i], .theme-toggle-btn {
     gap: 8px !important; 
     align-items: stretch !important;
 }
-```
 
 }
 
@@ -161,7 +159,6 @@ table td, table th { padding: 4px 2px !important; font-size: 12px !important; }
 #supplies-tab.has-content { page-break-before: avoid; margin-top: 0.2rem !important; }
 @page { size: letter; margin: 0.3in 0.4in; }
 
-```
 /* Force Light Mode */
 * { color: #000 !important; background: #fff !important; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
 input[type="checkbox"]:checked { background: #16a34a !important; border-color: #16a34a !important; }

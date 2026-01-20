@@ -12,7 +12,7 @@
 
         // Generate unique ID for new invoices
         generateId() {
-            return 'inv_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            return 'inv_' + Date.now() + '_' + Math.random().toString(36).substring(2, 11);
         }
 
         // Get all invoices

@@ -4,8 +4,10 @@
  */
 
 function useLocalStorage(key, defaultValue, projectId = null) {
-    const { useState, useEffect } = React;
-    const storage = new window.StorageService();
+    const { useState, useEffect, useMemo } = React;
+
+    // Create storage instance once using useMemo to prevent memory leak
+    const storage = useMemo(() => new window.StorageService(), []);
 
     // Initialize state with value from localStorage
     const [storedValue, setStoredValue] = useState(() => {
@@ -15,7 +17,7 @@ function useLocalStorage(key, defaultValue, projectId = null) {
     // Update localStorage when state changes
     useEffect(() => {
         storage.save(key, storedValue, projectId);
-    }, [storedValue, key, projectId]);
+    }, [storedValue, key, projectId, storage]);
 
     return [storedValue, setStoredValue];
 }
