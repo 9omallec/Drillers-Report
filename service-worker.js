@@ -1,8 +1,8 @@
 // Service Worker for Drillers Report App
 // Provides offline capability and faster loading
 
-const CACHE_NAME = 'drillers-report-v14-firebase-removal';
-const STATIC_CACHE = 'drillers-report-static-v14-firebase-removal';
+const CACHE_NAME = 'drillers-report-v15-fresh-bootstrap';
+const STATIC_CACHE = 'drillers-report-static-v15-fresh-bootstrap';
 
 // Files to cache for offline use
 const STATIC_FILES = [
