@@ -59,8 +59,8 @@
             }
 
             try {
-                // Fetch the script content (service worker handles caching)
-                const response = await fetch('app.js');
+                // Fetch the script content (bypass stale caches and service worker entries)
+                const response = await fetch('app.js?v=1.0.6');
                 const code = await response.text();
                 console.log('app.js fetched, creating inline script...');
 
