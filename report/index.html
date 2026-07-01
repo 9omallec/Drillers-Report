@@ -61,9 +61,7 @@
                     filename: 'app.js'
                 }).code;
 
-                const script = document.createElement('script');
-                script.textContent = transformed;
-                document.body.appendChild(script);
+                window.eval(transformed);
                 console.log('app.js loaded successfully');
             } catch (error) {
                 console.error('Failed to load app.js:', error);
