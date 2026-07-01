@@ -62,13 +62,11 @@
 
                 const code = await response.text();
                 const transformed = window.Babel.transform(code, {
-                    presets: ['react'],
+                    presets: [['react', { runtime: 'classic' }]],
                     filename: 'dashboard-app.js'
                 }).code;
 
-                const script = document.createElement('script');
-                script.textContent = transformed;
-                document.body.appendChild(script);
+                window.eval(transformed);
                 console.log('dashboard-app.js loaded successfully');
             } catch (error) {
                 console.error('Failed to load dashboard-app.js:', error);
