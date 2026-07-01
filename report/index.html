@@ -5,23 +5,53 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#16a34a">
     <title>Daily Drilling Report</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 0; background: #f8fafc; color: #111827; }
-        .container { max-width: 720px; margin: 0 auto; padding: 3rem 1.5rem; }
-        .card { background: white; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,.08); padding: 2rem; }
-        h1 { margin-top: 0; }
-        p { line-height: 1.6; }
-        .btn { display: inline-block; margin-top: 1rem; padding: 0.75rem 1rem; background: #16a34a; color: white; border-radius: 10px; text-decoration: none; }
-    </style>
+    <link rel="stylesheet" href="styles.css?v=1.0.3">
 </head>
 <body>
-    <div class="container">
-        <div class="card">
-            <h1>Daily Drilling Report</h1>
-            <p>The full interactive report editor is temporarily unavailable on GitHub Pages because the browser-based React/JSX runtime is not compatible with this deployment setup.</p>
-            <p>The site is still live and the dashboard entry is available. Please use the dashboard while the report editor is being restored.</p>
-            <a class="btn" href="/Drillers-Report/dashboard/">Open Dashboard</a>
+    <div id="root">
+        <div style="display: flex; justify-content: center; align-items: center; height: 100vh; font-family: sans-serif; flex-direction: column;">
+            <div style="font-size: 24px; margin-bottom: 10px;">Loading Report App...</div>
+            <div style="font-size: 14px; color: #666;">Please wait while the report editor loads</div>
         </div>
     </div>
+
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://apis.google.com/js/api.js"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="../shared/loader.js?v=1.3-mobile-fix"></script>
+
+    <script>
+        window.addEventListener('sharedModulesLoaded', async () => {
+            const rootEl = document.getElementById('root');
+            if (rootEl) {
+                rootEl.innerHTML = '<div style="display: flex; justify-content: center; align-items: center; height: 100vh; font-family: sans-serif; flex-direction: column;"><div style="font-size: 24px; margin-bottom: 10px;">Loading Report App...</div><div style="font-size: 14px; color: #666;">Please wait while the report editor loads</div></div>';
+            }
+
+            try {
+                const response = await fetch('./app.js?v=1.0.3');
+                if (!response.ok) {
+                    throw new Error(`Failed to load app.js: ${response.status}`);
+                }
+
+                const code = await response.text();
+                const transformed = window.Babel.transform(code, {
+                    presets: ['react'],
+                    filename: 'app.js'
+                }).code;
+
+                const script = document.createElement('script');
+                script.textContent = transformed;
+                document.body.appendChild(script);
+            } catch (error) {
+                console.error('Failed to load report app:', error);
+                if (rootEl) {
+                    rootEl.innerHTML = '<div style="display: flex; justify-content: center; align-items: center; height: 100vh; font-family: sans-serif; flex-direction: column; padding: 20px; text-align: center;"><div style="font-size: 24px; margin-bottom: 10px; color: #dc2626;">Error Loading Report App</div><div style="font-size: 14px; color: #666;">Please refresh the page and try again.</div></div>';
+                }
+            }
+        });
+    </script>
 </body>
 </html>
