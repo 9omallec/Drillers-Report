@@ -3,13 +3,30 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta http-equiv="refresh" content="0; url=./dashboard/" />
+  <meta name="theme-color" content="#16a34a" />
   <title>Drillers Report</title>
-  <script>
-    window.location.replace('./dashboard/');
-  </script>
+  <style>
+    :root { color-scheme: light; }
+    body { font-family: Arial, sans-serif; margin: 0; background: #f8fafc; color: #111827; }
+    .hero { min-height: 100vh; display: grid; place-items: center; padding: 2rem; }
+    .card { background: white; border-radius: 20px; box-shadow: 0 16px 40px rgba(0,0,0,.08); padding: 2rem; max-width: 720px; width: 100%; text-align: center; }
+    h1 { margin-top: 0; font-size: 2rem; }
+    p { line-height: 1.6; color: #4b5563; }
+    .actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 1rem; margin-top: 1.5rem; }
+    .btn { display: inline-block; padding: 0.9rem 1.2rem; background: #16a34a; color: white; border-radius: 999px; text-decoration: none; font-weight: 600; }
+    .btn.secondary { background: #2563eb; }
+  </style>
 </head>
 <body>
-  <p>Redirecting to the dashboard...</p>
+  <main class="hero">
+    <section class="card">
+      <h1>Drillers Report</h1>
+      <p>Choose the app you want to open. The dashboard and report experience are separate entry points and can be used independently.</p>
+      <div class="actions">
+        <a class="btn" href="./dashboard/">Open Dashboard</a>
+        <a class="btn secondary" href="./report/">Open Report App</a>
+      </div>
+    </section>
+  </main>
 </body>
 </html>
