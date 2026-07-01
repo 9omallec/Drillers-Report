@@ -1,8 +1,8 @@
 // Service Worker for Drillers Report App
 // Provides offline capability and faster loading
 
-const CACHE_NAME = 'drillers-report-v15-fresh-bootstrap';
-const STATIC_CACHE = 'drillers-report-static-v15-fresh-bootstrap';
+const CACHE_NAME = 'drillers-report-v17-service-worker-fix';
+const STATIC_CACHE = 'drillers-report-static-v17-service-worker-fix';
 
 // Files to cache for offline use
 const STATIC_FILES = [
@@ -14,7 +14,6 @@ const STATIC_FILES = [
     './dashboard/dashboard-styles.css',
     './report/styles.css',
     './shared/loader.js',
-    './shared/styles.css',
     './shared/services/storage.js',
     './shared/services/sharedDataSync.js',
     './shared/hooks/useLocalStorage.js',
