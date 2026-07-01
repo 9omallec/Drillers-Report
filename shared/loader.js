@@ -7,7 +7,7 @@
 (function() {
     'use strict';
 
-    const SHARED_BASE_PATH = '/Drillers-Report/shared/';
+    const SHARED_BASE_PATH = '../shared/';
 
     // List of modules to load in order (order matters for dependencies)
     const modules = [
