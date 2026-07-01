@@ -59,16 +59,21 @@
             }
 
             try {
+                const response = await fetch('/Drillers-Report/report/app.js?v=1.0.6');
+                if (!response.ok) {
+                    throw new Error(`Failed to load app.js: ${response.status}`);
+                }
+
+                const code = await response.text();
+                const transformed = window.Babel.transform(code, {
+                    presets: ['react'],
+                    filename: 'app.js'
+                }).code;
+
                 const script = document.createElement('script');
-                script.src = '/Drillers-Report/report/app.js?v=1.0.6';
-                script.async = false;
-                script.onload = () => {
-                    console.log('app.js loaded successfully');
-                };
-                script.onerror = () => {
-                    throw new Error('Failed to load app.js');
-                };
+                script.textContent = transformed;
                 document.body.appendChild(script);
+                console.log('app.js loaded successfully');
             } catch (error) {
                 console.error('Failed to load app.js:', error);
                 if (rootEl) {
