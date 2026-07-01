@@ -71,6 +71,7 @@
                 }).code;
 
                 const script = document.createElement('script');
+                script.type = 'text/javascript';
                 script.textContent = transformed;
                 document.body.appendChild(script);
                 console.log('app.js loaded successfully');
