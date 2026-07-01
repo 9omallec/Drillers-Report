@@ -2,102 +2,26 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, proxy-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#16a34a">
-    <link rel="manifest" href="../manifest.json">
-    <link rel="icon" href="data:,">
     <title>Daily Drilling Report</title>
-
-    <!-- Resource Hints for Performance -->
-    <link rel="dns-prefetch" href="https://unpkg.com">
-    <link rel="dns-prefetch" href="https://cdn.tailwindcss.com">
-    <link rel="dns-prefetch" href="https://www.gstatic.com">
-    <link rel="dns-prefetch" href="https://apis.google.com">
-    <link rel="dns-prefetch" href="https://accounts.google.com">
-    <link rel="preconnect" href="https://unpkg.com" crossorigin>
-    <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
-    <link rel="preconnect" href="https://apis.google.com">
-
-    <!-- External Dependencies -->
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://apis.google.com/js/api.js"></script>
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
-
-    <!-- Tailwind Configuration -->
-    <script src="tailwind-config.js"></script>
-
-    <!-- Custom Styles -->
-    <link rel="stylesheet" href="styles.css">
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; background: #f8fafc; color: #111827; }
+        .container { max-width: 720px; margin: 0 auto; padding: 3rem 1.5rem; }
+        .card { background: white; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,.08); padding: 2rem; }
+        h1 { margin-top: 0; }
+        p { line-height: 1.6; }
+        .btn { display: inline-block; margin-top: 1rem; padding: 0.75rem 1rem; background: #16a34a; color: white; border-radius: 10px; text-decoration: none; }
+    </style>
 </head>
 <body>
-    <div id="root">
-        <div style="display: flex; justify-content: center; align-items: center; height: 100vh; font-family: sans-serif; flex-direction: column;">
-            <div style="font-size: 24px; margin-bottom: 10px;">Loading...</div>
-            <div style="font-size: 14px; color: #666;">Please wait while the application loads</div>
+    <div class="container">
+        <div class="card">
+            <h1>Daily Drilling Report</h1>
+            <p>The full interactive report editor is temporarily unavailable on GitHub Pages because the browser-based React/JSX runtime is not compatible with this deployment setup.</p>
+            <p>The site is still live and the dashboard entry is available. Please use the dashboard while the report editor is being restored.</p>
+            <a class="btn" href="/Drillers-Report/dashboard/">Open Dashboard</a>
         </div>
     </div>
-
-    <!-- Shared Modules Loader -->
-    <script src="../shared/loader.js?v=1.3-mobile-fix-2"></script>
-
-    <!-- Main Application - Load after modules are ready -->
-    <script>
-        // Wait for shared modules before loading main app
-        window.addEventListener('sharedModulesLoaded', async () => {
-            console.log('sharedModulesLoaded event received, fetching app.js...');
-
-            // Update loading message
-            const rootEl = document.getElementById('root');
-            if (rootEl) {
-                rootEl.innerHTML = '<div style="display: flex; justify-content: center; align-items: center; height: 100vh; font-family: sans-serif; flex-direction: column;"><div style="font-size: 24px; margin-bottom: 10px;">Loading Application...</div><div style="font-size: 14px; color: #666;">Please wait, this may take a moment on mobile devices</div></div>';
-            }
-
-            try {
-                const response = await fetch('/Drillers-Report/report/app.js?v=1.0.7');
-                if (!response.ok) {
-                    throw new Error(`Failed to load app.js: ${response.status}`);
-                }
-
-                const code = await response.text();
-                const transformed = window.Babel.transform(code, {
-                    presets: ['react'],
-                    filename: 'app.js'
-                }).code;
-
-                window.eval(transformed);
-                console.log('app.js loaded successfully');
-            } catch (error) {
-                console.error('Failed to load app.js:', error);
-                if (rootEl) {
-                    rootEl.innerHTML = '<div style="display: flex; justify-content: center; align-items: center; height: 100vh; font-family: sans-serif; flex-direction: column; padding: 20px; text-align: center;"><div style="font-size: 24px; margin-bottom: 10px; color: #dc2626;">Error Loading App</div><div style="font-size: 14px; color: #666; margin-bottom: 20px;">Failed to load the application. Please try:</div><div style="font-size: 14px; color: #666;">1. Refresh the page (pull down or F5)</div><div style="font-size: 14px; color: #666;">2. Clear browser cache</div><div style="font-size: 14px; color: #666;">3. Check your internet connection</div></div>';
-                }
-            }
-        });
-    </script>
-
-    <!-- Service Worker Registration -->
-    <script>
-        // Register service worker for offline capability
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/Drillers-Report/service-worker.js', { scope: '/Drillers-Report/' })
-                    .then((registration) => {
-                        console.log('Service Worker registered successfully:', registration.scope);
-                    })
-                    .catch((error) => {
-                        console.log('Service Worker registration failed:', error);
-                    });
-            });
-        }
-    </script>
 </body>
 </html>
