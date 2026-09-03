@@ -271,7 +271,7 @@ const { useState, useEffect, useMemo, useCallback } = React;
                 signOut: signOutFromDrive,
                 uploadFile,
                 updateFile
-            } = window.useGoogleDrive(window.GOOGLE_DRIVE_CONFIG.SCOPES_FULL);
+            } = window.useGoogleDrive(window.GOOGLE_DRIVE_CONFIG.SCOPES_FULL, toast.error);
 
             // Upload report to Google Drive wrapper
             const uploadToDrive = async (reportJson) => {

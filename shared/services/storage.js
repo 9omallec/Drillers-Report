@@ -64,11 +64,9 @@ class StorageService {
         const usage = this.getStorageUsage();
         console.warn(`Storage usage: ${usage.usedMB.toFixed(2)}MB / ~5MB limit`);
 
-        // Alert user
-        if (window.useToast) {
-            const toast = window.useToast();
-            toast.error('Storage limit reached! Consider exporting and deleting old reports.');
-        }
+        // Alert user (no React render context available here, so a hook
+        // can't be called — plain alert is the safe fallback)
+        alert('Storage limit reached! Consider exporting and deleting old reports.');
     }
 
     // Get storage usage information

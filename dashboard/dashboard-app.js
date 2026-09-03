@@ -126,7 +126,7 @@
                 listFiles,
                 downloadFile,
                 driveService
-            } = window.useGoogleDrive(window.GOOGLE_DRIVE_CONFIG.SCOPES_FULL);
+            } = window.useGoogleDrive(window.GOOGLE_DRIVE_CONFIG.SCOPES_FULL, toast.error);
 
             // Sync reports from Google Drive using shared hook
             const syncFromDrive = useCallback(async (silent = false) => {

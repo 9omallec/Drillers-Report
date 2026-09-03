@@ -3,13 +3,20 @@
  * React hook for Google Drive integration
  */
 
-function useGoogleDrive(scopes) {
-    const { useState, useEffect } = React;
+function useGoogleDrive(scopes, onError) {
+    const { useState, useEffect, useRef } = React;
 
     const [isSignedIn, setIsSignedIn] = useState(false);
     const [driveStatus, setDriveStatus] = useState('');
     const [isInitialized, setIsInitialized] = useState(false);
     const [driveService, setDriveService] = useState(null);
+
+    // Event listeners below fire outside of render, so they can't call
+    // hooks directly. Keep the latest onError callback in a ref instead.
+    const onErrorRef = useRef(onError);
+    useEffect(() => {
+        onErrorRef.current = onError;
+    }, [onError]);
 
     useEffect(() => {
         const service = new window.GoogleDriveService(window.GOOGLE_DRIVE_CONFIG);
@@ -25,22 +32,12 @@ function useGoogleDrive(scopes) {
 
         service.on('onError', (error) => {
             console.error('Google Drive error:', error);
-            // Display error to user via toast if available
-            if (window.useToast && typeof window.useToast === 'function') {
-                // For multi-line error messages, show in alert as toast is single-line
-                if (error.includes('\n')) {
-                    alert(error);
-                } else {
-                    const toast = window.useToast();
-                    if (toast && toast.error) {
-                        toast.error(error);
-                    } else {
-                        alert(error);
-                    }
-                }
-            } else {
-                // Fallback to alert if toast not available
+            // Multi-line messages go to alert since toast is single-line;
+            // otherwise use the caller's toast if one was provided.
+            if (error.includes('\n') || !onErrorRef.current) {
                 alert(error);
+            } else {
+                onErrorRef.current(error);
             }
         });
 
