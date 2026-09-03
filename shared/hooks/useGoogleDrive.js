@@ -4,7 +4,7 @@
  */
 
 function useGoogleDrive(scopes, onError) {
-    const { useState, useEffect, useRef } = React;
+    const { useState, useEffect, useRef, useCallback } = React;
 
     const [isSignedIn, setIsSignedIn] = useState(false);
     const [driveStatus, setDriveStatus] = useState('');
@@ -58,45 +58,49 @@ function useGoogleDrive(scopes, onError) {
 
     }, [scopes]); // Re-initialize if scopes change
 
-    const signIn = () => {
+    // Memoized so identity only changes when driveService changes, not on
+    // every render — callers depend on these in effect/callback dep arrays
+    // (e.g. the auto-sync interval), and an unstable reference there would
+    // reset that timer on every render instead of every 2 minutes.
+    const signIn = useCallback(() => {
         if (driveService) {
             driveService.signIn();
         }
-    };
+    }, [driveService]);
 
-    const signOut = () => {
+    const signOut = useCallback(() => {
         if (driveService) {
             driveService.signOut();
         }
-    };
+    }, [driveService]);
 
-    const uploadFile = async (fileName, fileContent, mimeType) => {
+    const uploadFile = useCallback(async (fileName, fileContent, mimeType) => {
         if (driveService) {
             return await driveService.uploadFile(fileName, fileContent, mimeType);
         }
         throw new Error('Drive service not initialized');
-    };
+    }, [driveService]);
 
-    const listFiles = async (query) => {
+    const listFiles = useCallback(async (query) => {
         if (driveService) {
             return await driveService.listFiles(query);
         }
         throw new Error('Drive service not initialized');
-    };
+    }, [driveService]);
 
-    const downloadFile = async (fileId) => {
+    const downloadFile = useCallback(async (fileId) => {
         if (driveService) {
             return await driveService.downloadFile(fileId);
         }
         throw new Error('Drive service not initialized');
-    };
+    }, [driveService]);
 
-    const updateFile = async (fileId, fileName, fileContent, mimeType) => {
+    const updateFile = useCallback(async (fileId, fileName, fileContent, mimeType) => {
         if (driveService) {
             return await driveService.updateFile(fileId, fileName, fileContent, mimeType);
         }
         throw new Error('Drive service not initialized');
-    };
+    }, [driveService]);
 
     return {
         isSignedIn,

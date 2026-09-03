@@ -23,7 +23,7 @@
             if (!window.StorageService) {
                 throw new Error('StorageService not loaded. Ensure shared/loader.js loaded modules in correct order.');
             }
-            const storageService = window.StorageService;
+            const storageService = new window.StorageService();
 
             return {
                 timestamp: Date.now(),
@@ -44,7 +44,7 @@
             if (!window.StorageService) {
                 throw new Error('StorageService not loaded. Ensure shared/loader.js loaded modules in correct order.');
             }
-            const storageService = window.StorageService;
+            const storageService = new window.StorageService();
             const reports = storageService.loadGlobal('bossReports', []);
             return reports
                 .filter(r => r.approvalStatus === 'Approved')
@@ -177,7 +177,7 @@
                 if (!window.StorageService) {
                     throw new Error('StorageService not loaded. Ensure shared/loader.js loaded modules in correct order.');
                 }
-                const storageService = window.StorageService;
+                const storageService = new window.StorageService();
                 let itemsUpdated = 0;
 
                 // Update clients
@@ -228,7 +228,7 @@
             if (!window.StorageService) {
                 throw new Error('StorageService not loaded. Ensure shared/loader.js loaded modules in correct order.');
             }
-            const storageService = window.StorageService;
+            const storageService = new window.StorageService();
             const reports = storageService.loadGlobal('bossReports', []);
             const approvedIds = new Set(approvedReports.map(r => r.id));
 

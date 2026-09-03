@@ -1,8 +1,8 @@
 // Service Worker for Drillers Report App
 // Provides offline capability and faster loading
 
-const CACHE_NAME = 'drillers-report-v17-service-worker-fix';
-const STATIC_CACHE = 'drillers-report-static-v17-service-worker-fix';
+const CACHE_NAME = 'drillers-report-v18-no-cache-version-probes';
+const STATIC_CACHE = 'drillers-report-static-v18-no-cache-version-probes';
 
 // Files to cache for offline use
 const STATIC_FILES = [
@@ -70,6 +70,15 @@ self.addEventListener('fetch', (event) => {
     // Skip Google Drive API calls - always go to network
     if (event.request.url.includes('googleapis.com') ||
         event.request.url.includes('google.com/auth')) {
+        return;
+    }
+
+    // Version-check probes use a cache-busted URL (new timestamp every
+    // request) and a Range header. Never cache these - if left running for
+    // days, each unique URL would become a permanent, never-evicted cache
+    // entry and Cache Storage would grow without bound.
+    if (event.request.headers.has('Range')) {
+        event.respondWith(fetch(event.request));
         return;
     }
 
